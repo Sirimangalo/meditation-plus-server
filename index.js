@@ -175,12 +175,12 @@ function submitData(submit,formid) {
 			chatVersion = result.chat_version;
 		
 		var obj = result.list;
-		if(obj == -1)
+		if(!(obj instanceof Array))
 			obj = G_medObj;
 		else G_medObj = obj;
 		
 		var chatObj = result.chat;
-		if(chatObj == -1)
+		if(!(chatObj instanceof Array))
 			chatObj = G_chatObj;
 		else G_chatObj = chatObj;
 
@@ -326,7 +326,7 @@ function submitData(submit,formid) {
 
 		// skip hours field if same
 		
-		if(hoursObj != -1) {
+		if(hoursObj instanceof Array) {
 		
 			var now = new Date();
 			var nowHour= now.getUTCHours();
