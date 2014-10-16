@@ -1,10 +1,4 @@
 <?php 
-/***************************** 
-  File: includes/config.php 
-  Written by: Frost of Slunked.com 
-  Tutorial: User Registration and Login System 
-******************************/ 
-// start the session before any output.
 
 session_start(); 
 $_SESSION['error'] = ""; 
