@@ -327,14 +327,6 @@ if($listn != $listfo) {
 }
 */
 
-// reget list
-$chatfo = file_get_contents('chat');
-// if list is different, overwrite
-if($chatn != $chatfo) {
-	error_log('chat list changed');
-	file_put_contents('chat',$chatn);
-}
-
 $json = json_encode($data);
 
 echo $json;
