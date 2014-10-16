@@ -131,7 +131,7 @@ if(isset($_POST['form_id'])) {
 			error_log('chatform');
 			$message = str_replace('^','',$_POST['message']);
 			
-			if($user == 'Yuttadhammo' && $message == '/clear') {
+			if(in_array($user,$admin) && $message == '/clear') {
 				$clearchat = true;
 				$success = 1;
 				file_put_contents('chatv',++$chatVersion);
@@ -187,7 +187,7 @@ if(isset($_POST['form_id'])) {
 				file_put_contents('listv',++$listVersion);
 			}
 		}
-		else if(strpos($_POST['form_id'],'delchat_') === 0 && $user == 'Yuttadhammo') {
+		else if(strpos($_POST['form_id'],'delchat_') === 0 && in_array($user,$admin)) {
 			// del chat form
 			
 			$cid = (int)substr($_POST['form_id'],8);
