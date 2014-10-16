@@ -18,8 +18,9 @@ require('bar.php');
 
 <?php
 	
-	echo 'var G_static = '.(isset($_GET['static'])?'true':'false');
-
+	echo '
+		var G_static = '.(isset($_GET['static'])?'true':'false')+';';
+		
 	if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
 		echo '
 		var logged_user = \''.$_SESSION['username'].'\';';

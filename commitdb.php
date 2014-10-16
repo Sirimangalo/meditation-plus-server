@@ -300,7 +300,7 @@ if(isset($_POST['form_id'])) {
 	}
 }
 
-$sql="SELECT user_commitments.aid AS aid, commitments.cid AS cid, title, description, creatorid, period, day, time, length, users.uid AS uid, users.username AS username, creators.username AS creator FROM user_commitments, commitments, users, users AS creators WHERE users.uid = user_commitments.uid AND user_commitments.cid = commitments.cid AND creators.uid = commitments.creatorid";
+$sql="SELECT user_commitments.aid AS aid, commitments.cid AS cid, title, commitments.description AS description, creatorid, period, day, time, length, users.uid AS uid, users.username AS username, creators.username AS creator FROM user_commitments, commitments, users, users AS creators WHERE users.uid = user_commitments.uid AND user_commitments.cid = commitments.cid AND creators.uid = commitments.creatorid";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 

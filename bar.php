@@ -1,6 +1,6 @@
 <?php
 
-require('config.php');
+require_once('config.php');
 
 $sError = ""; 
 if (isset($_SESSION['error']) && strlen($_SESSION['error']) > 0) { 

@@ -250,7 +250,7 @@ function submitData(submit,formid) {
 			if(elaAge < 20)
 				hexColorString = 'green';
 
-			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'">'+chat_username+':&nbsp;</span>'+replaceSmilies(chatObj[i].message)+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
+			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chat_username+'">'+chat_username+'</a>:&nbsp;</span>'+replaceSmilies(chatObj[i].message)+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
 
 		}
 		
@@ -313,7 +313,7 @@ function submitData(submit,formid) {
 				var sitm = sitting;
 			}
 			
-			output += '<tr><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'">' + user + '</td><td>' + walkm + '/'+walking+'</td><td>' + sitm + '/'+sitting+'</td></tr>';					
+			output += '<tr><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td>' + walkm + '/'+walking+'</td><td>' + sitm + '/'+sitting+'</td></tr>';					
 		}
 		
 		// timer ringing
@@ -365,7 +365,7 @@ function submitData(submit,formid) {
 		var loggedUsers = result.logged;
 		var loggedOut = [];
 		for(var i = 0; i < loggedUsers.length; i++) {
-			loggedOut.push('<span class="one-logged-in-user'+(medList[loggedUsers[i]]?'-med':'')+'" title="'+(medList[loggedUsers[i]]?'':'not ')+'meditating">'+loggedUsers[i]+'</span>');
+			loggedOut.push('<span class="one-logged-in-user'+(medList[loggedUsers[i]]?'-med':'')+'" title="'+(medList[loggedUsers[i]]?'':'not ')+'meditating"><a class="noline" target="_blank" href="/profile.php?user='+loggedUsers[i]+'">'+loggedUsers[i]+'</a></span>');
 		}
 		if(loggedOut.length > 0) {
 			
