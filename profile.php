@@ -5,6 +5,8 @@ $isMe = true;
 
 $edit = false;
 
+$profilePage = true;
+
 if(isset($_GET['user'])) {
 	$profile = $_GET['user'];
 
@@ -116,13 +118,14 @@ if($edit) {
 					<input type="submit" name="submit" value="Submit">
 					<input type="hidden" name="old_name" value="<?php echo $profile; ?>">
 					<input type="hidden" name="uid" value="<?php echo $profilea['uid']; ?>">
+					<input type="hidden" name="form_id" value="profile">
 				</form>
 			</div>
 <?php }
 else {
 ?>
 			<div id="profile">
-				<div id="profile-title">Profile</div>
+				<div id="profile-title"><div id="big-flag"><img src="images/flags/48/<?php echo strtolower($profilea['country']); ?>.png"></div>Profile</div>
 				<span class="profile-field-head">Name</span>
 				<span name="name-span" id="name-span"><?php echo $profile; ?></span></<br/><br/>
 				<span class="profile-field-head">About</span>

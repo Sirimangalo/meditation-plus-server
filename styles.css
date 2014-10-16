@@ -14,6 +14,11 @@ a {
 	margin:4px 0;
 }
 
+.noline img {
+	vertical-align:text-bottom;
+	padding-right: 5px;
+}
+
 #inner {
 	padding:0px 100px;
 }
@@ -84,6 +89,13 @@ a {
 .header-image {
 	position: absolute;
 	padding-left: 16px;
+}
+.header-error {
+	background-color:yellow;
+	color:black;
+}
+
+#error {
 }
 
 #header {
@@ -263,9 +275,6 @@ td {
 	margin-top:4px;
 }
 .hour-number-now {
-	background-color:yellow;
-}
-#error {
 	background-color:yellow;
 }
 

@@ -313,7 +313,7 @@ function submitData(submit,formid) {
 				var sitm = sitting;
 			}
 			
-			output += '<tr><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td>' + walkm + '/'+walking+'</td><td>' + sitm + '/'+sitting+'</td></tr>';					
+			output += '<tr><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'') + user + '</a></td><td>' + walkm + '/'+walking+'</td><td>' + sitm + '/'+sitting+'</td></tr>';					
 		}
 		
 		// timer ringing

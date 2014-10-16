@@ -1,8 +1,6 @@
 <?php 
 
 session_start(); 
-$_SESSION['error'] = ""; 
-
 require('../meditation_config.php');
 
 /*

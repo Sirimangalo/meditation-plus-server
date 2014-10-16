@@ -14,6 +14,7 @@ require('bar.php');
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script src="smilies.js"></script>
 	<script src="tz.js"></script>
+	<script src="countries.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e4e0d1400cea51f" async></script>
 	<script>
@@ -43,23 +44,8 @@ require('bar.php');
 			<div class="p">  The meditation we practice is based on the teachings found in <a href="http://htm.sirimangalo.org/">this booklet</a>.</div>
 			<div class="p">Please let us know you are here by submitting your intended time spent walking and sitting.</div>
 			<div class="p">We normally do walking first, then sitting.</div>
-<?php
-	echo $sError;
-?>
-			
 		</div>
 		<table width="100%">
-			<tr>
-				<td align="center">
-					<!-- 
-						<img id="video-frame" width="320">
-					<div id="video-frame"></div>
-						<iframe src="" id="video-frame" width="320" height="240"></iframe> 
-					<br/>
-					<input id="vid-check" type="checkbox" checked> Refresh
-					-->
-				</td>
-			</tr>
 			<tr>
 				<td align="center">
 					<div id="live"></div>

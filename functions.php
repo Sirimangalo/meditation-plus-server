@@ -185,6 +185,9 @@ function validateUser($pUsername, $pPassword) {
 		setcookie('login-user',$pUsername,time()+60*60*24*365*10);
 		
 		return true; 
+	}
+	else {
+		$_SESSION['error'] = "Invalid username or password"; 
 	} 
 	 
 	 

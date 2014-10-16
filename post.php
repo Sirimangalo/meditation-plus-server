@@ -56,6 +56,10 @@ else if($_POST['submit'] == 'Register') {
 else if($_POST['submit'] == 'Refresh') {
 	require('db.php');
 }
+else if($_POST['submit'] == 'Profile') {
+	require_once('config.php');
+	require('profiledb.php');
+}
 
 if(isset($con))
 	mysqli_close($con);

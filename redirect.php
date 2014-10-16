@@ -15,6 +15,7 @@ if (isset($_GET['action'])) {
 					if (!validateUser($_POST['username'], $_POST['password'])) { 
 						// Well there was an error. Set the message and unset 
 						// the action so the normal form appears. 
+						$_SESSION['error'] = "Login error: ".$_SESSION['error']; 
 						unset($_GET['action']);
 					} 
 					else
@@ -32,11 +33,13 @@ if (isset($_GET['action'])) {
 						if (!validateUser($_POST['username'], $_POST['password'])) { 
 							// Well there was an error. Set the message and unset 
 							// the action so the normal form appears. 
+							$_SESSION['error'] = "Login error: ".$_SESSION['error']; 
 							unset($_GET['action']); 
 						} 
 						else
 							$_SESSION['error'] = ""; 
 					}else { 
+						$_SESSION['error'] = "Registration error: ".$_SESSION['error']; 
 						// unset the action to display the registration form. 
 						unset($_GET['action']); 
 					}         

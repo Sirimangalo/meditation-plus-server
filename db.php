@@ -7,7 +7,7 @@ function getNewList() {
 	global $con;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s')."' AND users.uid=sessions.uid;";
+	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s')."' AND users.uid=sessions.uid;";
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$lista[] = $row;
@@ -20,7 +20,7 @@ function getNewChats() {
 	global $con;
 	
 	$chata = [];
-	$sql="SELECT cid, chats.uid AS uid, username, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid;";
+	$sql="SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid;";
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$chata[] = $row;
@@ -219,6 +219,7 @@ foreach($lista as $idx => $member) {
 	$mStart = $member['start'];
 	$mWalk = $member['walking'];
 	$mSit = $member['sitting'];
+	$mCountry = $member['country'];
 
 	if($cancelmed && $mUser == $user) {
 		continue;
@@ -229,6 +230,7 @@ foreach($lista as $idx => $member) {
 		'start' => $mStart,
 		'walking' => $mWalk,
 		'sitting' => $mSit,
+		'country' => $mCountry,
 		'me' => strlen($user) > 0 && $mUser == $user ? 'true':'false',
 	);
 }

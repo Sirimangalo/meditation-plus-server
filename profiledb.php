@@ -1,6 +1,6 @@
 <?php
 
-if(isset($_POST['submit'])) {
+if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 	if(loggedIn()) {
 		
 		$name = mysqli_real_escape_string($con,$_POST['name']);
@@ -20,7 +20,7 @@ if(isset($_POST['submit'])) {
 	}
 }
 
-$sql="SELECT uid, username, email, ".($edit?"show_email, ":"")."website, description, country FROM users WHERE username='".$profile."'";
+$sql="SELECT uid, username, email, ".($edit?"show_email, ":"")."website, description, country FROM users WHERE username='".(isset($profilePage)?$profile:$_POST['profile'])."'";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
@@ -31,3 +31,5 @@ $row = mysqli_fetch_assoc($query);
 foreach($row as $key => $val)
 	$profilea[$key] = $val;
 
+if(!isset($profilePage))
+	echo json_encode($profilea);
