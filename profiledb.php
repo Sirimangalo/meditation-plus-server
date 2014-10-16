@@ -16,11 +16,16 @@ if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 		if($_SESSION['username'] == $old_name || in_array($_SESSION['username'],$admin)) {
 			$sqla = "UPDATE users SET username='".$name."', description='".$desc."', email='".$email."', show_email=".(int)$show_email.", website='".$website."', country='".$country."' WHERE uid = ".$uid;
 			$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
+			if(!isset($profilePage))
+				die('{"success":1}');
 		}
 	}
 }
 
-$sql="SELECT uid, username, email, ".($edit?"show_email, ":"")."website, description, country FROM users WHERE username='".(isset($profilePage)?$profile:$_POST['profile'])."'";
+if(!isset($edit))
+	$edit = loggedIn() && ($_SESSION['username'] == $_POST['profile'] || in_array($_SESSION['username'],$admin));
+
+$sql="SELECT uid, username".($edit?", email":"").", ".($edit?"show_email, ":"")."website, description, country FROM users WHERE username='".(isset($profilePage)?$profile:$_POST['profile'])."'";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
