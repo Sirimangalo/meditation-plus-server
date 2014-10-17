@@ -117,7 +117,7 @@ function logoutUser() {
 	// using unset will remove the variable 
 	// and thus logging off the user. 
 	unset($_SESSION['username']); 
-	unset($_SESSION['username']); 
+	unset($_SESSION['uid']); 
 	unset($_SESSION['loggedin']);
 	unset($_COOKIE['login-token']);
 	setcookie('login-token', '', time() - 3600);
