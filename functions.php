@@ -136,12 +136,13 @@ function validateUser($pUsername, $pPassword) {
 	global $con, $NUM_TOKENS;
 
 	// See if the username and password are valid. 
-	$sql = "SELECT username FROM users WHERE username = '" . mysqli_real_escape_string($con, $pUsername) . "' AND password = '" . hashPassword($pPassword, SALT1, SALT2) . "' LIMIT 1"; 
+	$sql = "SELECT username, uid FROM users WHERE username = '" . mysqli_real_escape_string($con, $pUsername) . "' AND password = '" . hashPassword($pPassword, SALT1, SALT2) . "' LIMIT 1"; 
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	
 	// If one row was returned, the user was logged in! 
 	if (mysqli_num_rows($query) == 1) {
 		$row = mysqli_fetch_assoc($query); 
+		$_SESSION['uid'] = $row['uid']; 
 		$_SESSION['username'] = $row['username']; 
 		$_SESSION['loggedin'] = true; 
 
@@ -154,7 +155,7 @@ function validateUser($pUsername, $pPassword) {
 
 		// get existing tokens
 
-		$sql = "SELECT token FROM logins WHERE username = '" . mysqli_real_escape_string($con, $pUsername)."';"; 
+		$sql = "SELECT token FROM logins WHERE uid = '" . $row['uid']."';"; 
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
 		if (mysqli_num_rows($query) == 1) { 
@@ -177,11 +178,11 @@ function validateUser($pUsername, $pPassword) {
 				$tokens = array_slice($tokens,$tl-$NUM_TOKENS+1,$NUM_TOKENS-1); // leave NUM_TOKENS -1 
 				
 			$tokenstring = implode(',',$tokens).','.$loginToken;
-			$sql = "UPDATE logins SET token='" . $tokenstring . "' WHERE username='".mysqli_real_escape_string($con,$pUsername)."';"; 
+			$sql = "UPDATE logins SET token='" . $tokenstring . "' WHERE uid=".$row['uid'].";"; 
 		}
 		else { 
 			$tokenstring = $loginToken;
-			$sql = "INSERT INTO logins (`username`, `token`) VALUES ('" . mysqli_real_escape_string($con,$pUsername) . "', '" . $loginToken . "');"; 
+			$sql = "INSERT INTO logins (`token`) VALUES ('" . mysqli_real_escape_string($con,$pUsername) . "', '" . $loginToken . "');"; 
 		}
 		
 		// save tokens
@@ -217,13 +218,14 @@ function validateToken($pUsername, $pToken) {
 	error_log('token right size');
 
 	// See if the username and token are valid. 
-	$sql = "SELECT username FROM logins WHERE username = '" . mysqli_real_escape_string($con,$pUsername) . "' AND token LIKE '%" . $pToken . "%'"; 
+	$sql = "SELECT users.username, logins.uid FROM logins,users WHERE logins.uid=users.uid AND users.username = '" . mysqli_real_escape_string($con,$pUsername) . "' AND token LIKE '%" . $pToken . "%'"; 
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	 
 	// If one row was returned, the user was logged in! 
 	if (mysqli_num_rows($query) == 1) { 
 		$row = mysqli_fetch_assoc($query); 
 		$_SESSION['username'] = $row['username']; 
+		$_SESSION['uid'] = $row['uid']; 
 		$_SESSION['loggedin'] = true; 
 		$_SESSION['login_token'] = $pToken;
 		return true; 
