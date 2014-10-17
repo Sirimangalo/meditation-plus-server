@@ -49,7 +49,7 @@ require('bar.php');
 	<script>
 
 <?php
-	
+
 	echo '
 		var G_static = '.(isset($_GET['static'])?'true':'false')+';';
 
@@ -78,10 +78,10 @@ require('bar.php');
 <?php
 	echo $sError;
 ?>
-			
+
 		</div>
 		<div id="inner">
-<?php 
+<?php
 
 if(!loggedIn())
 	die('Not logged in.');
@@ -102,14 +102,14 @@ if($edit) {
 					<hr/>
 					<span class="profile-field-head">Email</span>
 					<input name="email" id="email" size="50" value="<?php echo $profilea['email']; ?>"><hr/>
-					<span class="profile-field-head">Show Email</span> (<i>otherwise email is only used for recovering your password</i>):<br/> 
+					<span class="profile-field-head">Show Email</span> (<i>otherwise email is only used for recovering your password</i>):<br/>
 					<input type="radio" id="show_email0" name="show_email" value="0"<?php echo ($profilea['show_email'] == 0 ?' checked':'') ?>>Don't show
 					<input type="radio" id="show_email1" name="show_email" value="1"<?php echo ($profilea['show_email'] == 1 ?' checked':'') ?>>Show <hr/>
 					<span class="profile-field-head">Website</span>
 					<input name="website" id="website" size="50" value="<?php echo $profilea['website']; ?>">
 					<hr/>
 					<span class="profile-field-head">Country</span>
-					<select name="country" id="country"><?php 
+					<select name="country" id="country"><?php
 						foreach($countries as $code => $country) {
 							echo '<option value="'.$code.'"'.($code == $profilea['country'] ? ' selected' : '').'>'.$countries[$code].'</option>';
 						}
@@ -127,18 +127,18 @@ else {
 			<div id="profile">
 				<div id="profile-title"><div id="big-flag"><img src="images/flags/48/<?php echo strtolower($profilea['country']); ?>.png"></div>Profile</div>
 				<span class="profile-field-head">Name</span>
-				<span name="name-span" id="name-span"><?php echo $profile; ?></span></<br/><br/>
+				<span name="name-span" id="name-span"><?php echo htmlspecialchars($profile); ?></span></<br/><br/>
 				<span class="profile-field-head">About</span>
-				<span name="desc-span" id="desc-span"><?php echo str_replace("\n","<br/>",$profilea['description']); ?></span>
+				<span name="desc-span" id="desc-span"><?php echo nl2br(htmlspecialchars($profilea['description'])); ?></span>
 				<hr/>
-<?php if($profilea['show_email'] == 1) { ?>			
+<?php if($profilea['show_email'] == 1) { ?>
 				<span class="profile-field-head">Email</span>
 				<span name="email-span" id="email-span"><?php echo $profilea['email']; ?></span><br/><br/>
 <?php
 }
 ?>
 				<span class="profile-field-head">Website</span>
-				<span name="website-span" id="website-span"><?php echo $profilea['website']; ?></span>
+				<span name="website-span" id="website-span"><?php echo htmlspecialchars($profilea['website']); ?></span>
 				<hr/>
 				<span class="profile-field-head">Country</span>
 				<span name="country-span" id="country-span"><?php echo $countries[$profilea['country']]; ?></span>
