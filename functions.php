@@ -29,13 +29,19 @@ function createAccount($pUsername, $pPassword) {
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
  
 		// Error checks (Should be explained with the error) 
-		if ($uLen <= 3 || $uLen >= 21) { 
+		if (preg_match("/[^-0-9A-Za-z _]/",$pUsername) > 0) { 
+			$_SESSION['error'] = "Username may only contain alpha-numberical characters"; 
+		}
+		else if ($uLen <= 3 || $uLen >= 21) { 
 			$_SESSION['error'] = "Username must be between 4 and 20 characters."; 
-		}elseif ($pLen < 6) { 
+		}
+		else if ($pLen < 6) { 
 			$_SESSION['error'] = "Password must be longer then 5 characters."; 
-		}elseif (mysqli_num_rows($query) == 1) { 
+		}
+		else if (mysqli_num_rows($query) == 1) { 
 			$_SESSION['error'] = "Username already exists."; 
-		}else { 
+		}
+		else { 
 			// All errors passed lets 
 			// Create our insert SQL by hashing the password and using the escaped Username. 
 			$sql = "INSERT INTO users (`username`, `password`) VALUES ('" . $eUsername . "', '" . hashPassword($pPassword, SALT1, SALT2) . "');"; 

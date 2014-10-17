@@ -73,14 +73,6 @@ require('bar.php');
 <body onload="loaded()">
 <?php echo $header_bar; ?>
 	<div id="content">
-		<div id="header">
-			<div class="heading"><?php echo $profile; ?></div>
-<?php
-	echo $sError;
-?>
-			
-		</div>
-		<div id="inner">
 <?php 
 
 if(!loggedIn())
@@ -91,12 +83,18 @@ if(empty($profilea))
 
 if($edit) {
 ?>
+		<div id="header">
+			<div class="heading"><?php echo $profile; ?></div>
+		</div>
+		<div id="inner">
 			<div id="profile">
 				<div id="profile-title">Profile</div>
 				<br/>
 				<form id="profform" method="POST">
 					<span class="profile-field-head">Name</span>
 					<input name="name" id="name" value="<?php echo $profile; ?>"><hr/>
+					<span class="profile-field-head">Profile Image (square)</span>
+					<input name="img" id="img" value="<?php echo $profilea['img']; ?>"><hr/>
 					<span class="profile-field-head">About</span><br/>
 					<textarea name="desc" id="desc" rows="4" cols="40"><?php echo $profilea['description']; ?></textarea>
 					<hr/>
@@ -124,24 +122,31 @@ if($edit) {
 <?php }
 else {
 ?>
+		<div id="header">
+			<div class="heading"><?php echo $profile; ?></div>
+			<div id="profile-img"><?php if($profilea['img']) echo '<img src="'.$profilea['img'].'" width="100px" height="100px">';?></div>
+		</div>
+		<div id="inner">
 			<div id="profile">
-				<div id="profile-title"><div id="big-flag"><img src="images/flags/48/<?php echo strtolower($profilea['country']); ?>.png"></div>Profile</div>
-				<span class="profile-field-head">Name</span>
+				<div id="profile-title">Profile:</div>
+				<hr/>
+				<span class="profile-field-head">Name: </span>
 				<span name="name-span" id="name-span"><?php echo $profile; ?></span></<br/><br/>
-				<span class="profile-field-head">About</span>
+				<span class="profile-field-head">About: </span>
 				<span name="desc-span" id="desc-span"><?php echo str_replace("\n","<br/>",$profilea['description']); ?></span>
 				<hr/>
 <?php if($profilea['show_email'] == 1) { ?>			
-				<span class="profile-field-head">Email</span>
+				<span class="profile-field-head">Email: </span>
 				<span name="email-span" id="email-span"><?php echo $profilea['email']; ?></span><br/><br/>
 <?php
 }
 ?>
-				<span class="profile-field-head">Website</span>
+				<span class="profile-field-head">Website: </span>
 				<span name="website-span" id="website-span"><?php echo $profilea['website']; ?></span>
 				<hr/>
-				<span class="profile-field-head">Country</span>
+				<span class="profile-field-head">Country: </span>
 				<span name="country-span" id="country-span"><?php echo $countries[$profilea['country']]; ?></span>
+				<div id="big-flag"><?php if($profilea['country']) echo '<img src="images/flags/48/'.strtolower($profilea['country']).'.png">';?></div>
 			</div>
 <?php
 }

@@ -61,8 +61,8 @@ $alert = '';
 
 $user = '';
 
-if(isset($_POST['username']))
-	$user = preg_replace('/[^-0-9A-Za-z _]/','',$_POST['username']);
+if(isset($_SESSION['username']))
+	$user = preg_replace('/[^-0-9A-Za-z _]/','',$_SESSION['username']);
 
 $chatlimit = 50;
 $clearchat = false;
