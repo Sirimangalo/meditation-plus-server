@@ -61,6 +61,9 @@ $alert = '';
 
 $user = '';
 
+if(isset($_POST['username']) && !isset($_SESSION['username'])) // claiming to be logged in, not verified
+	loggedIn();
+
 if(isset($_SESSION['username']))
 	$user = preg_replace('/[^-0-9A-Za-z _]/','',$_SESSION['username']);
 

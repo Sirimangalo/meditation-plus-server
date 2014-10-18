@@ -35,7 +35,7 @@ function checkCommitment($c) {
 			$edate = date_modify($date,'+1 hour');
 			$edate = date_format($edate,'Y-m-d H:i:s');
 			
-			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND end < '".gmdate('Y-m-d H:i:s')."' AND start < '".$edate."'"; // starts after time and ends before now and starts before one hour after time
+			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND start < '".$edate."'"; // starts after time and starts before one hour after time
 		}
 		
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
@@ -112,7 +112,7 @@ function checkCommitment($c) {
 			$edate = date_modify($date,'+1 hour');
 			$edate = date_format($edate,'Y-m-d H:i:s');
 			
-			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND end < '".gmdate('Y-m-d H:i:s')."' AND start < '".$edate."'"; // starts after time and ends before now and starts before one hour after time
+			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND start < '".$edate."'"; // starts after time and ends before now and starts before one hour after time
 		}
 		
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
@@ -176,7 +176,7 @@ function checkCommitment($c) {
 			$edate = date_modify($date,'+1 hour');
 			$edate = date_format($edate,'Y-m-d H:i:s');
 			
-			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND end < '".gmdate('Y-m-d H:i:s')."' AND start < '".$edate."'"; // starts after time and ends before now and starts before one hour after time
+			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND start < '".$edate."'"; // starts after time and ends before now and starts before one hour after time
 		}
 		
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
