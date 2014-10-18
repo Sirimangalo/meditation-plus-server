@@ -18,6 +18,8 @@ function loaded() {
 
 var obj;
 
+var seq = 0;
+
 var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 
 var dow = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -226,20 +228,21 @@ function submitData(submit,formid) {
 				if(j == obj[i]['creator'])
 					k = '['+j+']';
 				if(ucomm == '100')
-					usera.push('<span class="committed" title="user has fulfilled their commitment">'+k+'</span>');
+					usera.push('<span style="color:'+makeRedGreen(ucomm,true)+'" title="user has fulfilled their commitment">'+k+'</span>');
 				else
-					usera.push('<span class="uncommitted" title="user has fulfilled '+ucomm+'% of their commitment">'+k+'</span>');
+					usera.push('<span style="color:'+makeRedGreen(ucomm,true)+'" title="user has fulfilled '+ucomm+'% of their commitment">'+k+'</span>');
 			}
 			var commit = '';
 			if(logged_user) {
 				if(obj[i]['users'][logged_user] == null)
 					commit = '<input type="button" onclick="submitData(true,\'commitform_'+obj[i]['cid']+'\')" value="Commit">';
-				else if(obj[i]['creator'] != logged_user)
+				else 
 					commit = '<input type="button" onclick="submitData(true,\'uncommitform_'+obj[i]['cid']+'\')" value="Uncommit">';
-				else
-					commit = '<input type="button" onclick="editCommit('+i+')" value="Edit"><input type="button" onclick="submitData(true,\'delcommitform_'+obj[i]['cid']+'\')" value="Delete">';
+				
+				if(obj[i]['creator'] == logged_user)
+					commit += '<input type="button" onclick="editCommit('+i+')" value="Edit"><input type="button" onclick="submitData(true,\'delcommitform_'+obj[i]['cid']+'\')" value="Delete">';
 			}
-			output += '<div class="a-comm-shell'+(committed == '100'?'-committed" title="you have fulfilled your commitment':(committed != '-1'?'-uncommitted" title="you have fulfilled '+committed+'% of your commitment':''))+'"><div class="a-comm-title">'+obj[i]['title']+'</div><div class="a-comm-desc">'+obj[i]['description']+'</div><div class="a-comm-creator">'+obj[i]['creator']+'</div><div class="a-comm-def">'+def+'</div><div class="a-comm-users">'+usera.join(', ')+'</div><div class="a-comm-commit">'+commit+'</div></div>';
+			output += '<div class="a-comm-shell" style="background-color:'+makeRedGreen(ucomm,false)+'" title="'+(committed == '100'?'you have fulfilled your commitment':(committed != '-1'?'you have fulfilled '+committed+'% of your commitment':''))+'"><div class="a-comm-title">'+obj[i]['title']+'</div><div class="a-comm-desc">'+obj[i]['description']+'</div><div class="a-comm-creator">'+obj[i]['creator']+'</div><div class="a-comm-def">'+def+'</div><div class="a-comm-users">'+usera.join(', ')+'</div><div class="a-comm-commit">'+commit+'</div></div>';
 		}
 		$('#commitments').html(output);
 	});
@@ -251,6 +254,34 @@ function submitData(submit,formid) {
 		if($inputs)
 			$inputs.prop("disabled", false);
 	});
+}
+
+function makeRedGreen(percent,dark) {
+	var green = "";
+
+	var red = "";
+
+    var max = 255;
+	var min = 200
+    if(dark) {
+		max = 100;
+		min = 0;
+	}
+	
+	var varColor = Math.round(min + ((100-percent)*(max-min)/100)).toString(16);
+	var maxColor = max.toString(16);
+	var blue = min.toString(16);
+
+	if(percent > 50) { // becoming green
+		red = varColor;
+		green = maxColor;
+	}
+	else { // becoming red
+		green = varColor;
+		red = maxColor;
+	}
+
+	return "#" + (red.length == 1?"0":"") + red + (green.length == 1?"0":"") + green + (blue.length == 1?"0":"") + blue;
 }
 
 function editCommit(id) {

@@ -281,7 +281,7 @@ if(isset($_POST['form_id'])) {
 			$username = mysqli_real_escape_string($con,$_SESSION['username']);
 			$cid = (int) substr($_POST['form_id'],13);
 			
-			$sql = "DELETE FROM user_commitments WHERE cid = ".$cid." AND uid IN (SELECT uid FROM users WHERE username = '".$username."') AND cid NOT IN (SELECT cid FROM commitments,users WHERE cid = ".$cid." AND creatorid = uid AND username = '".$username."');";
+			$sql = "DELETE FROM user_commitments WHERE cid = ".$cid." AND uid IN (SELECT uid FROM users WHERE username = '".$username."')";
 			
 			//error_log($sql);
 			
