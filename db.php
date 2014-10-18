@@ -62,10 +62,18 @@ $alert = '';
 $user = '';
 
 if(isset($_POST['username']) && !isset($_SESSION['username'])) // claiming to be logged in, not verified
-	loggedIn();
+	if(!loggedIn()) {
+		$data = array(
+			'success' => -1,
+			'error' => "Login error: ".$_SESSION['error'],
+		);
+		die(json_encode($data));
+	}
 
 if(isset($_SESSION['username']))
 	$user = preg_replace('/[^-0-9A-Za-z _]/','',$_SESSION['username']);
+
+$loginToken = @$_SESSION['login_token'];
 
 $chatlimit = 50;
 $clearchat = false;
@@ -116,7 +124,6 @@ if(isset($_POST['form_id'])) {
 		error_log('submitting form_id: '.$_POST['form_id'].' user: '.$user);
 		
 		if($_POST['form_id'] == 'cancelform') {
-			error_log('cancelform');
 
 			$sql = "DELETE FROM sessions WHERE uid = (SELECT uid FROM users WHERE username = '".mysqli_real_escape_string($con,$user)."') AND end > '".gmdate('Y-m-d H:i:s')."'"; 
 			
@@ -131,7 +138,6 @@ if(isset($_POST['form_id'])) {
 			file_put_contents('listv',++$listVersion);
 		}
 		else if($_POST['form_id'] == 'chatform') {
-			error_log('chatform');
 			$message = str_replace('^','',$_POST['message']);
 			
 			if(in_array($user,$admin) && $message == '/clear') {
@@ -153,7 +159,6 @@ if(isset($_POST['form_id'])) {
 			}
 		}
 		else if($_POST['form_id'] == 'timeform') {
-			error_log('timeform');
 			// time form
 
 			$start = time();
@@ -194,7 +199,6 @@ if(isset($_POST['form_id'])) {
 			// del chat form
 			
 			$cid = (int)substr($_POST['form_id'],8);
-			error_log('deleting chat: '+$cid);
 			
 			$sql = "DELETE FROM chats WHERE cid = ".$cid;
 			
@@ -207,7 +211,10 @@ if(isset($_POST['form_id'])) {
 		}
 	}
 	else {
-		$success = -1; // not logged in, failed
+		$data = array(
+			'success' => -1,
+		);
+		die(json_encode($data));
 	}
 }
 
@@ -316,21 +323,12 @@ $data = array(
 	'success' => $success,
 	'list_version' => $listVersion,
 	'chat_version' => $chatVersion,
+	'login_token' => $loginToken,
 	'alert' => $alert,
 	'refresh' => $refresh,
 	'admin' => in_array($user,$admin)?'true':'false',
 );
-//error_log($listVersion.' '.$chatVersion);
 
-/*
-// reget list
-$listfo = file_get_contents('meds');
-// if list is different, overwrite
-if($listn != $listfo) {
-	error_log('med list changed');
-	file_put_contents('meds',$listn);
-}
-*/
 
 $json = json_encode($data);
 

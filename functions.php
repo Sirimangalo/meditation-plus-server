@@ -75,35 +75,26 @@ function loggedIn() {
 
 	// check both loggedin and username to verify user. 
 	if (isset($_SESSION['loggedin']) && isset($_SESSION['username'])) {
-		error_log('in session');
 		return true; 
 	}
 
 	// check for login token when not already logged in, validate token
 
 	if(isset($_COOKIE['login-token'])) {
-		error_log('checking token: '.$_COOKIE['login-token']);
 		if(validateToken($_COOKIE['login-user'],$_COOKIE['login-token'])) {
-			error_log('token good');
 			return true;
 		}
 		else { // unset invalid cookie
-			error_log('token bad');
+			$_SESSION['error'] = "token bad";
 			unset($_COOKIE['login-token']);
 			setcookie('login-token', '', time() - 3600);
 		}
 			
 	}
 	if(isset($_POST['login_token'])) {
-		error_log('checking token: '.$_POST['login_token']);
 		if(validateToken($_POST['username'],$_POST['login_token'])) {
-			error_log('token good');
 			return true;
 		}
-		else { // unset invalid cookie
-			error_log('token bad');
-		}
-			
 	}
 
 	return false; 
@@ -151,11 +142,10 @@ function validateUser($pUsername, $pPassword) {
 		// generate new token
 
 		$loginToken = generateRandomString();
-		$_SESSION['login_token'] = $loginToken; 
 
 		// get existing tokens
 
-		$sql = "SELECT token FROM logins WHERE uid = '" . $row['uid']."';"; 
+		$sql = "SELECT token, uid FROM logins WHERE uid = " . $row['uid'].";"; 
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
 		if (mysqli_num_rows($query) == 1) { 
@@ -166,7 +156,6 @@ function validateUser($pUsername, $pPassword) {
 			// reuse old token
 			
 			if(isset($_COOKIE['login-token']) && isset($_COOKIE['login-user']) && $_COOKIE['login-user'] == $pUsername && in_array($_COOKIE['login-token'],$tokens)) {
-				error_log('reusing old token');
 				return true; 
 			}
 				
@@ -185,11 +174,13 @@ function validateUser($pUsername, $pPassword) {
 			$sql = "INSERT INTO logins (`token`) VALUES ('" . mysqli_real_escape_string($con,$pUsername) . "', '" . $loginToken . "');"; 
 		}
 		
+		
 		// save tokens
 		
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 		setcookie('login-token',$loginToken,time()+60*60*24*365*10);
 		setcookie('login-user',$pUsername,time()+60*60*24*365*10);
+		$_SESSION['login_token'] = $loginToken; 
 		
 		return true; 
 	}
@@ -214,8 +205,6 @@ function validateToken($pUsername, $pToken) {
 
 	if(strlen($pToken) != 128)
 		return false;
-
-	error_log('token right size');
 
 	// See if the username and token are valid. 
 	$sql = "SELECT users.username, logins.uid FROM logins,users WHERE logins.uid=users.uid AND users.username = '" . mysqli_real_escape_string($con,$pUsername) . "' AND token LIKE '%" . $pToken . "%'"; 

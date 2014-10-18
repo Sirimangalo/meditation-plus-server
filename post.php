@@ -1,5 +1,7 @@
 <?php
 
+error_log('post');
+
 if($_POST['submit'] == 'Login') {
 	require('config.php');
 	error_log('login');
