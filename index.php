@@ -22,7 +22,7 @@ require('bar.php');
 <?php
 	
 	echo '
-		var G_static = '.(isset($_GET['static'])?'true':'false')+';';
+		var G_static = '.(isset($_GET['static'])?'true':'false').';';
 		
 	if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
 		echo '
@@ -33,7 +33,7 @@ require('bar.php');
 		var logged_user = \'\';';
 ?>
 	</script>
-	<script src="index.js?ver=6"></script>
+	<script src="index.js?ver=7"></script>
 </head>
 
 <body onload="loaded()">
@@ -44,11 +44,13 @@ require('bar.php');
 			<div class="p">  The meditation we practice is based on the teachings found in <a href="http://htm.sirimangalo.org/">this booklet</a>.</div>
 			<div class="p">Please let us know you are here by submitting your intended time spent walking and sitting.</div>
 			<div class="p">We normally do walking first, then sitting.</div>
+			<div class="p">Please visit our <a class="link bold" href="/commit.php">commitments</a> page to join or create a group of committed meditators.</div>
+			<div class="p">Also, don't forget to update <a class="link bold" href="/profile.php">your profile</a> to let us know where you're from.</div>
 		</div>
 		<table width="100%">
 			<tr>
 				<td align="center">
-					<div id="live"></div>
+					<div id="live">The time now is:<div id="time"></div></div>
 				</td>
 			</tr>
 			<tr>

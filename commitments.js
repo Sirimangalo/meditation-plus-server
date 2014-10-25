@@ -242,7 +242,7 @@ function submitData(submit,formid) {
 				if(obj[i]['creator'] == logged_user)
 					commit += '<input type="button" onclick="editCommit('+i+')" value="Edit"><input type="button" onclick="submitData(true,\'delcommitform_'+obj[i]['cid']+'\')" value="Delete">';
 			}
-			output += '<div class="a-comm-shell" style="background-color:'+makeRedGreen(ucomm,false)+'" title="'+(committed == '100'?'you have fulfilled your commitment':(committed != '-1'?'you have fulfilled '+committed+'% of your commitment':''))+'"><div class="a-comm-title">'+obj[i]['title']+'</div><div class="a-comm-desc">'+obj[i]['description']+'</div><div class="a-comm-creator">'+obj[i]['creator']+'</div><div class="a-comm-def">'+def+'</div><div class="a-comm-users">'+usera.join(', ')+'</div><div class="a-comm-commit">'+commit+'</div></div>';
+			output += '<div class="a-comm-shell"'+(committed != -1?' style="background-color:'+makeRedGreen(committed,false)+'"':'')+' title="'+(committed == '100'?'you have fulfilled your commitment':(committed != '-1'?'you have fulfilled '+committed+'% of your commitment':''))+'"><div class="a-comm-title">'+obj[i]['title']+'</div><div class="a-comm-desc">'+obj[i]['description']+'</div><div class="a-comm-creator">'+obj[i]['creator']+'</div><div class="a-comm-def">'+def+'</div><div class="a-comm-users">'+usera.join(', ')+'</div><div class="a-comm-commit">'+commit+'</div></div>';
 		}
 		$('#commitments').html(output);
 	});
@@ -257,6 +257,7 @@ function submitData(submit,formid) {
 }
 
 function makeRedGreen(percent,dark) {
+	percent = parseInt(percent);
 	var green = "";
 
 	var red = "";
@@ -268,16 +269,15 @@ function makeRedGreen(percent,dark) {
 		min = 0;
 	}
 	
-	var varColor = Math.round(min + ((100-percent)*(max-min)/100)).toString(16);
 	var maxColor = max.toString(16);
 	var blue = min.toString(16);
 
 	if(percent > 50) { // becoming green
-		red = varColor;
+		red = Math.round(max - ((percent-50)*(max-min)/50)).toString(16);
 		green = maxColor;
 	}
 	else { // becoming red
-		green = varColor;
+		green = Math.round(min + (percent*(max-min)/50)).toString(16);
 		red = maxColor;
 	}
 
@@ -371,7 +371,7 @@ function clearForm() {
 function validateForm(id) {
 	var error = '';
 	
-	if(id == 'newform') {
+	if(id == 'newcommit') {
 		var title = $('#title').val();
 		var desc = $('#desc').val();
 		

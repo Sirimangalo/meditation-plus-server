@@ -7,7 +7,7 @@ function getNewList() {
 	global $con;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s')."' AND users.uid=sessions.uid;";
+	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s')."' AND users.uid=sessions.uid ORDER BY end DESC;"; // ,strtotime('12 hours ago')
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$lista[] = $row;
@@ -20,7 +20,7 @@ function getNewChats() {
 	global $con;
 	
 	$chata = [];
-	$sql="SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid;";
+	$sql="(SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid ORDER BY time DESC LIMIT 50) ORDER BY time ASC;";
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$chata[] = $row;
@@ -48,7 +48,7 @@ function getHoursList() {
 			$time = 60-(int)date('i',$row['start']);
 			$hours[$hs] += $time;
 			while ($ho < $he) {
-				$hours[$ho] += 60;
+				$hours[$ho++] += 60;
 			}
 			$time = (int)date('i',$row['end']);
 			$hours[$he] += $time;
@@ -117,7 +117,7 @@ $success = 0;
 
 // deal with members
 
-if(isset($_POST['form_id'])) {
+if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 
 	if(loggedIn()) {
 		$user = $_SESSION['username'];
@@ -227,6 +227,7 @@ foreach($lista as $idx => $member) {
 	
 	$mUser = $member['username'];
 	$mStart = $member['start'];
+	$mEnd = $member['end'];
 	$mWalk = $member['walking'];
 	$mSit = $member['sitting'];
 	$mCountry = $member['country'];
@@ -238,9 +239,11 @@ foreach($lista as $idx => $member) {
 	$list[] = array(
 		'username' => $mUser,
 		'start' => $mStart,
+		'end' => $mEnd,
 		'walking' => $mWalk,
 		'sitting' => $mSit,
 		'country' => $mCountry,
+		'can_edit' => $$mUser == $user || in_array($user,$admin) ? 'true':'false',
 		'me' => strlen($user) > 0 && $mUser == $user ? 'true':'false',
 	);
 }

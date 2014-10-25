@@ -43,6 +43,8 @@ $row = mysqli_fetch_assoc($query);
 
 foreach($row as $key => $val)
 	$profilea[$key] = $val;
+	
+$profilea['can_edit'] = $edit ? 'true' : 'false';
 
 if(!isset($profilePage))
 	echo json_encode($profilea);

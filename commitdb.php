@@ -215,7 +215,10 @@ function checkCommitment($c) {
 
 if(isset($_POST['form_id'])) {
 	if(loggedIn()) {
-		if($_POST['form_id'] == 'newform') {
+		
+		error_log($_POST['form_id']);
+		
+		if($_POST['form_id'] == 'newcommit') {
 			
 			$edit = isset($_POST['edit-com']) && strlen($_POST['edit-com']) > 0;
 			
@@ -224,7 +227,6 @@ if(isset($_POST['form_id'])) {
 			$creator = mysqli_real_escape_string($con,$_SESSION['username']);
 			$period = mysqli_real_escape_string($con,$_POST['period']);
 
-			$specDay = isset($_POST['spec-day']);
 			$dow = $_POST['dow'];
 			$dom = $_POST['dom'];
 			$doy = $_POST['doy'];

@@ -374,14 +374,22 @@ span.uncommitted {
 	display:none;
 }
 
-.green {
-	color:Chartreuse;
-}
-
 #profile-title {
 	font-weight:bold;
 	font-size:24px;
 }
 .profile-field-head {
+	font-weight:bold;
+}
+
+
+.green {
+	color:Chartreuse;
+}
+
+.link {
+	color:#009900 !important;
+}
+.bold {
 	font-weight:bold;
 }

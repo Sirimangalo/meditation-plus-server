@@ -53,7 +53,7 @@ function refreshTime() {
 		var lminute = d.getMinutes().toString().length == 1 ? '0'+d.getMinutes():d.getMinutes();
 		var lsecond = d.getSeconds().toString().length == 1 ? '0'+d.getSeconds():d.getSeconds();
 
-						
+/*						
 		var myTime = 'Meditation sessions are generally held every day at:<br><br/>';
 		
 		for(i = 0; i < start.length; i++) {
@@ -63,9 +63,11 @@ function refreshTime() {
 			
 			myTime += '<b>'+(start[i]<10?'0':'')+start[i]+'00h UTC</b> - <i>('+(mtime.getHours()>12?mtime.getHours()-12:mtime.getHours())+':'+((mtime.getMinutes()<10?'0':'')+mtime.getMinutes())+' '+(mtime.getHours()>11 && mtime.getHours()<24?'PM':'AM')+' your time)</i><br/>';
 		}
-		myTime += '<br/>The time now is:<br/><br/><b id="now">'+hour+':'+minute+':'+second + ' UTC, '+ monthNames[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', '+d.getUTCFullYear()+'</b><br/><i>('+lhour+':'+lminute+':'+lsecond+', '+ monthNames[d.getMonth()] + ' ' + d.getDate() + ', '+d.getFullYear()+' your time)</i>';
-
-		$('#live').html(myTime);
+*/
+		var myTime = '<b id="now">'+hour+':'+minute+':'+second + ' UTC, '+ monthNames[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', '+d.getUTCFullYear()+'</b><br/><i>('+lhour+':'+lminute+':'+lsecond+', '+ monthNames[d.getMonth()] + ' ' + d.getDate() + ', '+d.getFullYear()+' your time)</i>';
+		$('#time').html(myTime);
+		
+		
 		
 		window.setTimeout(function() {refreshTime() },1000);
 
@@ -279,41 +281,56 @@ function submitData(submit,formid) {
 			
 			var time = Math.ceil(new Date().getTime() / 1000);
 			
-			if(end < time) {
-				listVersion = -1; // force refresh
-				continue;
-			}
-			
-			var elapsed = time - start;
-			
-			var walks = walking * 60;
-			var sits = sitting * 60;
+			var opacity = "";
+
+			var walkOut = walking;
+			var sitOut = sitting;
 
 			var current = "walking";
-
-			// sitting
-			if(walks < elapsed) {
+			
+			if(end < time) {
+				var opi = 1 - Math.round((time-end)*10/(60*60*12))/10;
+				if(opi > 1)
+					opi = 1;
+				opacity = ' style="opacity:'+opi+'"';
 				
-				if(me) {
-					if(imWalking) // walking finished
-						ringTimer();
-						
-					imWalking = false;
-					imSitting = true;
-				}
-				
-				current = "sitting";
-				var walkm = 0;
-				var sitm = Math.floor((sits + walks - elapsed)/60);
+				current = "finished";
 			}
 			else {
-				if(me)
-					imWalking = true;
-				var walkm = Math.floor((walks - elapsed)/60);
-				var sitm = sitting;
+			
+				var elapsed = time - start;
+				
+				var walks = walking * 60;
+				var sits = sitting * 60;
+
+
+				// sitting
+				if(walks < elapsed) {
+					
+					if(me) {
+						if(imWalking) // walking finished
+							ringTimer();
+							
+						imWalking = false;
+						imSitting = true;
+					}
+					
+					current = "sitting";
+					var walkm = 0;
+					var sitm = Math.floor((sits + walks - elapsed)/60);
+				}
+				else {
+					if(me)
+						imWalking = true;
+					var walkm = Math.floor((walks - elapsed)/60);
+					var sitm = sitting;
+				}
+				
+				walkOut = walkm + '/' + walking;
+				sitOut = sitm + '/' + sitting;
 			}
 			
-			output += '<tr><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'') + user + '</a></td><td>' + walkm + '/'+walking+'</td><td>' + sitm + '/'+sitting+'</td></tr>';					
+			output += '<tr'+opacity+'><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'') + user + '</a></td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';					
 		}
 		
 		// timer ringing

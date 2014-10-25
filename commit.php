@@ -57,7 +57,7 @@ require('bar.php');
 			<div id="commitments"></div>
 			<div id="new-commitment">
 				<div id="new-comm-title">New Commitment</div>
-				<form id="newform">
+				<form id="newcommit">
 					Title<br/>
 					<input name="title" id="title"><br/><br/>
 					Description<br/>
@@ -109,7 +109,7 @@ require('bar.php');
 						</div>
 						<hr/>
 					</div>
-					<input id="new-button" type="button" onclick="submitData(true,'newform')" value="Submit">
+					<input id="new-button" type="button" onclick="submitData(true,'newcommit')" value="Submit">
 					<input id="edit-com" name="edit-com" type="hidden" value="">
 				</form>
 			</div>
