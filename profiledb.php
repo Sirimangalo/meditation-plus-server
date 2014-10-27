@@ -2,7 +2,6 @@
 
 if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 	if(loggedIn()) {
-		
 		$name = mysqli_real_escape_string($con,$_POST['name']);
 		$old_name = mysqli_real_escape_string($con,$_POST['old_name']);
 		$desc = mysqli_real_escape_string($con,$_POST['desc']);
@@ -22,7 +21,7 @@ if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 		&& strlen($country) == 2
 		&& strlen($img) <= 255
 		) {
-			$sqla = "UPDATE users SET username='".$name."', description='".$desc."', email='".$email."', show_email=".(int)$show_email.", website='".$website."', country='".$country."', img='".$img."' WHERE uid = ".$uid;
+			$sqla = "UPDATE users SET username='".$name."', description='".$desc."', email='".$email."', show_email=".(int)$show_email.", website='".$website."', country='".$country."', img='".$img."' WHERE username = '".$old_name."' AND uid = ".$uid;
 			$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
 			if(!isset($profilePage))
 				die('{"success":1}');
@@ -33,7 +32,7 @@ if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 if(!isset($edit))
 	$edit = loggedIn() && ($_SESSION['username'] == $_POST['profile'] || in_array($_SESSION['username'],$admin));
 
-$sql="SELECT uid, username".($edit?", email":"").", ".($edit?"show_email, ":"")."website, description, country, img FROM users WHERE username='".(isset($profilePage)?$profile:$_POST['profile'])."'";
+$sql="SELECT uid, username".($edit?", email":"").", show_email, website, description, country, img FROM users WHERE username='".(isset($profilePage)?$profile:$_POST['profile'])."'";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 

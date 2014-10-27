@@ -171,7 +171,7 @@ function validateUser($pUsername, $pPassword) {
 		}
 		else { 
 			$tokenstring = $loginToken;
-			$sql = "INSERT INTO logins (`token`) VALUES ('" . mysqli_real_escape_string($con,$pUsername) . "', '" . $loginToken . "');"; 
+			$sql = "INSERT INTO logins (`uid`,`token`) VALUES (" . $row['uid'] . ", '" . $loginToken . "');"; 
 		}
 		
 		
@@ -200,7 +200,6 @@ function validateUser($pUsername, $pPassword) {
 		If they are not valid it simply returns false.  
 ************/ 
 function validateToken($pUsername, $pToken) {
-
 	global $con;
 
 	if(strlen($pToken) != 128)

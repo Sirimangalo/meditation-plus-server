@@ -8,7 +8,7 @@ function checkCommitment($c) {
 
 	if($c['period'] == 'daily') {
 		if($c['time'] == 'any') // any time
-			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".gmdate('Y-m-d H:i:s',strtotime('one day ago'))."' AND end < '".gmdate('Y-m-d H:i:s')."'";
+			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 day ago'))."' AND end < '".gmdate('Y-m-d H:i:s')."'";
 		else {
 			$start = explode(':',$c['time']);
 			
@@ -37,7 +37,6 @@ function checkCommitment($c) {
 			
 			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND start < '".$edate."'"; // starts after time and starts before one hour after time
 		}
-		
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 		
 		if(strpos($c['length'],':') === false) { // total length
@@ -70,7 +69,7 @@ function checkCommitment($c) {
 	}
 	else if($c['period'] == 'weekly') {
 		if($c['time'] == 'any') // per week total
-			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".gmdate('Y-m-d H:i:s',strtotime('one week ago'))."' AND end < '".gmdate('Y-m-d H:i:s')."'";
+			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 week ago'))."' AND end < '".gmdate('Y-m-d H:i:s')."'";
 		else {
 
 			$dow = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
@@ -114,7 +113,6 @@ function checkCommitment($c) {
 			
 			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".$sdate."' AND start < '".$edate."'"; // starts after time and ends before now and starts before one hour after time
 		}
-		
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 		
 		if(strpos($c['length'],':') === false) { // total length
@@ -146,7 +144,7 @@ function checkCommitment($c) {
 	}
 	else if($c['period'] == 'monthly') {
 		if($c['time'] == 'any') // per month total
-			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".gmdate('Y-m-d H:i:s',strtotime('one month ago'))."' AND end < '".gmdate('Y-m-d H:i:s')."'";
+			$sql = "SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE uid = ".$c['uid']." AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 month ago'))."' AND end < '".gmdate('Y-m-d H:i:s')."'";
 		else {
 
 			$monthNames = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
@@ -302,17 +300,18 @@ if(isset($_POST['form_id'])) {
 	}
 }
 
-$sql="SELECT user_commitments.aid AS aid, commitments.cid AS cid, title, commitments.description AS description, creatorid, period, day, time, length, users.uid AS uid, users.username AS username, creators.username AS creator FROM user_commitments, commitments, users, users AS creators WHERE users.uid = user_commitments.uid AND user_commitments.cid = commitments.cid AND creators.uid = commitments.creatorid";
+$sql="SELECT commitments.cid AS cid, title, commitments.description AS description, creatorid, period, day, time, length, users.uid AS uid, users.username AS username, creators.username AS creator FROM commitments LEFT JOIN users AS creators ON creators.uid = commitments.creatorid LEFT JOIN user_commitments ON user_commitments.cid = commitments.cid LEFT JOIN users ON users.uid = user_commitments.uid ORDER BY day, time, title";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
 $commitments = [];
 
 while($row = mysqli_fetch_assoc($query)) {
-	
 	if(!isset($commitments[$row['cid']]))
 		$commitments[$row['cid']] = $row;
 
+	if(@$row['username'] == "")
+		$row['username'] = 'none';
 	$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
 }
 
