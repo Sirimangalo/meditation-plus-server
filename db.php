@@ -7,7 +7,7 @@ function getNewList() {
 	global $con;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s')."' AND users.uid=sessions.uid ORDER BY end DESC;"; // ,strtotime('12 hours ago')
+	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY end DESC;"; // ,strtotime('12 hours ago')
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$lista[] = $row;
@@ -98,7 +98,7 @@ $total_hours = -1;
 $newList = false;
 
 if(isset($_POST['list_version']) && (int)$_POST['list_version'] < $listVersion) {
-	error_log('new list '.($user!=''?$user:$_SERVER['REMOTE_ADDR']));
+	error_log('new list '.($user!=''?$user:'').' '.$_SERVER['REMOTE_ADDR']);
 	$newList = true;
 	$lista = getNewList();
 	$total_hours = getHoursList();
@@ -108,7 +108,7 @@ $chata = [];
 $newChat = false;
 
 if(isset($_POST['chat_version']) && (int)$_POST['chat_version'] < $chatVersion) {
-	error_log('new chat '.($user!=''?$user:$_SERVER['REMOTE_ADDR']));
+        error_log('new chat'.($user!=''?$user:'').' '.$_SERVER['REMOTE_ADDR']);
 	$newChat = true;
 	$chata = getNewChats();
 }
@@ -167,12 +167,14 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			
 			// only add member if valid
 			if(strlen($user) > 0 && strlen($user) < 20 && preg_match('/[A-Za-z]/',$user) && !preg_match('/[^-0-9A-Za-z _]/',$user) && !preg_match('/[^0-9]/',$walking) && !preg_match('/[^0-9]/',$sitting) && $walking < 60 && $sitting < 60 && $walking >= 0 && $sitting >= 0) {
+				if(empty($lista))
+		                        $lista = getNewList();
 				
 				// check for same user
 				$duplicate = false;
 				foreach($lista as $idx => $val) {
-					if($val['username'] == $user) { // currently meditating, replace
-						$sql = "UPDATE sessions SET `start`=".gmdate('Y-m-d H:i:s', $start).", `walking`=".$walking.", `sitting`=".$sitting.", `end`=".gmdate('Y-m-d H:i:s', $start+($walking*60)+($sitting*60))."' WHERE sid = '".$val['sid']."'"; 
+					if($val['username'] == $user && $val['end'] > time()) { // currently meditating, replace
+						$sql = "UPDATE sessions SET `start`='".gmdate('Y-m-d H:i:s', $start)."', `walking`=".$walking.", `sitting`=".$sitting.", `end`='".gmdate('Y-m-d H:i:s', $start+($walking*60)+($sitting*60))."' WHERE sid = '".$val['sid']."'"; 
 						$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 						
 						$duplicate = true;
@@ -289,8 +291,10 @@ foreach($loggeda as $alog) {
 		continue;
 	$newloggeda[$aloga[0]] = $aloga[1];
 }
-if(strlen($user) > 0)
-		$newloggeda[$user] = $now;
+if(strlen($user) > 0) {
+	$newloggeda[$user] = $now;
+	//error_log($user." ".$_SERVER['REMOTE_ADDR']);
+}
 
 $newloggedf = [];
 foreach($newloggeda as $key => $val) {

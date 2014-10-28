@@ -3,6 +3,13 @@
 session_start(); 
 require('../meditation_config.php');
 
+        if(in_array($_SERVER["REMOTE_ADDR"],$banned)) {
+                error_log("banned: ".$_SERVER["REMOTE_ADDR"]);
+                $_SESSION['error'] = "IP banned - contact admin";
+               die('{"error":"'.$_SESSION['error'].'"}');
+        }
+
+
 /*
 
 Below is a sample of our ../meditation_config.php file

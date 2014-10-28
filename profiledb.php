@@ -40,8 +40,9 @@ $profilea = [];
 
 $row = mysqli_fetch_assoc($query);
 
-foreach($row as $key => $val)
-	$profilea[$key] = $val;
+if($row)
+	foreach($row as $key => $val)
+		$profilea[$key] = $val;
 	
 $profilea['can_edit'] = $edit ? 'true' : 'false';
 

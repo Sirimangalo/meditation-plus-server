@@ -72,7 +72,12 @@ function hashPassword($pPassword, $pSalt1="2345#$%@3e", $pSalt2="taesa%#@2%^#") 
 		and the user is valid for this session. 
 ************/ 
 function loggedIn() { 
-
+	global $banned;
+	if(in_array($_SERVER["REMOTE_ADDR"],$banned)) {
+		error_log("banned: ".$_SERVER["REMOTE_ADDR"]);
+		$_SESSION['error'] = "IP banned - contact admin";
+		return false;
+	}
 	// check both loggedin and username to verify user. 
 	if (isset($_SESSION['loggedin']) && isset($_SESSION['username'])) {
 		return true; 

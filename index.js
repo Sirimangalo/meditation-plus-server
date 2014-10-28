@@ -289,7 +289,7 @@ function submitData(submit,formid) {
 			var current = "walking";
 			
 			if(end < time) {
-				var opi = 1 - Math.round((time-end)*10/(60*60*12))/10;
+				var opi = 1 - Math.round((time-end)*10/(60*60))/10;
 				if(opi > 1)
 					opi = 1;
 				opacity = ' style="opacity:'+opi+'"';
