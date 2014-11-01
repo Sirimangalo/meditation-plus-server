@@ -7,7 +7,7 @@ function getNewList() {
 	global $con;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;"; // ,strtotime('12 hours ago')
+	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;"; // ,strtotime('12 hours ago')
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$lista[] = $row;
@@ -33,7 +33,7 @@ function getHoursList() {
 	global $con;
 	
 	$hours = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-	$sql="SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('one month ago'))."'";
+	$sql="SELECT UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM sessions WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 week ago'))."'";
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$hs = (int)date('G',$row['start']);
@@ -197,6 +197,21 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 				file_put_contents('listv',++$listVersion);
 			}
 		}
+                else if($_POST['form_id'] == 'change_type') {
+			$type = mysqli_real_escape_string($con,$_POST['type']);
+                        if(!preg_match('/[^-0-9A-Za-z_]/',$type)) {
+			        $sql = "UPDATE sessions SET `type`='".$type."' WHERE uid=(SELECT uid FROM users WHERE username='".$user."') AND end < NOW() AND end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."'";
+                                $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con));
+                                // update list
+                                $newList = true;
+                                $lista = getNewList();
+                                $total_hours = getHoursList();
+
+                                $success = 1;
+
+                                file_put_contents('listv',++$listVersion);
+                        }
+		}
 		else if(strpos($_POST['form_id'],'delchat_') === 0 && in_array($user,$admin)) {
 			// del chat form
 			
@@ -233,6 +248,7 @@ foreach($lista as $idx => $member) {
 	$mWalk = $member['walking'];
 	$mSit = $member['sitting'];
 	$mCountry = $member['country'];
+	$mType = @$member['type'];
 
 	if($cancelmed && $mUser == $user) {
 		continue;
@@ -245,7 +261,8 @@ foreach($lista as $idx => $member) {
 		'walking' => $mWalk,
 		'sitting' => $mSit,
 		'country' => $mCountry,
-		'can_edit' => $$mUser == $user || in_array($user,$admin) ? 'true':'false',
+		'type' => $mType,
+		'can_edit' => $mUser == $user || in_array($user,$admin) ? 'true':'false',
 		'me' => strlen($user) > 0 && $mUser == $user ? 'true':'false',
 	);
 }
@@ -267,6 +284,7 @@ foreach($chata as $achat) {
 		break;
 
 	$achat['me'] = $achat['username'] == $user ? 'true':'false';
+	$achat['can_edit'] = $achat['username'] == $user || in_array($user,$admin) ? 'true':'false';
 
 	$chatj[] = $achat;
 }

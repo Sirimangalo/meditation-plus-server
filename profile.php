@@ -4,6 +4,7 @@ require_once('config.php');
 $isMe = true;
 
 $edit = false;
+$can_edit = false;
 
 $profilePage = true;
 
@@ -13,16 +14,27 @@ if(isset($_GET['user'])) {
 	if(isset($_SESSION['username'])) {
 		if($_SESSION['username'] != $profile) {
 			$isMe = false;
-			if(in_array($_SESSION['username'],$admin))
-				$edit = true;
+			if(in_array($_SESSION['username'],$admin)) {
+				if(isset($_GET['edit']))
+					$edit = true;
+				else
+					$can_edit = true;
+			}
 		}
-		else
-			$edit = true;
+		else {
+			if(isset($_GET['edit']))
+				$edit = true;
+			else
+				$can_edit = true;
+		}
 	}
 }
 else if(isset($_SESSION['username'])) {
 	$profile = $_SESSION['username'];
-	$edit = true;
+	if(isset($_GET['edit']))
+		$edit = true;
+	else
+		$can_edit = true;
 }
 else
 	die('You are not logged in');
@@ -123,7 +135,7 @@ if($edit) {
 else {
 ?>
 		<div id="header">
-			<div class="heading"><?php echo $profile; ?></div>
+			<div class="heading"><?php echo $profile; if($can_edit) echo ' <a href="javascript:void()" title="edit profile" onclick="window.location.search+=\'&edit\';"><img src="edit.png"></a>'; ?></div>
 			<div id="profile-img"><?php if($profilea['img']) echo '<img src="'.$profilea['img'].'" width="100px" height="100px">';?></div>
 		</div>
 		<div id="inner">
@@ -147,6 +159,38 @@ else {
 				<span class="profile-field-head">Country: </span>
 				<span name="country-span" id="country-span"><?php echo $countries[$profilea['country']]; ?></span>
 				<div id="big-flag"><?php if($profilea['country']) echo '<img src="images/flags/48/'.strtolower($profilea['country']).'.png">';?></div>
+				<hr/>
+				<span class="profile-field-head">Meditation Log: </span>
+				<div><?php 
+
+	$nowHour= gmdate('G');
+	
+	$total_hours = $profilea['hours'];
+	
+	$max_hour = max($total_hours);
+	
+	if($max_hour < 60)
+		$max_hour = 60;
+	
+	$max_height = 80;
+	$hours_table = '<table id="hours-table"><tr style="height:'.$max_height.'px">';
+	
+	for($i = 0; $i < count($total_hours); $i++) {
+		$height = ceil($max_height*$total_hours[$i]/$max_hour);
+		$htime = $total_hours[$i];
+		if($htime > 4*60)
+			$htime = round($htime / 60) +' hours';
+		else $htime .= ' minutes';
+		
+		$hours_table .= '<td class="hour-cell" title="'.($i < 10?'0':'').$i.'00h: '.$htime.' total"><div class="hour-bar" style="height:'.$height.'px">&nbsp;</div><div class="hour-number'.($nowHour == $i?'-now':'').'">'.$i.'</div></td>';
+	}
+
+	$hours_table .= '</tr></table>';
+	
+	echo $hours_table;
+
+				
+				?></div>
 			</div>
 <?php
 }

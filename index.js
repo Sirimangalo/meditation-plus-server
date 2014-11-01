@@ -329,8 +329,10 @@ function submitData(submit,formid) {
 				walkOut = walkm + '/' + walking;
 				sitOut = sitm + '/' + sitting;
 			}
-			
-			output += '<tr'+opacity+'><td><img src="'+ current + '_icon.png" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'') + user + '</a></td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';					
+
+			var current_status = obj[i].type == "love" ? "love_icon.png" : current + '_icon.png';			
+
+			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'') + user + '</a></td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';					
 		}
 		
 		// timer ringing

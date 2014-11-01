@@ -300,7 +300,7 @@ if(isset($_POST['form_id'])) {
 	}
 }
 
-$sql="SELECT commitments.cid AS cid, title, commitments.description AS description, creatorid, period, day, time, length, users.uid AS uid, users.username AS username, creators.username AS creator FROM commitments LEFT JOIN users AS creators ON creators.uid = commitments.creatorid LEFT JOIN user_commitments ON user_commitments.cid = commitments.cid LEFT JOIN users ON users.uid = user_commitments.uid ORDER BY day, time, title";
+$sql="SELECT commitments.cid AS cid, title, commitments.description AS description, creatorid, period, day, time, length, CASE WHEN `length` LIKE '[0-9]*' THEN 'total' ELSE 'repeat' END AS type, users.uid AS uid, users.username AS username, creators.username AS creator FROM commitments LEFT JOIN users AS creators ON creators.uid = commitments.creatorid LEFT JOIN user_commitments ON user_commitments.cid = commitments.cid LEFT JOIN users ON users.uid = user_commitments.uid ORDER BY type, period, time, day, title";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
