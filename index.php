@@ -56,7 +56,7 @@ require('bar.php');
 			<tr>
 				<td align="center">
 					<div id="log-frame">
-						<div id="hours-header">Total minutes of meditation per hour (UTC) of day (past month):</div>
+						<div id="hours-header">Total minutes of meditation per hour (UTC) of day (past week):</div>
 						<div id="hours-container"></div>
 					</div>
 				</td>
