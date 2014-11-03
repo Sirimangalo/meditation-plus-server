@@ -29,10 +29,11 @@ if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 	}
 }
 
-if(!isset($edit))
-	$edit = loggedIn() && ($_SESSION['username'] == $_POST['profile'] || in_array($_SESSION['username'],$admin));
+if(!isset($can_edit)) {
+	$can_edit = loggedIn() && ($_SESSION['username'] == $_POST['profile'] || in_array($_SESSION['username'],$admin));
+}
 
-$sql="SELECT users.uid, username".($edit?", email":"").", show_email, website, description, country, img, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM users LEFT JOIN sessions ON users.uid = sessions.uid WHERE username='".(isset($profilePage)?$profile:$_POST['profile'])."' AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 week ago'))."'";
+$sql="SELECT users.uid, username".($can_edit?", email":"").", show_email, website, description, country, img, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM users LEFT JOIN sessions ON users.uid = sessions.uid WHERE username='".(isset($profile)?$profile:$_POST['profile'])."' AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 week ago'))."'";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 

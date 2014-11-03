@@ -8,11 +8,11 @@ require('bar.php');
 	<title>Meditation+</title>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta name="generator" content="Geany 0.21" />
-	<link rel="stylesheet" type="text/css" href="styles.css">
+	<link rel="stylesheet" type="text/css" href="styles.css?version=2">
 	<link rel="image_src" href="http://static.sirimangalo.org/images/dhammawheelcommunity_t.png" />
 	<link rel="Shortcut Icon" type="image/x-icon" href="http://www.sirimangalo.org/favicon.ico" />
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script src="smilies.js"></script>
+	<script src="smilies.js?ver=2"></script>
 	<script src="tz.js"></script>
 	<script src="countries.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -33,7 +33,7 @@ require('bar.php');
 		var logged_user = \'\';';
 ?>
 	</script>
-	<script src="index.js?ver=7"></script>
+	<script src="index.js?ver=8"></script>
 </head>
 
 <body onload="loaded()">

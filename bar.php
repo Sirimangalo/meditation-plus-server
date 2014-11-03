@@ -20,11 +20,13 @@ $links[] = array(
 
 $links[] = array(
 	'link' => '/commit.php',
-	'title' => 'Commit'
+	'title' => 'Commit',
+	'logged' => true,
 	);
 $links[] = array(
 	'link' => '/profile.php',
-	'title' => 'Profile'
+	'title' => 'Profile',
+	'logged' => true,
 	);
 
 $header_bar = '<div id="header-bar">
@@ -45,12 +47,15 @@ $header_bar .= '	</div>
 ';
 
 foreach($links as $l) {
+	
+	$hidden = isset($l['logged']) && !isset($_SESSION['loggedin'])?' hidden':'';
+	
 	if($_SERVER['PHP_SELF'] == $l['link']) {
-		$header_bar .= '		<span class="header-link green">'.$l['title'].'</span>
+		$header_bar .= '		<span class="header-link green'.$hidden.'">'.$l['title'].'</span>
 ';	
 	}
 	else {
-		$header_bar .= '		<span class="header-link"><a href="'.$l['link'].'">'.$l['title'].'</a></span>
+		$header_bar .= '		<span class="header-link'.$hidden.'"><a href="'.$l['link'].'">'.$l['title'].'</a></span>
 ';
 	}
 }

@@ -44,6 +44,8 @@ var seq = 0;
 var imWalking = false;
 var imSitting = false;
 
+var chatUsers = [];
+
 function refreshTime() {
 		var d = new Date();
 		var hour = d.getUTCHours().toString().length == 1 ? '0'+d.getUTCHours():d.getUTCHours();
@@ -222,7 +224,11 @@ function submitData(submit,formid) {
 				time = date.getUTCDate()+'/'+(date.getUTCMonth()+1)+'/'+date.getUTCFullYear().toString().substring(2);
 			}
 			
-			var chat_username = chatObj[i].username.replace(' ','&nbsp;');
+			var chat_username = chatObj[i].username;
+			
+			chatUsers[chat_username] = true;
+			
+			chat_username = chat_username.replace(' ','&nbsp;');
 
 			// get age color
 			
@@ -252,11 +258,14 @@ function submitData(submit,formid) {
 			if(elaAge < 20)
 				hexColorString = 'green';
 
-			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chat_username+'">'+chat_username+'</a>:&nbsp;</span>'+replaceSmilies(chatObj[i].message)+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
+			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chat_username+'">'+chat_username+'</a>:&nbsp;</span>'+formatChatMessage(chatObj[i].message)+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
 
 		}
 		
-		output += '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Walking</td><td class="thead">Sitting</td></tr>';
+		output += '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Country</td><td class="thead">Walking</td><td class="thead">Sitting</td></tr>';
+		
+		var meStart = 0;
+		
 		for(var i = 0; i < obj.length; i++) {
 			
 			// is a meditator
@@ -269,9 +278,11 @@ function submitData(submit,formid) {
 			var walking = obj[i].walking;
 			var sitting = obj[i].sitting;
 			var me = obj[i].me == 'true';
-			
-			if(me)
-				imMeditating = true;
+
+			// tells us that this session is our latest so far (in case of multiple me sessions)
+
+			if(me && start > meStart)
+				meStart = start;
 			
 			// add to meditator list
 			
@@ -289,6 +300,11 @@ function submitData(submit,formid) {
 			var current = "walking";
 			
 			if(end < time) {
+				
+				if(me&& meStart == start && imMeditating) {
+					imMeditating = false;
+				}
+				
 				var opi = 1 - Math.round((time-end)*10/(60*60))/10;
 				if(opi > 1)
 					opi = 1;
@@ -297,6 +313,10 @@ function submitData(submit,formid) {
 				current = "finished";
 			}
 			else {
+
+				if(me && meStart == start)
+					imMeditating = true;
+
 			
 				var elapsed = time - start;
 				
@@ -306,9 +326,8 @@ function submitData(submit,formid) {
 
 				// sitting
 				if(walks < elapsed) {
-					
-					if(me) {
-						if(imWalking) // walking finished
+					if(me && meStart == start) {
+						if(imWalking && walking > 0) // walking finished
 							ringTimer();
 							
 						imWalking = false;
@@ -320,8 +339,10 @@ function submitData(submit,formid) {
 					var sitm = Math.floor((sits + walks - elapsed)/60);
 				}
 				else {
-					if(me)
+					if(me && meStart == start) {
 						imWalking = true;
+						imSitting = false;
+					}
 					var walkm = Math.floor((walks - elapsed)/60);
 					var sitm = sitting;
 				}
@@ -332,7 +353,7 @@ function submitData(submit,formid) {
 
 			var current_status = obj[i].type == "love" ? "love_icon.png" : current + '_icon.png';			
 
-			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'') + user + '</a></td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';					
+			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';					
 		}
 		
 		// timer ringing
@@ -403,6 +424,26 @@ function submitData(submit,formid) {
 	});
 }
 
+function formatChatMessage(message) {
+	message = replaceSmilies(message);
+	if(logged_user.length > 0)
+		message = message.replace('@'+logged_user,'<span class="red">@<x/>'+logged_user+'</span>');
+
+	var ats = message.match(new RegExp('@[-a-zA-Z0-9_]+','gi'));
+	
+	if(!ats)
+		return message;
+
+	for(var i = 0; i < ats.length; i++) {
+		var u = ats[i].substring(1);
+		if(chatUsers[u]) {
+			message = message.replace(new RegExp(ats[i],'i'),'<a class="link" target="_blank" href="/profile.php?user='+u+'">@<x/>'+u+'</a>');
+		}
+	}
+	
+	return message;
+}
+
 function openSmilies() {
 	$('#smilie-box').toggle();
 }
@@ -419,6 +460,12 @@ function replaceSmilies(text) {
 		var rep = new RegExp(esc,"g")
 		text = text.replace(rep,'<img onmouseover="$(this).attr(\'src\',\''+smilies[i][2]+'\')" onmouseout="$(this).attr(\'src\',\''+smilies[i][1]+'\')" class="smilie" src="'+smilies[i][1]+'">');
 	}
+	
+	// unicode hack
+	
+	for (i in unicode_smilies)
+		text = text.replace(i,'<img class="smilie" src="http://apps.timwhitlock.info/static/images/emoji/emoji-android/'+unicode_smilies[i]+'.png">');
+	
 	return text;
 }
 
@@ -521,13 +568,13 @@ var whichAudio;
 
 function ringTimer() {
 	if(whichAudio != 'none') {
-		$("#audio-"+whichAudio).trigger('pause');
-		$("#audio-"+whichAudio).prop("currentTime",0);
+		document.getElementById("audio-"+whichAudio).pause();
+		document.getElementById("audio-"+whichAudio).setAttribute("currentTime",0);
 	}
 	whichAudio = $( "#audio-select" ).val();
 	if(whichAudio == 'none')
 		return;
-	$("#audio-"+whichAudio).trigger('play');
+	document.getElementById("audio-"+whichAudio).play();
 }
 
 function loadAudio(cookie) {
@@ -539,13 +586,19 @@ function loadAudio(cookie) {
 	if(whichAudio == 'none')
 		return;
 	
-	$("#audio-"+whichAudio).trigger('load');
+	document.getElementById("audio-"+whichAudio).load();
 }
 
 function stopTimer() {
 	whichAudio = $( "#audio-select" ).val();
 	if(whichAudio == 'none')
 		return;
-	$("#audio-"+whichAudio).trigger('pause');
-	$("#audio-"+whichAudio).prop("currentTime",0);
+
+	document.getElementById("audio-"+whichAudio).pause();
+	document.getElementById("audio-"+whichAudio).setAttribute("currentTime",0);
+}
+
+function dAlert(s) {
+	if(logged_user && logged_user == 'Yuttadhammo')
+		alert(s);
 }

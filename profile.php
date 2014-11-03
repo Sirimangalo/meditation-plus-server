@@ -135,32 +135,29 @@ if($edit) {
 else {
 ?>
 		<div id="header">
-			<div class="heading"><?php echo $profile; if($can_edit) echo ' <a href="javascript:void()" title="edit profile" onclick="window.location.search+=\'&edit\';"><img src="edit.png"></a>'; ?></div>
-			<div id="profile-img"><?php if($profilea['img']) echo '<img src="'.$profilea['img'].'" width="100px" height="100px">';?></div>
+			<div class="heading"><?php if($profilea['country']) echo '<img id="profile-header-flag" src="images/flags/48/'.strtolower($profilea['country']).'.png">';?><?php echo $profile; if($can_edit) echo ' <a href="javascript:void()" title="edit profile" onclick="window.location.search+=\'&edit\';"><img src="edit.png"></a>'; ?></div>
+			<div id="profile-img"><?php echo '<img src="'.(@$profilea['img']?$profilea['img']:'http://www.gravatar.com/avatar/'.md5( strtolower( trim( @$profilea['email'] ) ) ).'?s=100').'" width="100px" height="100px">';?></div>
 		</div>
 		<div id="inner">
 			<div id="profile">
-				<div id="profile-title">Profile:</div>
 				<hr/>
-				<span class="profile-field-head">Name: </span>
-				<span name="name-span" id="name-span"><?php echo htmlspecialchars($profile); ?></span></<br/><br/>
 				<span class="profile-field-head">About</span>
-				<span name="desc-span" id="desc-span"><?php echo nl2br(htmlspecialchars($profilea['description'])); ?></span>
-				<hr/>
-<?php if($profilea['show_email'] == 1) { ?>
+				<span name="desc-span" id="desc-span"><?php echo nl2br(htmlspecialchars($profilea['description'])); ?></span><br/><br/>
+<?php 
+error_log('show email? '.$profilea['show_email'].' '.$profilea['email']);
+
+if($profilea['show_email'] == 1) { ?>
 				<span class="profile-field-head">Email</span>
-				<span name="email-span" id="email-span"><?php echo $profilea['email']; ?></span><br/><br/>
+				<span name="email-span" class="link" id="email-span"><?php echo '<a href="mailto:'.$profilea['email'].'" target="_blank">'.$profilea['email'].'</a>'; ?></span><br/><br/>
 <?php
 }
 ?>
 				<span class="profile-field-head">Website</span>
-				<span name="website-span" id="website-span"><?php echo htmlspecialchars($profilea['website']); ?></span>
-				<hr/>
-				<span class="profile-field-head">Country: </span>
+				<span name="website-span" class="link" id="website-span"><?php echo '<a href="'.preg_replace('/[^-a-zA-Z0-9._~!$&\'()*+,;=:@%\/]/','',$profilea['website']).'" target="_blank">'.htmlspecialchars($profilea['website']).'</a>'; ?></span><br/><br/>
+				<span class="profile-field-head">Country </span>
 				<span name="country-span" id="country-span"><?php echo $countries[$profilea['country']]; ?></span>
-				<div id="big-flag"><?php if($profilea['country']) echo '<img src="images/flags/48/'.strtolower($profilea['country']).'.png">';?></div>
 				<hr/>
-				<span class="profile-field-head">Meditation Log: </span>
+				<span class="profile-field-head">Meditation Log </span>
 				<div><?php 
 
 	$nowHour= gmdate('G');

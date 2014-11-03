@@ -29,7 +29,7 @@ function createAccount($pUsername, $pPassword) {
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
  
 		// Error checks (Should be explained with the error) 
-		if (preg_match("/[^-0-9A-Za-z _]/",$pUsername) > 0) { 
+		if (preg_match("/[^-0-9A-Za-z_]/",$pUsername) > 0) { 
 			$_SESSION['error'] = "Username may only contain alpha-numberical characters"; 
 		}
 		else if ($uLen <= 3 || $uLen >= 21) { 

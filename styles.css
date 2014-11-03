@@ -51,8 +51,8 @@ a {
 #header-links {
 	text-align:center;
 	position:absolute;
-	left:0;
-	right:0;
+	left:300px;
+	right:300px;
 	top:0;
 	bottom:0;
 	padding-top:3px;
@@ -78,6 +78,11 @@ a {
 	z-index:1000;
 	vertical-align:top;
 }
+
+.header-link, .header-text, .header-image {
+	background-color:#333;
+} 
+
 .header-link {
 	padding:0px 10px;
 	display:inline-block;
@@ -125,7 +130,7 @@ td {
 #timeform-frame {
 	background-color:#EEEEEE;
 	width:600px;
-	margin-top:20px;
+	margin-top:20px;s
 }
 
 #live {
@@ -226,10 +231,10 @@ td {
 #chat-form-frame {
 	position:relative;
 	width:100%;
-	text-align:left;
+	text-align:center;
 }
 #message{
-	width:514px;
+	width:510px;
 }
 #chat-button{
 	width:56px;
@@ -245,6 +250,8 @@ td {
 	border:1px solid grey;
 	width:300px;
 	right:0;
+	background-color:white;
+	z-index: 1000;
 }
 
 #log-frame {
@@ -378,8 +385,15 @@ span.uncommitted {
 	font-weight:bold;
 	font-size:24px;
 }
+#profile-header-flag {
+	height: 32px;
+	vertical-align: bottom;
+	margin-right: 8px;
+}
+
 .profile-field-head {
 	font-weight:bold;
+	font-size:125%
 }
 
 
@@ -387,9 +401,16 @@ span.uncommitted {
 	color:Chartreuse;
 }
 
+.red {
+	color:Maroon !important;
+}
+
 .link {
 	color:#009900 !important;
 }
 .bold {
 	font-weight:bold;
+}
+.hidden {
+	display:none;
 }
