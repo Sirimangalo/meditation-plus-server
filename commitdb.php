@@ -243,28 +243,55 @@ if(isset($_POST['form_id'])) {
 			
 			$specTime = isset($_POST['spec-time']) && $type == 'repeat';
 			
+			$hour = $_POST['hour'];
+			$min = $_POST['min'];
+			
 			if($specTime) {
-				$time = mysqli_real_escape_string($con,$_POST['hour'].':'.$_POST['min']);
+				$time = mysqli_real_escape_string($con,$hour.':'.$min);
 			}
 			else
 				$time = 'any';
 
+			$walking = $_POST['walking'];
+			$sitting = $_POST['sitting'];
+			$length = $_POST['length'];
+
+
 			if($type == 'repeat')
-				$length = mysqli_real_escape_string($con,$_POST['walking'].':'.$_POST['sitting']);
+				$length = mysqli_real_escape_string($con,$walking.':'.$sitting);
 			else
-				$length = mysqli_real_escape_string($con,$_POST['length']);
+				$length = mysqli_real_escape_string($con,$length);
 
-
-			if($edit) {
-				$sqla = "UPDATE commitments SET title='".$title."', description='".$desc."', period='".$period."', day=".(int)$day.", time='".$time."', length='".$length."' WHERE cid = ".(int)$_POST['edit-com'];
-				$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
+			// checks
+			
+			if(
+				strlen($title) == 0 || strlen($title) > 20 || 
+				($type == 'repeat' && 
+					(preg_match("/[^0-9]/",$walking) || preg_match("/[^0-9]/",$sitting) || strlen($walking) == 0 || strlen($walking) > 2 || strlen($sitting) == 0 || strlen($sitting) > 2 || 
+						($period == 'monthly'  && (preg_match("/[^0-9]/",$dom) || strlen($dom) == 0 || strlen($dom) > 2)) || 
+						($period == 'yearly' && (preg_match("/[^0-9]/",$doy) || strlen($doy) == 0 || strlen($doy) > 3))
+					)
+				) || 
+				($specTime && 
+					(preg_match("/[^0-9]/",$hour) || preg_match("/[^0-9]/",$min) || strlen($hour) == 0 || strlen($hour) > 2 || strlen($min) == 0 || strlen($min) > 2)
+				)
+			) {
+				$_SESSION['error'] = 'invalid commitment data';
+				
 			}
 			else {
-				$sqla = "INSERT INTO commitments (title, description, creatorid, period, day, time, length) SELECT '".$title."', '".$desc."', uid, '".$period."', ".(int)$day.", '".$time."', '".$length."' FROM users WHERE username = '".$creator."'";
-				$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
-				
-				$sql = "INSERT INTO user_commitments (cid,uid) SELECT ".mysqli_insert_id($con).", uid FROM users WHERE username = '".$creator."'";
-				$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
+
+				if($edit) {
+					$sqla = "UPDATE commitments SET title='".$title."', description='".$desc."', period='".$period."', day=".(int)$day.", time='".$time."', length='".$length."' WHERE cid = ".(int)$_POST['edit-com'];
+					$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
+				}
+				else {
+					$sqla = "INSERT INTO commitments (title, description, creatorid, period, day, time, length) SELECT '".$title."', '".$desc."', uid, '".$period."', ".(int)$day.", '".$time."', '".$length."' FROM users WHERE username = '".$creator."'";
+					$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
+					
+					$sql = "INSERT INTO user_commitments (cid,uid) SELECT ".mysqli_insert_id($con).", uid FROM users WHERE username = '".$creator."'";
+					$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
+				}
 			}
 		}
 		else if(strpos($_POST['form_id'],'commitform_') === 0) {

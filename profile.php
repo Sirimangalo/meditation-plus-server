@@ -136,7 +136,19 @@ else {
 ?>
 		<div id="header">
 			<div class="heading"><?php if($profilea['country']) echo '<img id="profile-header-flag" src="images/flags/48/'.strtolower($profilea['country']).'.png">';?><?php echo $profile; if($can_edit) echo ' <a href="javascript:void()" title="edit profile" onclick="window.location.search+=\'&edit\';"><img src="edit.png"></a>'; ?></div>
-			<div id="profile-img"><?php echo '<img src="'.(@$profilea['img']?$profilea['img']:'http://www.gravatar.com/avatar/'.md5( strtolower( trim( @$profilea['email'] ) ) ).'?s=100').'" width="100px" height="100px">';?></div>
+			<div id="profile-img"><?php 
+			if(@$profilea['img']) {
+				echo '<img src="'.$profilea['img'].'" width="100px" height="100px">';
+			}
+			else if(isset($profilea['email']) && $profilea['email'] != "") {
+				$hash = md5( strtolower( trim( @$profilea['email'] ) ) );
+				echo '<a href="http://www.gravatar.com/'.$hash.'"><img src="http://www.gravatar.com/avatar/'.$hash.'?d=mm&s=100"></a>';
+			}
+			else {
+				echo '<img src="http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y&s=100">';
+			}
+			
+			?></div>
 		</div>
 		<div id="inner">
 			<div id="profile">
@@ -176,7 +188,7 @@ if($profilea['show_email'] == 1) { ?>
 		$height = ceil($max_height*$total_hours[$i]/$max_hour);
 		$htime = $total_hours[$i];
 		if($htime > 4*60)
-			$htime = round($htime / 60) +' hours';
+			$htime = round($htime / 60) .' hours';
 		else $htime .= ' minutes';
 		
 		$hours_table .= '<td class="hour-cell" title="'.($i < 10?'0':'').$i.'00h: '.$htime.' total"><div class="hour-bar" style="height:'.$height.'px">&nbsp;</div><div class="hour-number'.($nowHour == $i?'-now':'').'">'.$i.'</div></td>';
