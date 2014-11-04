@@ -68,7 +68,6 @@ while($row = mysqli_fetch_assoc($query)) {
 			$hours[$he] += $time;
 		}
 	}
-	error_log($row['start']);
 }
 
 $profilea['hours'] = $hours;
