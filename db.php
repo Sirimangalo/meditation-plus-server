@@ -7,9 +7,25 @@ function getNewList() {
 	global $con;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;"; // ,strtotime('12 hours ago')
+	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;"; // ,strtotime('12 hours ago')
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
+		$email = $row['email'];
+		
+		if($row['img'] && $row['img'] != '') {
+			$row['avatar'] = $row['img'];
+		}
+		else if($email && $email != "") {
+			$hash = md5( strtolower( trim( $email ) ) );
+			$row['avatar'] = 'http://www.gravatar.com/avatar/'.$hash.'?d=mm&s=100';
+		}
+		else {
+			$row['avatar'] = 'http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y&s=100';
+		}
+
+		unset($row['email']);
+		unset($row['img']);
+		
 		$lista[] = $row;
 	}
 	
@@ -243,6 +259,7 @@ $chats = [];
 foreach($lista as $idx => $member) {
 	
 	$mUser = $member['username'];
+	$mAvatar = $member['avatar'];
 	$mStart = $member['start'];
 	$mEnd = $member['end'];
 	$mWalk = $member['walking'];
@@ -256,6 +273,7 @@ foreach($lista as $idx => $member) {
 		
 	$list[] = array(
 		'username' => $mUser,
+		'avatar' => $mAvatar,
 		'start' => $mStart,
 		'end' => $mEnd,
 		'walking' => $mWalk,

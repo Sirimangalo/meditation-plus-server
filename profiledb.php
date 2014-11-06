@@ -9,19 +9,21 @@ if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 		$website = mysqli_real_escape_string($con,$_POST['website']);
 		$country = mysqli_real_escape_string($con,$_POST['country']);
 		$img = mysqli_real_escape_string($con,$_POST['img']);
+		$pass = $_POST['newpass'];
 
 		$uid =(int)$_POST['uid'];
 		$show_email = (int)$_POST['show_email'];
 		
 		if(($_SESSION['username'] == $old_name || in_array($_SESSION['username'],$admin))
 		&& strlen($name) <= 20
+		&& (strlen($pass) === 0 || (strlen($pass) >= 6 && strlen($pass) <= 20))
 		&& strlen($email) <= 50
 		&& strlen($website) <= 50
 		&& strlen($desc) <= 255
 		&& strlen($country) == 2
 		&& strlen($img) <= 255
 		) {
-			$sqla = "UPDATE users SET username='".$name."', description='".$desc."', email='".$email."', show_email=".(int)$show_email.", website='".$website."', country='".$country."', img='".$img."' WHERE username = '".$old_name."' AND uid = ".$uid;
+			$sqla = "UPDATE users SET username='".$name."', ".($pass && $pass != ""?"password='".hashPassword($pass, SALT1, SALT2)."', ":'')."description='".$desc."', email='".$email."', show_email=".(int)$show_email.", website='".$website."', country='".$country."', img='".$img."' WHERE username = '".$old_name."' AND uid = ".$uid;
 			$query = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
 			if(!isset($profilePage))
 				die('{"success":1}');

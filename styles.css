@@ -289,6 +289,7 @@ td {
 	width:600px;
 	background: #EEEEEE;
 	border-top:1px solid white;
+	margin-bottom:10px;
 }
 
 #logged-users-shell {
@@ -312,7 +313,6 @@ td {
 
 #addthis-shell {
 	text-align:center;
-	margin-top:20px;
 	background-color:#FFFF99;
 	padding:20px;
 	width:558px;
@@ -413,4 +413,52 @@ span.uncommitted {
 }
 .hidden {
 	display:none;
+}
+
+.rot {
+	display: block;
+	position: absolute;
+	top: 50%; left: 50%;
+	border-radius: 50%;
+}
+#avatar-container {
+	position: relative;
+	border-radius: 50%;
+	display:inline-block;
+	border:1px dashed grey;
+}
+.avatar { 
+	border-radius: 50%;
+	display: block; width: 100%; 
+}
+.avatar-flag {
+	position:absolute;
+	left:0px;
+}
+.avatar-title {
+	font-weight:bold;
+	margin-left:20px;
+}
+
+.rot:hover .avatar-info { 
+	visibility: visible; 
+}
+
+.avatar-info {
+	position: relative;
+	display:inline-block;
+	visibility:hidden;
+	text-align:center;
+}
+
+#avatar-container:hover .rot {
+  opacity: 0.5;
+}
+
+#avatar-container .rot:hover {
+  opacity: 1;
+}
+
+#notice-shell {
+	background-color:#FFCCCC;
 }

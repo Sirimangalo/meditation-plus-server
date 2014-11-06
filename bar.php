@@ -38,7 +38,7 @@ if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
 ';
 }
 else {
-	$header_bar .= '		<div id="header-login"><form name="login" method="post" action="redirect.php?action=login"><span class="header-text">Username:</span> <input id="header-username" type="text" name="username" /> <span class="header-text">Password:</span> <input id="header-password" type="password" name="password" /> <input type="submit" name="submit" value="Login" /> <input type="submit" name="submit" value="Register" /></form><div class="header-error">'.$sError.'</div></div>
+	$header_bar .= '		<div id="header-login"><form name="login" method="post" action="redirect.php?action=login"><span class="header-text">Username:</span> <input id="header-username" type="text" name="username" /> <span class="header-text">Password:</span> <input id="header-password" type="password" name="password" /> <input type="submit" name="submit" value="Login" /> <input type="submit" name="submit" value="Register" /> <a href="/reset.php">Reset</a></form><div class="header-error">'.$sError.'</div></div>
 ';
 }
 

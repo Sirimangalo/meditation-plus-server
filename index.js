@@ -89,6 +89,7 @@ function submitData(submit,formid) {
 	if(formid == 'cancelform') {
 		imWalking = false;
 		imSitting = false;
+		imMeditating = false;
 	}
 	if(formid == 'chatform') {
 		$('#message').focus();
@@ -191,7 +192,6 @@ function submitData(submit,formid) {
 		var hoursObj = result.hours;
 
 
-		var output = '';
 		var chats = '';
 		var meds = false;
 		
@@ -262,7 +262,9 @@ function submitData(submit,formid) {
 
 		}
 		
-		output += '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Country</td><td class="thead">Walking</td><td class="thead">Sitting</td></tr>';
+		var output = '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Country</td><td class="thead">Walking</td><td class="thead">Sitting</td></tr>';
+		
+		var avatars = '';
 		
 		var meStart = 0;
 		
@@ -349,11 +351,14 @@ function submitData(submit,formid) {
 				
 				walkOut = walkm + '/' + walking;
 				sitOut = sitm + '/' + sitting;
+
+				avatars += '<div class="rot"><a href="/profile.php?user='+user+'"><img class="avatar" src="'+(obj[i].avatar)+'"></a><div class="avatar-info">'+(obj[i].country?'<img class="avatar-flag" title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">&nbsp;':'')+'<a class="avatar-title" href="/profile.php?user='+user+'">'+user+'</a><br/>'+(current ==  'walking'?'<b>'+walkOut+'</b>':walkOut)+'<br/>'+(current ==  'sitting'?'<b>'+sitOut+'</b>':sitOut)+'</div></div>';					
+
 			}
 
 			var current_status = obj[i].type == "love" ? "love_icon.png" : current + '_icon.png';			
 
-			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';					
+			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';
 		}
 		
 		// timer ringing
@@ -396,6 +401,11 @@ function submitData(submit,formid) {
 
 		output += '</table>';
 		$('#list').html(output);
+
+		if(logged_user == 'Yuttadhammo') {
+			$('#avatar-container').html(avatars);
+			createAvatarCircle();
+		}
 
 		chats += '</table>';
 		var chatd = $('#chats');
@@ -443,6 +453,57 @@ function formatChatMessage(message) {
 	
 	return message;
 }
+
+function createAvatarCircle() {
+	var no = $('.rot').length;
+	
+	if(no == 0) {
+		$('#avatar-container').hide();
+		return;
+	}
+
+	$('#avatar-container').show();
+
+	var baseSize = 30;
+	var eachSize = baseSize/no;
+	
+	if(eachSize > baseSize/3)
+		eachSize = baseSize/3;
+	else if (eachSize < baseSize/5)
+		eachSize = baseSize/5;
+
+	$('#avatar-container').css({
+		'padding':eachSize*0.7+'em',
+		'width':baseSize+'em',
+		'height':baseSize+'em',
+	});
+	
+	var margin = (800 - document.getElementById('avatar-container').offsetWidth)/2;
+
+	document.getElementById('avatar-container').style.margin = '0 '+margin+'px 10px';
+
+	
+	$('.rot').each(
+		function(i, el) {
+			el.style.width = eachSize+'em';
+			el.style.height = eachSize+'em';
+			el.style.margin = (-eachSize/2)+'em';
+			var angle = 360/no*(i+1);
+			el.style.transform = 'rotate('+angle+'deg) translate('+(baseSize/2)+'em) rotate(-'+angle+'deg)';
+			
+			var elw = el.offsetWidth;
+			$(el).find('.avatar-info').each(
+				function(i) {
+					this.style.fontSize = (80+(20/no))+'%';
+					this.style.marginLeft = (this.offsetWidth/(-2)+elw/2)+'px';
+				}
+			);
+			
+			
+		}
+	);
+
+}	
 
 function openSmilies() {
 	$('#smilie-box').toggle();

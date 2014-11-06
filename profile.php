@@ -105,14 +105,16 @@ if($edit) {
 				<form id="profform" method="POST">
 					<span class="profile-field-head">Name</span>
 					<input name="name" id="name" value="<?php echo $profile; ?>"><hr/>
-					<span class="profile-field-head">Profile Image (square)</span>
+					<span class="profile-field-head">Password</span> (<i>leave empty if unchanged</i>)
+					<input type="password" name="newpass" id="newpass" value=""><hr/>
+					<span class="profile-field-head">Profile Image URL (square)</span><br/>(<i>If empty, your email can be used to create a <a class="link" href="http://www.gravatar.com/" target="_blank">globally-recognized avatar, or "gravatar"</a></i>)<br/>
 					<input name="img" id="img" value="<?php echo $profilea['img']; ?>"><hr/>
 					<span class="profile-field-head">About</span><br/>
 					<textarea name="desc" id="desc" rows="4" cols="40"><?php echo $profilea['description']; ?></textarea>
 					<hr/>
 					<span class="profile-field-head">Email</span>
 					<input name="email" id="email" size="50" value="<?php echo $profilea['email']; ?>"><hr/>
-					<span class="profile-field-head">Show Email</span> (<i>otherwise email is only used for recovering your password</i>):<br/>
+					<span class="profile-field-head">Show Email</span><br/>(<i>otherwise email is only used for recovering your password and showing your <a class="link" href="http://www.gravatar.com/" target="_blank">gravatar</a></i>)<br/>
 					<input type="radio" id="show_email0" name="show_email" value="0"<?php echo ($profilea['show_email'] == 0 ?' checked':'') ?>>Don't show
 					<input type="radio" id="show_email1" name="show_email" value="1"<?php echo ($profilea['show_email'] == 1 ?' checked':'') ?>>Show <hr/>
 					<span class="profile-field-head">Website</span>
