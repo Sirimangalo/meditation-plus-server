@@ -17,10 +17,10 @@ function getNewList() {
 		}
 		else if($email && $email != "") {
 			$hash = md5( strtolower( trim( $email ) ) );
-			$row['avatar'] = 'http://www.gravatar.com/avatar/'.$hash.'?d=mm&s=100';
+			$row['avatar'] = 'http://www.gravatar.com/avatar/'.$hash.'?d=wavatar&s=140';
 		}
 		else {
-			$row['avatar'] = 'http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y&s=100';
+			$row['avatar'] = 'http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y&s=140';
 		}
 
 		unset($row['email']);

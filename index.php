@@ -12,7 +12,7 @@ require('bar.php');
 	<link rel="image_src" href="http://static.sirimangalo.org/images/dhammawheelcommunity_t.png" />
 	<link rel="Shortcut Icon" type="image/x-icon" href="http://www.sirimangalo.org/favicon.ico" />
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script src="smilies.js?ver=2"></script>
+	<script src="smilies.js?ver=3"></script>
 	<script src="tz.js"></script>
 	<script src="countries.js"></script>
 	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e4e0d1400cea51f" async></script>
@@ -32,7 +32,7 @@ require('bar.php');
 		var logged_user = \'\';';
 ?>
 	</script>
-	<script src="index.js?ver=10"></script>
+	<script src="index.js?ver=11"></script>
 </head>
 
 <body onload="loaded()">

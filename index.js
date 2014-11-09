@@ -352,7 +352,7 @@ function submitData(submit,formid) {
 				walkOut = walkm + '/' + walking;
 				sitOut = sitm + '/' + sitting;
 
-				avatars += '<div class="rot"><a href="/profile.php?user='+user+'"><img class="avatar" src="'+(obj[i].avatar)+'"></a><div class="avatar-info">'+(obj[i].country?'<img class="avatar-flag" title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">&nbsp;':'')+'<a class="avatar-title" href="/profile.php?user='+user+'">'+user+'</a><br/>'+(current ==  'walking'?'<b>'+walkOut+'</b>':walkOut)+'<br/>'+(current ==  'sitting'?'<b>'+sitOut+'</b>':sitOut)+'</div></div>';					
+				avatars += '<div class="rot"><a href="/profile.php?user='+user+'" target="_blank"><img class="avatar" src="'+(obj[i].avatar)+'"></a><div class="avatar-info">'+(obj[i].country?'<img class="avatar-flag" title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">&nbsp;':'')+'<a class="avatar-title" href="/profile.php?user='+user+'" target="_blank">'+user+'</a><br/>'+(current ==  'walking'?'<b>'+walkOut+'</b>':walkOut)+'<br/>'+(current ==  'sitting'?'<b>'+sitOut+'</b>':sitOut)+'</div></div>';					
 
 			}
 
@@ -402,10 +402,8 @@ function submitData(submit,formid) {
 		output += '</table>';
 		$('#list').html(output);
 
-		if(logged_user == 'Yuttadhammo') {
-			$('#avatar-container').html(avatars);
-			createAvatarCircle();
-		}
+		$('#avatar-container').html(avatars);
+		createAvatarCircle();
 
 		chats += '</table>';
 		var chatd = $('#chats');

@@ -43,6 +43,7 @@ a {
 	text-align:center;
 	position:fixed;
 	top:0;
+	z-index:10;
 }
 #header-bar a, #header-bar a:visited {
 	text-decoration:none !important;
