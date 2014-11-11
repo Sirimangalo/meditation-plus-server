@@ -314,28 +314,32 @@ $loggeds = file_get_contents('loggedin');
 $loggeda = explode("\n",$loggeds);
 
 $dataLogged = [];
+$dataLoggedOld = []; // legacy
+
 $newloggeda = [];
 $now = time();
 foreach($loggeda as $alog) {
 	$aloga = explode('^',$alog);
-	if(count($aloga) != 2)
-		continue;
-	if(strlen($user) > 0 && $aloga[1] == $user) {
+	if(strlen($user) > 0 && $aloga[0] == $user) {
 		continue;
 	}
 	if($now - $aloga[1] > 60) // greater than one minute
 		continue;
-	$newloggeda[$aloga[0]] = $aloga[1];
+	$newloggeda[$aloga[0]] = $aloga[1].(isset($aloga[2])?'^'.$aloga[2]:'');
 }
 if(strlen($user) > 0) {
-	$newloggeda[$user] = $now;
+	$newloggeda[$user] = $now.(isset($_POST['source'])?'^'.$_POST['source']:'');
 	//error_log($user." ".$_SERVER['REMOTE_ADDR']);
 }
 
 $newloggedf = [];
 foreach($newloggeda as $key => $val) {
 	$newloggedf[] = $key.'^'.$val;
-	$dataLogged[] = $key;
+	$dataLoggedOld[] = $key;
+	$dataLogged[] = array(
+		'username' => $key,
+		'source' => explode('^',$val)[1],
+	);
 }
 $newloggeds = implode("\n",$newloggedf);	
 
@@ -362,7 +366,8 @@ $data = array(
 	'chat' => $newChat ? $chatj:'-1',
 	'commit' => $commita,
 	'hours' => $total_hours,
-	'logged' => $dataLogged,
+	'logged' => $dataLoggedOld,
+	'loggedin' => $dataLogged,
 	'success' => $success,
 	'list_version' => $listVersion,
 	'chat_version' => $chatVersion,

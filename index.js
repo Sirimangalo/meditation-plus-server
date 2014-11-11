@@ -30,6 +30,8 @@ var G_chatObj = '';
 var listVersion = -1;
 var chatVersion = -1;
 
+var lastChatTime = 0;
+
 var start = [];
 start.push(1);
 start.push(11);
@@ -133,6 +135,7 @@ function submitData(submit,formid) {
 	serializedData += (serializedData.length > 0?'&':'')+(logged_user?"username="+logged_user:'');
 	serializedData += (serializedData.length > 0?'&':'')+"list_version="+listVersion;
 	serializedData += (serializedData.length > 0?'&':'')+"chat_version="+chatVersion;
+	serializedData += (serializedData.length > 0?'&':'')+"source=web";
 
 	// fire off the request to /db.php
 	request = $.ajax({
@@ -198,9 +201,13 @@ function submitData(submit,formid) {
 		var medList = [];
 		var imMeditating = false;
 		
+		var latestChatTime = 0;
+		
 		chats += '<table id="chat-table">';
 		for(var i = 0; i < chatObj.length; i++) {
 			var then = chatObj[i].time-2;
+			
+			latestChatTime = then;
 			
 			var date = new Date(chatObj[i].time*1000);
 
@@ -407,13 +414,23 @@ function submitData(submit,formid) {
 
 		chats += '</table>';
 		var chatd = $('#chats');
-		chatd.html(chats);
-		chatd.scrollTop(chatd.prop("scrollHeight"));
 		
-		var loggedUsers = result.logged;
+		var scrolled = chatd.scrollTop();
+		
+		chatd.html(chats);
+		
+		if(lastChatTime < latestChatTime) {
+			chatd.scrollTop(chatd.prop("scrollHeight"));
+			lastChatTime = latestChatTime;
+		}
+		else
+			chatd.scrollTop(scrolled);
+		
+		
+		var loggedUsers = result.loggedin;
 		var loggedOut = [];
 		for(var i = 0; i < loggedUsers.length; i++) {
-			loggedOut.push('<span class="one-logged-in-user'+(medList[loggedUsers[i]]?'-med':'')+'" title="'+(medList[loggedUsers[i]]?'':'not ')+'meditating"><a class="noline" target="_blank" href="/profile.php?user='+loggedUsers[i]+'">'+loggedUsers[i]+'</a></span>');
+			loggedOut.push('<span class="one-logged-in-user'+(medList[loggedUsers[i].username]?'-med':'')+'" title="'+(medList[loggedUsers[i].username]?'':'not ')+'meditating">'+(loggedUsers[i].source == 'android'?'<a href="https://play.google.com/store/apps/details?id=org.sirimangalo.meditationplus" target="_blank"><img src="images/android.png" height="12" title="User is on Android"></a>':'')+'<a class="noline" target="_blank" href="/profile.php?user='+loggedUsers[i].username+'">'+loggedUsers[i].username+'</a></span>');
 		}
 		if(loggedOut.length > 0) {
 			
@@ -524,7 +541,23 @@ function replaceSmilies(text) {
 	
 	for (i in unicode_smilies)
 		text = text.replace(i,'<img class="smilie" src="http://apps.timwhitlock.info/static/images/emoji/emoji-android/'+unicode_smilies[i]+'.png">');
+
+	// other replaces
+
+	// youtube
 	
+	//text = text.replace(/https{0,1}:\/\/w{0,3}\.*youtube\.com\/watch\?\S*v=([A-Za-z0-9_-]+)[^< ]*/gi,'<iframe width="420" height="315" src="http://www.youtube.com/embed/$1?wmode=transparent" frameborder="0" allowfullscreen></iframe>');
+
+	//text = text.replace(/https{0,1}:\/\/w{0,3}\.*youtu\.be\/([A-Za-z0-9_-]+)[^< ]*/gi,'<iframe width="420" height="315" src="http://www.youtube.com/embed/$1?wmode=transparent" frameborder="0" allowfullscreen></iframe>');
+
+	// image
+
+	//text = text.replace(/(https*:\/\/[-\%_\/.a-zA-Z0-9+]+\.(png|jpg|jpeg|gif|bmp))[^< ]*/gi,'<img src="$1" style="max-width:420px;max-height:315px" />');
+	
+	// link
+	
+	text = text.replace(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/g,"<a href=\"$1\" class=\"link\">$1</a>");
+
 	return text;
 }
 
