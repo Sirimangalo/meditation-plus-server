@@ -182,7 +182,7 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			$sitting = $_POST['sitting'];
 			
 			// only add member if valid
-			if(strlen($user) > 0 && strlen($user) < 20 && preg_match('/[A-Za-z]/',$user) && !preg_match('/[^-0-9A-Za-z _]/',$user) && !preg_match('/[^0-9]/',$walking) && !preg_match('/[^0-9]/',$sitting) && $walking < 60 && $sitting < 60 && $walking >= 0 && $sitting >= 0) {
+			if(strlen($user) > 0 && strlen($user) < 20 && preg_match('/[A-Za-z]/',$user) && !preg_match('/[^-0-9A-Za-z _]/',$user) && !preg_match('/[^0-9]/',$walking) && !preg_match('/[^0-9]/',$sitting) && $walking <= 60 && $sitting <= 60 && $walking >= 0 && $sitting >= 0) {
 				if(empty($lista))
 		                        $lista = getNewList();
 				
