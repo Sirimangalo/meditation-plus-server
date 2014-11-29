@@ -131,7 +131,19 @@ td {
 #timeform-frame {
 	background-color:#EEEEEE;
 	width:600px;
-	margin-top:20px;s
+	margin-top:20px;
+}
+
+#live_feed {
+	text-align:center;
+	padding:10px;
+	border-radius:10px;
+	background-color:#ff9;
+	border:solid 2px #990;
+	margin-left:auto;
+	margin-right:auto;
+	margin-bottom:10px;
+	max-width:600px;
 }
 
 #live {

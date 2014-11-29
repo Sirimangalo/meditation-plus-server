@@ -32,6 +32,8 @@ var chatVersion = -1;
 
 var lastChatTime = 0;
 
+var isLive = false;
+
 var start = [];
 start.push(1);
 start.push(11);
@@ -409,23 +411,45 @@ function submitData(submit,formid) {
 		output += '</table>';
 		$('#list').html(output);
 
-		$('#avatar-container').html(avatars);
-		createAvatarCircle();
+		// chats
 
 		chats += '</table>';
 		var chatd = $('#chats');
-		
+
 		var scrolled = chatd.scrollTop();
 		
 		chatd.html(chats);
-		
+
 		if(lastChatTime < latestChatTime) {
 			chatd.scrollTop(chatd.prop("scrollHeight"));
 			lastChatTime = latestChatTime;
 		}
 		else
 			chatd.scrollTop(scrolled);
+
+		// avatar circle
+
+		$('#avatar-container').html(avatars);
+		createAvatarCircle();
 		
+		
+		// live?
+
+		if(result.live != 'false' && !isLive) {
+			$('#live_feed').html('<a href="'+result.live+'">Audio is live. Click here for live audio dhamma.<br/>'+result.live+'</a><br/><audio controls><source src="'+result.live+'" type="audio/mpeg">Your browser does not support HTML5 audio.</audio>');		
+			isLive = true;
+		}		
+		else if (result.live == 'false' && isLive) {
+			$('#live_feed').html('');
+			isLive = false;
+		}
+
+		if(result.live == 'false')
+			$('#live_feed').hide();
+		else
+			$('#live_feed').show();
+
+		// login form	
 		
 		var loggedUsers = result.loggedin;
 		var loggedOut = [];

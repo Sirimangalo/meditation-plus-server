@@ -360,6 +360,10 @@ if(isset($_POST['submit']) && $_POST['submit'] == 'Refresh' && isset($_POST['ful
 
 	$commita = json_decode($commits);
 }
+$live_url = 'http://sirimangalo.org:8000/live';
+$live_headers = @get_headers($live_url);
+error_log($live_headers[0]);
+$live = strpos($live_headers[0], ' 404 ') == false;
 
 $data = array(
 	'list' => $newList ? $list:'-1',
@@ -374,6 +378,7 @@ $data = array(
 	'login_token' => $loginToken,
 	'alert' => $alert,
 	'refresh' => $refresh,
+	'live' => !$live ? 'false' : $live_url,
 	'admin' => in_array($user,$admin)?'true':'false',
 );
 
