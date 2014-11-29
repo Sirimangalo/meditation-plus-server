@@ -32,7 +32,7 @@ require('bar.php');
 		var logged_user = \'\';';
 ?>
 	</script>
-	<script src="index.js?ver=12"></script>
+	<script src="index.js?ver=13"></script>
 </head>
 
 <body onload="loaded()">
@@ -45,7 +45,7 @@ require('bar.php');
 			<div class="p">We normally do walking first, then sitting.</div>
 			<div class="p">Please visit our <a class="link bold" href="/commit.php">commitments</a> page to join or create a group of committed meditators.</div>
 			<div class="p">Also, don't forget to update <a class="link bold" href="/profile.php">your profile</a> to let us know where you're from.</div>
-			<div class="p" id="live_feed"></div>
+			<div class="p" id="live_feed">Live stream currently offline. Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks</div>
 		</div>
 		<div align="center">
 			<div id="live">The time now is:<div id="time"></div></div>

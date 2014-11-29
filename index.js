@@ -440,14 +440,9 @@ function submitData(submit,formid) {
 			isLive = true;
 		}		
 		else if (result.live == 'false' && isLive) {
-			$('#live_feed').html('');
+			$('#live_feed').html('Live stream currently offline. Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks');
 			isLive = false;
 		}
-
-		if(result.live == 'false')
-			$('#live_feed').hide();
-		else
-			$('#live_feed').show();
 
 		// login form	
 		
