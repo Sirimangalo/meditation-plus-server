@@ -137,6 +137,7 @@ function submitData(submit,formid) {
 	serializedData += (serializedData.length > 0?'&':'')+(logged_user?"username="+logged_user:'');
 	serializedData += (serializedData.length > 0?'&':'')+"list_version="+listVersion;
 	serializedData += (serializedData.length > 0?'&':'')+"chat_version="+chatVersion;
+	serializedData += (serializedData.length > 0?'&':'')+"last_chat="+lastChatTime;
 	serializedData += (serializedData.length > 0?'&':'')+"source=web";
 
 	// fire off the request to /db.php
@@ -192,7 +193,13 @@ function submitData(submit,formid) {
 		var chatObj = result.chat;
 		if(!(chatObj instanceof Array))
 			chatObj = G_chatObj;
-		else G_chatObj = chatObj;
+		else {
+			if(chatObj.length < G_chatObj.length) {
+				chatObj = G_chatObj.concat(chatObj);
+				chatObj = chatObj.slice(chatObj.length - G_chatObj.length); // max length will be G_chatObj.length (50)
+			}
+			G_chatObj = chatObj;
+		}
 
 		var hoursObj = result.hours;
 
@@ -209,7 +216,7 @@ function submitData(submit,formid) {
 		for(var i = 0; i < chatObj.length; i++) {
 			var then = chatObj[i].time-2;
 			
-			latestChatTime = then;
+			latestChatTime = chatObj[i].time;
 			
 			var date = new Date(chatObj[i].time*1000);
 
@@ -271,7 +278,7 @@ function submitData(submit,formid) {
 
 		}
 		
-		var output = '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Country</td><td class="thead">Walking</td><td class="thead">Sitting</td></tr>';
+		var output = '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Country</td><td class="thead">Walking</td><td class="thead">Sitting</td><td class="thead">+1</td></tr>';
 		
 		var avatars = '';
 		
@@ -316,7 +323,7 @@ function submitData(submit,formid) {
 					imMeditating = false;
 				}
 				
-				var opi = 1 - Math.round((time-end)*10/(60*60))/10;
+				var opi = 1 - Math.round((time-end)*10/(60*60*2))/10;
 				if(opi > 1)
 					opi = 1;
 				opacity = ' style="opacity:'+opi+'"';
@@ -367,7 +374,9 @@ function submitData(submit,formid) {
 
 			var current_status = obj[i].type == "love" ? "love_icon.png" : current + '_icon.png';			
 
-			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td></tr>';
+			var anumodana = '<span class="anumodana" title="Anumodana!" onclick="submitData(true,\'anumed_'+obj[i].sid+'\')"><img src="/images/left_hand.png" height=16>'+(obj[i].anumodana > 0?'<span class="anu-number">'+obj[i].anumodana+'</span>':'')+'<img src="/images/right_hand.png" height=16></span>';
+
+			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td><td>' + anumodana +'</td></tr>';
 		}
 		
 		// timer ringing

@@ -8,6 +8,7 @@ require('bar.php');
 	<title>Meditation+</title>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta name="generator" content="Geany 0.21" />
+	<meta name="description" content="Online meditation resource for the Sirimangalo International meditation community" />
 	<link rel="stylesheet" type="text/css" href="styles.css?version=2">
 	<link rel="image_src" href="http://static.sirimangalo.org/images/dhammawheelcommunity_t.png" />
 	<link rel="Shortcut Icon" type="image/x-icon" href="http://www.sirimangalo.org/favicon.ico" />

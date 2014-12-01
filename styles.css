@@ -175,6 +175,16 @@ td {
 	font-weight:bold;
 }
 
+.anumodana {
+	cursor:pointer;
+	font-weight:bold;
+	font-family:sans-serif;
+	color:green;
+}
+.anu-number {
+	vertical-align: bottom;
+}
+
 #chatframe {
 	border:solid #AAA 1px;
 	width:600px;

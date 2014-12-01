@@ -7,7 +7,7 @@ function getNewList() {
 	global $con;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;"; // ,strtotime('12 hours ago')
+	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type, (SELECT COUNT(*) FROM anumodana WHERE sessions.sid=anumodana.sid) AS anumodana FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;";
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$email = $row['email'];
@@ -31,13 +31,16 @@ function getNewList() {
 	
 	return $lista;
 }
-function getNewChats() {
+function getNewChats($last = 0) {
 
 	global $con;
 	
 	$chata = [];
-	$sql="(SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid ORDER BY time DESC LIMIT 50) ORDER BY time ASC;";
+	
+	$sql="(SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid".($last != 0?" AND time > '".gmdate('Y-m-d H:i:s',$last)."'":"")." ORDER BY time DESC LIMIT 50) ORDER BY time ASC;";
+	
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
+	
 	while($row = mysqli_fetch_assoc($query)) {
 		$chata[] = $row;
 	}
@@ -121,13 +124,9 @@ if(isset($_POST['list_version']) && (int)$_POST['list_version'] < $listVersion) 
 }
 
 $chata = [];
-$newChat = false;
 
-if(isset($_POST['chat_version']) && (int)$_POST['chat_version'] < $chatVersion) {
-        error_log('new chat'.($user!=''?$user:'').' '.$_SERVER['REMOTE_ADDR']);
-	$newChat = true;
-	$chata = getNewChats();
-}
+$newChat = true;
+$chata = getNewChats(isset($_POST['last_chat'])?$_POST['last_chat']:0);
 
 $success = 0;
 
@@ -168,7 +167,7 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 				$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 
 				$newChat = true;
-				$chata = getNewChats();
+				$chata = getNewChats(isset($_POST['last_chat'])?$_POST['last_chat']:0);
 
 				$success = 1;
 				file_put_contents('chatv',++$chatVersion);
@@ -213,20 +212,20 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 				file_put_contents('listv',++$listVersion);
 			}
 		}
-                else if($_POST['form_id'] == 'change_type') {
+		else if($_POST['form_id'] == 'change_type') {
 			$type = mysqli_real_escape_string($con,$_POST['type']);
-                        if(!preg_match('/[^-0-9A-Za-z_]/',$type)) {
-			        $sql = "UPDATE sessions SET `type`='".$type."' WHERE uid=(SELECT uid FROM users WHERE username='".$user."') AND end < NOW() AND end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."'";
-                                $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con));
-                                // update list
-                                $newList = true;
-                                $lista = getNewList();
-                                $total_hours = getHoursList();
+			if(!preg_match('/[^-0-9A-Za-z_]/',$type)) {
+				$sql = "UPDATE sessions SET `type`='".$type."' WHERE uid=(SELECT uid FROM users WHERE username='".$user."') AND end < NOW() AND end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."'";
+				$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con));
+				// update list
+				$newList = true;
+				$lista = getNewList();
+				$total_hours = getHoursList();
 
-                                $success = 1;
+				$success = 1;
 
-                                file_put_contents('listv',++$listVersion);
-                        }
+				file_put_contents('listv',++$listVersion);
+			}
 		}
 		else if(strpos($_POST['form_id'],'delchat_') === 0 && in_array($user,$admin)) {
 			// del chat form
@@ -238,9 +237,28 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 			
 			$newChat = true;
-			$chata = getNewChats();
+			$chata = getNewChats(isset($_POST['last_chat'])?$_POST['last_chat']:0);
 			$success = 1;
 			file_put_contents('chatv',++$chatVersion);
+		}
+		else if(strpos($_POST['form_id'],'anumed_') === 0) {
+			// anumodana chat form
+			
+			$sid = (int)substr($_POST['form_id'],7);
+			
+			error_log($sid);
+			
+			$sql = "INSERT INTO anumodana (sid, uid) VALUES(".$sid.", (SELECT uid FROM users WHERE username = '".mysqli_real_escape_string($con,$user)."'))";
+			
+			$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
+			
+			$newList = true;
+			$lista = getNewList();
+			$total_hours = getHoursList();
+
+			$success = 1;
+
+			file_put_contents('listv',++$listVersion);
 		}
 	}
 	else {
@@ -266,6 +284,8 @@ foreach($lista as $idx => $member) {
 	$mSit = $member['sitting'];
 	$mCountry = $member['country'];
 	$mType = @$member['type'];
+	$mSid = @$member['sid'];
+	$mAnumodana = @$member['anumodana'];
 
 	if($cancelmed && $mUser == $user) {
 		continue;
@@ -280,6 +300,8 @@ foreach($lista as $idx => $member) {
 		'sitting' => $mSit,
 		'country' => $mCountry,
 		'type' => $mType,
+		'sid' => $mSid,
+		'anumodana' => $mAnumodana,
 		'can_edit' => $mUser == $user || in_array($user,$admin) ? 'true':'false',
 		'me' => strlen($user) > 0 && $mUser == $user ? 'true':'false',
 	);
@@ -362,7 +384,6 @@ if(isset($_POST['submit']) && $_POST['submit'] == 'Refresh' && isset($_POST['ful
 }
 $live_url = 'http://sirimangalo.org:8000/live';
 $live_headers = @get_headers($live_url);
-error_log($live_headers[0]);
 $live = strpos($live_headers[0], ' 404 ') == false;
 
 $data = array(
