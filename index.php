@@ -41,7 +41,7 @@ require('bar.php');
 	<div id="content">
 		<div id="header">
 			<div class="heading">Welcome&nbsp;to&nbsp;our online&nbsp;meditation&nbsp;page!</div>
-			<div class="p">  The meditation we practice is based on the teachings found in <a href="http://htm.sirimangalo.org/">this booklet</a>.</div>
+			<div class="p">  The meditation we practice is based on the teachings found in <a class="link" href="http://htm.sirimangalo.org/">this booklet</a>.</div>
 			<div class="p">Please let us know you are here by submitting your intended time spent walking and sitting.</div>
 			<div class="p">We normally do walking first, then sitting.</div>
 			<div class="p">Please visit our <a class="link bold" href="/commit.php">commitments</a> page to join or create a group of committed meditators.</div>
