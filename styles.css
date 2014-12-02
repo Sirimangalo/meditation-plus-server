@@ -178,13 +178,13 @@ td {
 .anumodana {
 	cursor:pointer;
 	font-family:sans-serif;
-	color:green;
 }
 .anu-number {
 	vertical-align: bottom;
 }
 .anu-me {
 	font-weight:bold;
+	color:green;
 }
 
 #chatframe {

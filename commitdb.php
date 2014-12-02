@@ -142,7 +142,10 @@ function checkCommitment($c) {
 			if($tw >= $walk && $ts >= $sit)
 				return 100;
 			
-			return round((($tw*100/$walk)+($ts*100/$sit))/2); // average percent between the two
+			$walkp = $walk > 0 ? ($tw*100/$walk) : 0;
+			$sitp = $sit > 0 ? ($ts*100/$sit) : 0;
+			
+			return round(($walkp+$sitp)/2); // average percent between the two
 		}
 	}
 	else if($c['period'] == 'monthly') {
@@ -206,7 +209,10 @@ function checkCommitment($c) {
 			if($tw >= $walk && $ts >= $sit)
 				return 100;
 			
-			return round((($tw*100/$walk)+($ts*100/$sit))/2); // average percent between the two
+			$walkp = $walk > 0 ? ($tw*100/$walk) : 0;
+			$sitp = $sit > 0 ? ($ts*100/$sit) : 0;
+			
+			return round(($walkp+$sitp)/2); // average percent between the two
 		}
 	}
 	
@@ -336,20 +342,27 @@ $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_err
 
 $commitments = [];
 
+
 while($row = mysqli_fetch_assoc($query)) {
 	if(!isset($commitments[$row['cid']]))
 		$commitments[$row['cid']] = $row;
 
 	if(@$row['username'] == "")
 		$row['username'] = 'none';
-	if(isset($row['uid']))
-		$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
+		
+	if(!isset($row['uid']))
+		$row['uid'] = 0;
+		
+	$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
 }
 
 $comm = [];
 foreach ($commitments as $i => $c) {
 	$comm[] = $c;
 }
+	
+error_log(count($commitments));
+
 	
 $commit_data = array(
 	'commitments' => $comm,
