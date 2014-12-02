@@ -63,7 +63,10 @@ function checkCommitment($c) {
 			if($tw >= $walk && $ts >= $sit)
 				return 100;
 			
-			return round((($tw*100/$walk)+($ts*100/$sit))/2); // average percent between the two
+			$walkp = $walk > 0 ? ($tw*100/$walk) : 0;
+			$sitp = $sit > 0 ? ($ts*100/$sit) : 0;
+			
+			return round(($walkp+$sitp)/2); // average percent between the two
 		}
 		
 	}
@@ -339,7 +342,8 @@ while($row = mysqli_fetch_assoc($query)) {
 
 	if(@$row['username'] == "")
 		$row['username'] = 'none';
-	$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
+	if(isset($row['uid']))
+		$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
 }
 
 $comm = [];

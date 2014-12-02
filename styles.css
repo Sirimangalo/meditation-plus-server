@@ -177,12 +177,14 @@ td {
 
 .anumodana {
 	cursor:pointer;
-	font-weight:bold;
 	font-family:sans-serif;
 	color:green;
 }
 .anu-number {
 	vertical-align: bottom;
+}
+.anu-me {
+	font-weight:bold;
 }
 
 #chatframe {

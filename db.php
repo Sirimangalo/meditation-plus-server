@@ -4,10 +4,11 @@ require_once('config.php');
 
 function getNewList() {
 	
-	global $con;
+	global $con, $user;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type, (SELECT COUNT(*) FROM anumodana WHERE sessions.sid=anumodana.sid) AS anumodana FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;";
+	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type, (SELECT COUNT(*) FROM anumodana WHERE sessions.sid=anumodana.sid) AS anumodana, (SELECT CASE WHEN EXISTS (SELECT * FROM anumodana WHERE uid = (SELECT uid FROM users WHERE username = '".$user."') AND sid = sessions.sid) THEN 1 ELSE 0 END) AS anu_me FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;";
+	
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
 		$email = $row['email'];
@@ -245,10 +246,8 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			// anumodana chat form
 			
 			$sid = (int)substr($_POST['form_id'],7);
-			
-			error_log($sid);
-			
-			$sql = "INSERT INTO anumodana (sid, uid) VALUES(".$sid.", (SELECT uid FROM users WHERE username = '".mysqli_real_escape_string($con,$user)."'))";
+						
+			$sql = "INSERT INTO anumodana (sid, uid) VALUES(".$sid.", (SELECT users.uid FROM users, sessions WHERE username = '".mysqli_real_escape_string($con,$user)."' AND sid = ".$sid." AND users.uid != sessions.uid))";
 			
 			$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 			
@@ -286,6 +285,7 @@ foreach($lista as $idx => $member) {
 	$mType = @$member['type'];
 	$mSid = @$member['sid'];
 	$mAnumodana = @$member['anumodana'];
+	$mAnuMe = @$member['anu_me'];
 
 	if($cancelmed && $mUser == $user) {
 		continue;
@@ -302,6 +302,7 @@ foreach($lista as $idx => $member) {
 		'type' => $mType,
 		'sid' => $mSid,
 		'anumodana' => $mAnumodana,
+		'anu_me' => $mAnuMe,
 		'can_edit' => $mUser == $user || in_array($user,$admin) ? 'true':'false',
 		'me' => strlen($user) > 0 && $mUser == $user ? 'true':'false',
 	);

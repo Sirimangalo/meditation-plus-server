@@ -374,7 +374,7 @@ function submitData(submit,formid) {
 
 			var current_status = obj[i].type == "love" ? "love_icon.png" : current + '_icon.png';			
 
-			var anumodana = '<span class="anumodana" title="Anumodana!" onclick="submitData(true,\'anumed_'+obj[i].sid+'\')"><img src="/images/left_hand.png" height=16>'+(obj[i].anumodana > 0?'<span class="anu-number">'+obj[i].anumodana+'</span>':'')+'<img src="/images/right_hand.png" height=16></span>';
+			var anumodana = '<span class="anumodana" title="Anumodana!" onclick="submitData(true,\'anumed_'+obj[i].sid+'\')"><img src="/images/left_hand.png" height=16>'+(obj[i].anumodana > 0?'<span class="anu-number'+(obj[i].anu_me == "1" ? ' anu-me' :'')+'">'+obj[i].anumodana+'</span>':'')+'<img src="/images/right_hand.png" height=16></span>';
 
 			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td><td>' + anumodana +'</td></tr>';
 		}
