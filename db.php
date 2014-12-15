@@ -7,7 +7,7 @@ function getNewList() {
 	global $con, $user;
 	
 	$lista = [];
-	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type, (SELECT COUNT(*) FROM anumodana WHERE sessions.sid=anumodana.sid) AS anumodana, (SELECT CASE WHEN EXISTS (SELECT * FROM anumodana WHERE uid = (SELECT uid FROM users WHERE username = '".$user."') AND sid = sessions.sid) THEN 1 ELSE 0 END) AS anu_me FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('1 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;";
+	$sql="SELECT sid, sessions.uid AS uid, username, country, img, email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end, type, (SELECT COUNT(*) FROM anumodana WHERE sessions.sid=anumodana.sid) AS anumodana, (SELECT CASE WHEN EXISTS (SELECT * FROM anumodana WHERE uid = (SELECT uid FROM users WHERE username = '".$user."') AND sid = sessions.sid) THEN 1 ELSE 0 END) AS anu_me FROM sessions, users WHERE sessions.end > '".gmdate('Y-m-d H:i:s',strtotime('3 hour ago'))."' AND users.uid=sessions.uid ORDER BY start DESC;";
 	
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	while($row = mysqli_fetch_assoc($query)) {
@@ -77,6 +77,21 @@ function getHoursList() {
 	return $hours;
 }
 
+
+function getSchedule() {
+
+	global $con;
+	
+	$sql="SELECT * FROM schedule ORDER BY time";
+	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
+	$schedule = [];
+	while($row = mysqli_fetch_assoc($query)) {
+		$schedule[] = $row;
+	}
+	return $schedule;
+}
+
+
 $alert = '';
 
 $user = '';
@@ -102,27 +117,13 @@ $cancelmed = false;
 $list = [];
 $chat = [];
 
-$listVersion = (int)file_get_contents('listv');
-$chatVersion = (int)file_get_contents('chatv');
-$hoursVersion = (int)file_get_contents('hoursv');
-
-if(!$listVersion)
-	$listVersion = 1;
-if(!$chatVersion)
-	$chatVersion = 1;
-if(!$hoursVersion)
-	$hoursVersion = 1;
-
 $lista = [];
 $total_hours = -1;
 $newList = false;
 
-if(isset($_POST['list_version']) && (int)$_POST['list_version'] < $listVersion) {
-	error_log('new list '.($user!=''?$user:'').' '.$_SERVER['REMOTE_ADDR']);
-	$newList = true;
-	$lista = getNewList();
-	$total_hours = getHoursList();
-}
+$newList = true;
+$lista = getNewList();
+$total_hours = getHoursList();
 
 $chata = [];
 
@@ -151,7 +152,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			$newList = true;
 			$lista = getNewList();
 			$total_hours = getHoursList();				
-			file_put_contents('listv',++$listVersion);
 		}
 		else if($_POST['form_id'] == 'chatform') {
 			$message = str_replace('^','',$_POST['message']);
@@ -159,7 +159,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			if(in_array($user,$admin) && $message == '/clear') {
 				$clearchat = true;
 				$success = 1;
-				file_put_contents('chatv',++$chatVersion);
 			}
 			else if(strlen($user) > 0 && strlen($user) < 64 && strlen($message) > 0 && strlen($message) < 140) {
 				$time = time();
@@ -171,7 +170,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 				$chata = getNewChats(isset($_POST['last_chat'])?$_POST['last_chat']:0);
 
 				$success = 1;
-				file_put_contents('chatv',++$chatVersion);
 			}
 		}
 		else if($_POST['form_id'] == 'timeform') {
@@ -210,7 +208,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 
 				$success = 1;
 				
-				file_put_contents('listv',++$listVersion);
 			}
 		}
 		else if($_POST['form_id'] == 'change_type') {
@@ -225,7 +222,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 
 				$success = 1;
 
-				file_put_contents('listv',++$listVersion);
 			}
 		}
 		else if(strpos($_POST['form_id'],'delchat_') === 0 && in_array($user,$admin)) {
@@ -240,7 +236,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			$newChat = true;
 			$chata = getNewChats(isset($_POST['last_chat'])?$_POST['last_chat']:0);
 			$success = 1;
-			file_put_contents('chatv',++$chatVersion);
 		}
 		else if(strpos($_POST['form_id'],'anumed_') === 0) {
 			// anumodana chat form
@@ -257,7 +252,6 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 
 			$success = 1;
 
-			file_put_contents('listv',++$listVersion);
 		}
 	}
 	else {
@@ -392,11 +386,12 @@ $data = array(
 	'chat' => $newChat ? $chatj:'-1',
 	'commit' => $commita,
 	'hours' => $total_hours,
+	'schedule' => getSchedule(),
 	'logged' => $dataLoggedOld,
 	'loggedin' => $dataLogged,
 	'success' => $success,
-	'list_version' => $listVersion,
-	'chat_version' => $chatVersion,
+	'list_version' => 1,
+	'chat_version' => 1,
 	'login_token' => $loginToken,
 	'alert' => $alert,
 	'refresh' => $refresh,
