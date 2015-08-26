@@ -9,6 +9,8 @@ if (isset($_SESSION['error']) && strlen($_SESSION['error']) > 0) {
 } 
 loggedIn();
 
+include('quotedb.php');
+
 mysqli_close($con);
 
 $links = [];

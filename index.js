@@ -297,6 +297,11 @@ function submitData(submit,formid) {
 			var sitting = obj[i].sitting;
 			var me = obj[i].me == 'true';
 
+			// change my type
+			
+			if(me)
+				$('#type').val(obj[i].type == "love" ? "normal" : "love");
+
 			// tells us that this session is our latest so far (in case of multiple me sessions)
 
 			if(me && start > meStart)
@@ -323,7 +328,7 @@ function submitData(submit,formid) {
 					imMeditating = false;
 				}
 				
-				var opi = 1 - Math.round((time-end)*10/(60*60*2))/10;
+				var opi = 1 - (Math.round((time-end)*10/(60*60*2))/10)/2;
 				if(opi > 1)
 					opi = 1;
 				opacity = ' style="opacity:'+opi+'"';
@@ -376,7 +381,7 @@ function submitData(submit,formid) {
 
 			var anumodana = '<span class="anumodana" title="Anumodana!" onclick="submitData(true,\'anumed_'+obj[i].sid+'\')"><img src="/images/left_hand.png" height=16>'+(obj[i].anumodana > 0?'<span class="anu-number'+(obj[i].anu_me == "1" ? ' anu-me' :'')+'">'+obj[i].anumodana+'</span>':'')+'<img src="/images/right_hand.png" height=16></span>';
 
-			output += '<tr'+opacity+'><td><img src="'+ current_status + '" height="16" title="'+current+'"></td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td><td>' + anumodana +'</td></tr>';
+			output += '<tr'+opacity+'><td>'+(me && current == 'finished' ?'<a href="javascript:void()" onclick="submitData(true,\'change_type\')">':'')+'<img src="'+ current_status + '" height="16" title="'+current+'">'+(me && current == 'finished'?'</a>':'')+'</td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td><td>' + anumodana +'</td></tr>';
 		}
 		
 		// timer ringing
@@ -584,7 +589,7 @@ function replaceSmilies(text) {
 	
 	// link
 	
-	text = text.replace(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/g,"<a href=\"$1\" class=\"link\">$1</a>");
+	text = text.replace(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/g,"<a href=\"$1\" target=\"_blank\" class=\"link\">$1</a>");
 
 	return text;
 }
@@ -629,8 +634,8 @@ function validateForm(id) {
 		if(!logged_user) {
 			error = 'Please log in first';
 		}
-		if(message.indexOf() > 140) {
-			error = 'chat message max 140 char';
+		if(message.indexOf() > 1000) {
+			error = 'chat message max 400 char';
 		}
 		if(message.length < 1) {
 			error = 'must input chat message';

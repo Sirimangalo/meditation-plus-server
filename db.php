@@ -160,7 +160,7 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 				$clearchat = true;
 				$success = 1;
 			}
-			else if(strlen($user) > 0 && strlen($user) < 64 && strlen($message) > 0 && strlen($message) < 140) {
+			else if(strlen($user) > 0 && strlen($user) < 64 && strlen($message) > 0 && strlen($message) < 1000) {
 				$time = time();
 
 				$sql = "INSERT INTO chats (`uid`, `time`, `message`) SELECT uid, '".gmdate('Y-m-d H:i:s', $time)."', '".mysqli_real_escape_string($con,htmlspecialchars($message))."' FROM users WHERE username = '".mysqli_real_escape_string($con,$user)."'"; 
@@ -176,8 +176,8 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			// time form
 
 			$start = time();
-			$walking = $_POST['walking'];
-			$sitting = $_POST['sitting'];
+			$walking = (int) $_POST['walking'];
+			$sitting = (int) $_POST['sitting'];
 			
 			// only add member if valid
 			if(strlen($user) > 0 && strlen($user) < 20 && preg_match('/[A-Za-z]/',$user) && !preg_match('/[^-0-9A-Za-z _]/',$user) && !preg_match('/[^0-9]/',$walking) && !preg_match('/[^0-9]/',$sitting) && $walking <= 60 && $sitting <= 60 && $walking >= 0 && $sitting >= 0) {
