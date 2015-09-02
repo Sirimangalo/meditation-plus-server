@@ -354,15 +354,17 @@ while($row = mysqli_fetch_assoc($query)) {
 		$row['uid'] = 0;
 		
 	$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
+	
+	if($commitments[$row['cid']]['users'][$row['username']] == 0)
+		unset($commitments[$row['cid']]['users'][$row['username']]);
+	
 }
 
 $comm = [];
 foreach ($commitments as $i => $c) {
-	$comm[] = $c;
+	if(!empty($c['users']))
+		$comm[] = $c;
 }
-	
-error_log(count($commitments));
-
 	
 $commit_data = array(
 	'commitments' => $comm,

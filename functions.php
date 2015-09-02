@@ -52,8 +52,10 @@ function createAccount($pUsername, $pPassword) {
 				return true; 
 			}   
 		} 
-	} 
-	 
+	}
+	else 
+		$_SESSION['error'] = "You must provide a username and password to register."; 
+ 	 
 	return false; 
 } 
  

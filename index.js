@@ -81,6 +81,7 @@ function refreshTime() {
 			if(++seq % 60 == 0){
 				listVersion = -1;
 				chatVersion = -1;
+				seq = 0;
 			}
 				
 			submitData();
@@ -392,11 +393,12 @@ function submitData(submit,formid) {
 			imSitting = false;
 		}
 
+		var now = new Date();
+
 		// skip hours field if same
 		
 		if(hoursObj instanceof Array) {
 		
-			var now = new Date();
 			var nowHour= now.getUTCHours();
 			
 			var total_hours = result.hours;
@@ -449,12 +451,40 @@ function submitData(submit,formid) {
 		
 		// live?
 
+		var sched = result.schedule;
+		var nextEvent = -1;
+		var nowHour = now.getUTCHours();
+		var nowMin = now.getUTCMinutes();
+		var timeLeft = 24*60;
+		var nowTime = nowHour*60 + nowMin;
+		
+		for(var i = 0; i < sched.length; i++) {
+			
+			var eHour = parseInt(sched[i].time.substring(0,2).replace(/^0/,''));
+			var eMin = parseInt(sched[i].time.substring(2,4).replace(/^0/,''));
+			
+			var eTime = eMin + eHour * 60;
+			if((eTime > nowTime && eTime - nowTime < timeLeft)) {
+				timeLeft = eTime - nowTime;
+				nextEvent = i;
+			}
+			else if(eTime < nowTime && eTime + 24*60 - nowTime < timeLeft) {
+				timeLeft = eTime + 24*60 - nowTime;
+				nextEvent = i;
+			}
+		}
+		
+
 		if(result.live != 'false' && !isLive) {
 			$('#live_feed').html('<a href="'+result.live+'">Audio is live. Click here for live audio dhamma.<br/>'+result.live+'</a><br/><audio controls><source src="'+result.live+'" type="audio/mpeg">Your browser does not support HTML5 audio.</audio>');		
 			isLive = true;
-		}		
+		}
+		else if(nextEvent > -1) { // scheduled event
+			$('#live_feed').html('Live stream currently offline. Next broadcast is <b>'+sched[nextEvent].title+'</b> at <b>'+sched[nextEvent].time+'h UTC</b> ('+(timeLeft > 60 ? Math.floor(timeLeft/60)+'h'+(timeLeft % 60 != 0?' and '+timeLeft % 60+'m':'') :timeLeft+'m')+' from now). Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks.');
+			isLive = false;
+		}
 		else if (result.live == 'false' && isLive) {
-			$('#live_feed').html('Live stream currently offline. Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks');
+			$('#live_feed').html('Live stream currently offline. Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks.');
 			isLive = false;
 		}
 

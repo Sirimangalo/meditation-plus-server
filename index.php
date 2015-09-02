@@ -33,7 +33,7 @@ require('bar.php');
 		var logged_user = \'\';';
 ?>
 	</script>
-	<script src="index.js?ver=16"></script>
+	<script src="index.js?ver=17"></script>
 </head>
 
 <body onload="loaded()">

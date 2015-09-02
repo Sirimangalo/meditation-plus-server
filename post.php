@@ -71,6 +71,9 @@ else if($_POST['submit'] == 'Profile') {
 else if($_POST['submit'] == 'Schedule') {
 	require('scheduledb.php');
 }
+else if($_POST['submit'] == 'Quote') {
+	require('quote2db.php');
+}
 
 if(isset($con))
 	mysqli_close($con);

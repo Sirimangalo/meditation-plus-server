@@ -38,7 +38,7 @@ function getNewChats($last = 0) {
 	
 	$chata = [];
 	
-	$sql="(SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid".($last != 0?" AND time > '".gmdate('Y-m-d H:i:s',$last)."'":"")." ORDER BY time DESC LIMIT 50) ORDER BY time ASC;";
+	$sql="(SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid".($last != 0?" AND time > '".gmdate('Y-m-d H:i:s',$last)."'":"")." ORDER BY time DESC LIMIT 100) ORDER BY time ASC;";
 	
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	
@@ -110,7 +110,7 @@ if(isset($_SESSION['username']))
 
 $loginToken = @$_SESSION['login_token'];
 
-$chatlimit = 50;
+$chatlimit = 100;
 $clearchat = false;
 $cancelmed = false;
 
