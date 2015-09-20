@@ -9,7 +9,7 @@ require('bar.php');
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta name="generator" content="Geany 0.21" />
 	<meta name="description" content="Online meditation resource for the Sirimangalo International meditation community" />
-	<link rel="stylesheet" type="text/css" href="styles.css?version=2">
+	<link rel="stylesheet" type="text/css" href="styles.css?version=3">
 	<link rel="image_src" href="http://static.sirimangalo.org/images/dhammawheelcommunity_t.png" />
 	<link rel="Shortcut Icon" type="image/x-icon" href="http://www.sirimangalo.org/favicon.ico" />
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -33,13 +33,14 @@ require('bar.php');
 		var logged_user = \'\';';
 ?>
 	</script>
-	<script src="index.js?ver=17"></script>
+	<script src="index.js?ver=19"></script>
 </head>
 
 <body onload="loaded()">
 <?php echo $header_bar; ?>
 	<div id="content">
 		<div id="header">
+			<div class="subheading">Quote of the Day</div>
 			<div class="p" id="daily_quote"><?php echo $quoteString ?></div>
 			<div class="heading">Welcome&nbsp;to&nbsp;our online&nbsp;meditation&nbsp;page!</div>
 			<div class="p"> The meditation we practice is based on the teachings found in <a class="link" href="http://htm.sirimangalo.org/">this booklet</a>.</div>

@@ -344,19 +344,21 @@ $commitments = [];
 
 
 while($row = mysqli_fetch_assoc($query)) {
-	if(!isset($commitments[$row['cid']]))
-		$commitments[$row['cid']] = $row;
 
-	if(@$row['username'] == "")
-		$row['username'] = 'none';
-		
-	if(!isset($row['uid']))
-		$row['uid'] = 0;
-		
-	$commitments[$row['cid']]['users'][$row['username']] = checkCommitment($row);
+	if(!isset($row['username']) || !isset($row['uid']))
+		continue;
+
+	if($row['username'] == "")
+		continue;
+			
+	$percent = checkCommitment($row);
 	
-	if($commitments[$row['cid']]['users'][$row['username']] == 0)
-		unset($commitments[$row['cid']]['users'][$row['username']]);
+	if($percent > 0 || (isset($_SESSION['username']) && $row['username'] == $_SESSION['username']) || (isset($_POST['username']) && $row['username'] == $_POST['username'])) {
+		if(!isset($commitments[$row['cid']]))
+			$commitments[$row['cid']] = $row;
+		$commitments[$row['cid']]['users'][$row['username']] = $percent;
+
+	}
 	
 }
 

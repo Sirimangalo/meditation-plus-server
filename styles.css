@@ -113,6 +113,13 @@ a {
 	font-weight:bold;
 	font-size:28px;
 }
+
+.subheading {
+	padding:10px 0;
+	font-weight:bold;
+	font-size:22px;
+}
+
 td {
 	vertical-align:top;
 }
@@ -147,16 +154,18 @@ td {
 }
 
 #daily_quote {
-
-	margin-top:20px;
 	margin-left:auto;
 	margin-right:auto;
 	max-width:600px;
 }
 
 #quote-quote {
-	font-size:12px;
-	text-align:justify;
+    font-size: 13px;
+    text-align: justify;
+    max-height: 200px;
+    overflow: auto;
+    padding: 10px;
+    font-style:italic;
 }
 
 #quote-cite {
@@ -164,6 +173,7 @@ td {
 	text-align:right;
 	color:green;
 	margin-top:10px;
+    font-style:italic;
 }
 
 
@@ -508,4 +518,29 @@ span.uncommitted {
 
 #notice-shell {
 	background-color:#FFCCCC;
+}
+
+.th {
+	font-weight:bold;
+}
+
+#appointment-schedule {
+	width:100%;
+	text-align:center;
+}
+
+.appoint-avail,.appoint-open {
+	background-color:#99FF99;
+}
+.appoint-me {
+	background-color:#99FFFF;
+}
+
+.appoint-avail:hover,.appoint-me:hover {
+	cursor:pointer;
+	background-color:#FFFF99;
+}
+
+.appoint-taken {
+	background-color:#FF9999;
 }

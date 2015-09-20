@@ -26,6 +26,11 @@ $links[] = array(
 	'logged' => true,
 	);
 $links[] = array(
+	'link' => '/appointment.php',
+	'title' => 'Meet',
+	'logged' => true,
+	);
+$links[] = array(
 	'link' => '/profile.php',
 	'title' => 'Profile',
 	'logged' => true,

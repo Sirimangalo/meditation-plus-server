@@ -64,7 +64,7 @@ function createAccount($pUsername, $pPassword) {
 		This will create a SHA1 hash of the password 
 		using 2 salts that the user specifies. 
 ************/ 
-function hashPassword($pPassword, $pSalt1="2345#$%@3e", $pSalt2="taesa%#@2%^#") { 
+function hashPassword($pPassword, $pSalt1, $pSalt2) { 
 	return sha1(md5($pSalt2 . $pPassword . $pSalt1)); 
 } 
  

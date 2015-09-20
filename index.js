@@ -479,7 +479,7 @@ function submitData(submit,formid) {
 			$('#live_feed').html('<a href="'+result.live+'">Audio is live. Click here for live audio dhamma.<br/>'+result.live+'</a><br/><audio controls><source src="'+result.live+'" type="audio/mpeg">Your browser does not support HTML5 audio.</audio>');		
 			isLive = true;
 		}
-		else if(nextEvent > -1) { // scheduled event
+		else if(nextEvent > -1  && !isLive) { // scheduled event
 			$('#live_feed').html('Live stream currently offline. Next broadcast is <b>'+sched[nextEvent].title+'</b> at <b>'+sched[nextEvent].time+'h UTC</b> ('+(timeLeft > 60 ? Math.floor(timeLeft/60)+'h'+(timeLeft % 60 != 0?' and '+timeLeft % 60+'m':'') :timeLeft+'m')+' from now). Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks.');
 			isLive = false;
 		}
@@ -722,7 +722,7 @@ function HTMLEncode(str){
 var whichAudio;
 
 function ringTimer() {
-	if(whichAudio != 'none') {
+	if(whichAudio && whichAudio != 'none' && document.getElementById("audio-"+whichAudio)) {
 		document.getElementById("audio-"+whichAudio).pause();
 		document.getElementById("audio-"+whichAudio).setAttribute("currentTime",0);
 	}
