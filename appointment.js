@@ -24,16 +24,20 @@ function refreshTime() {
 		var myTime = 'The time now is:<br/><br/><b id="now">'+hour+':'+minute+':'+second + ' UTC, ' + dow[d.getUTCDay()] + ', ' + monthNames[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', '+d.getUTCFullYear()+'</b><br/><i>('+lhour+':'+lminute+':'+lsecond+', ' + dow[d.getDay()] + ', ' + monthNames[d.getMonth()] + ' ' + d.getDate() + ', '+d.getFullYear()+' your time)</i>';
 
 		$('#live').html(myTime);
-
-		if(meetingRoom != '') {
-			$('#meeting-room').attr('href','meeting.php?room='+meetingRoom); 
+		if(meetingMember != '') {
 			$('#meeting').show();
+			$('#meeting-user').html('Currently scheduled: <a class="link bold" target="_blank" href="profile.php?user='+meetingMember+'">'+meetingMember+'</a>.');
+			if(meetingRoom != '') {
+				$('#meeting-room').attr('href','meeting.php?room='+meetingRoom); 
+				$('#meeting-link').show();
+			}
+			else {
+				$('#meeting').hide();
+			}
 		}
-		else {
-			meetingRoom = '';
+		else
 			$('#meeting').hide();
-		}
-		
+
 		window.setTimeout(function() {refreshTime() },1000);
 
 		if(++seq % 30 == 0 && !G_static) {
@@ -49,6 +53,7 @@ function changeAppointment(day,time,username) {
 var me = [-1,'0000'];
 
 var meetingRoom = '';
+var meetingMember = '';
 
 function submitData(serializedData) {
 	
@@ -100,19 +105,26 @@ function submitData(serializedData) {
 
 		var im = false;
 
+		var d = new Date();
 		for(var atime in obj) {
-			output += '<tr><td class="th">'+atime+'h UTC</td>';
+			
+			var mmins = parseInt(atime.substring(0,2))*60 + parseInt(atime.substring(2,4));
+			var mins = d.getUTCHours()*60 + d.getUTCMinutes();
+			
+			var myTimeM = mmins - d.getTimezoneOffset();
+			var myMins = myTimeM % 60;
+			var myTime = Math.floor(myTimeM/60) + ':' + (myMins < 10 ? '0' : '') +myMins;
+			
+			output += '<tr><td class="th pointer" title="'+myTime+' your time.">'+atime+'h UTC</td>';
 			for(var i = 0; i < 7; i++) {
 				if(obj[atime][i]) {
 					
 					// meeting room hash
 					
-					var d = new Date();
-					var mmins = parseInt(atime.substring(0,2))*60 + parseInt(atime.substring(2,4));
-					var mins = d.getUTCHours()*60 + d.getUTCMinutes();
-					
-					if(obj[atime][i]['room'] && i == d.getUTCDay() && mmins < mins && mins - mmins > 30)
+					if(obj[atime][i]['room'] && i == d.getUTCDay() && mmins < mins && mins - mmins < 30) {
 						meetingRoom = obj[atime][i]['room'];
+						meetingMember = obj[atime][i]['username'];
+					}
 					
 					var a = obj[atime][i];
 					var func;

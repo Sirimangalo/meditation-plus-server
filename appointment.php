@@ -40,22 +40,47 @@ require('bar.php');
 <body onload="loaded()">
 <?php echo $header_bar; ?>
 	<div id="content">
-		<div id="header">
+		<div class="inner">
 			<div class="heading">One-On-One Reporting Schedule</div>
 		</div>
 		<div id="inner">
 			<div id="register">
-				<div class="p" style="text-align:center">
-					Book an appointment using the table below.
+				<ul>
+					<li>
+						This page is for those practicing formal meditation daily who would like to undertake a formal meditation course over the Internet.
+					</li>
+					<li>
+						Book an appointment using the table below by clicking on the appropriate box. For local time conversion, hover the mouse over the times on the left-hand side.
+					</li>
+					<li>
+						When the time for your meeting arrives, you will see a special link in a yellow box below this text inviting you to enter the one-on-one meeting room.
+					</li>
+					<li>
+						<b>Please note that if you miss an appointment without notifying us, your reservation will be cancelled.</b>
+					</li>
+					<li>
+						In order to book an appointment, you must be logged in and have set an email address on <a href="profile.php">your profile page</a>.
+					</li>
+					<li>
+						You will need headphones and a microphone, and preferably a webcam as well.
+					</li>
+					<li>
+						<b>This feature may not work with Internet Explorer or Safari.</b>
+					</li>
+				</ul>				
+			</div>
+			<div class="yellow-box" id="meeting">
+				<div id="meeting-user" class="p" style="text-align:center">
+					
 				</div>
-				<div class="p" style="text-align:center">
-					In order to book an appointment, you must be logged in <br/>and have set an email address on <a href="profile.php">your profile page</a>.
+				<div id="meeting-link">
+					<div class="p" style="text-align:center">
+						<a id="meeting-room" class="link bold" href="meeting.php" target="_blank">Click here to enter the meeting room.</a>
+					</div>
 				</div>
 			</div>
-			<div id="meeting">
-				<div class="p" style="text-align:center">
-					<a id="meeting-room" href="meeting.php">Click here to enter the meeting room.</a>
-				</div>
+			<div class="p" style="text-align:center">
+				<a id="meeting-room-generic" class="link bold" href="meeting.php" target="_blank">Click here to enter the general-purpose group lounge.</a>
 			</div>
 		</div>
 		<div id="live"></div>

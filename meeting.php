@@ -7,7 +7,7 @@ $mday = -1;
 
 if(isset($_SESSION['username'])) {
 
-	if(!in_array($_SESSION['username'],$admin)) {
+	if(!in_array($_SESSION['username'],$admin) && isset($_GET['room'])) {
 		$sql="SELECT day, time FROM appointments JOIN appointment_slots ON appointments.aid = appointment_slots.id JOIN users ON users.uid = appointments.uid WHERE username='".$_SESSION['username']."'";
 
 		$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con));
@@ -48,7 +48,7 @@ require('bar.php');
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<title>Meditation+ Appointments</title>
+	<title>Meditation+ Meeting Room</title>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta name="generator" content="Geany 0.21" />
 	<link rel="stylesheet" type="text/css" href="styles.css">
@@ -56,7 +56,6 @@ require('bar.php');
 	<link rel="Shortcut Icon" type="image/x-icon" href="http://www.sirimangalo.org/favicon.ico" />
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script src="tz.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script>
 
 <?php
@@ -92,6 +91,16 @@ require('bar.php');
 					localVideoEl: 'localVideo',
 					// the id/element dom element that will hold remote videos
 					remoteVideosEl: 'remotesVideos',
+					media: {
+						video: {
+							mandatory: {
+								maxFrameRate: 15,
+								maxWidth: 320,
+								maxHeight: 240
+							}
+						},
+						audio: true
+					},
 					// immediately ask for camera access
 					autoRequestMedia: true
 				});
@@ -99,7 +108,7 @@ require('bar.php');
 				// we have to wait until it's ready
 				webrtc.on('readyToCall', function () {
 					// you can name it anything
-					webrtc.joinRoom('<?php echo $_GET['room'] ?>');
+					webrtc.joinRoom('<?php echo(isset($_GET['room']) ? $_GET['room'] : 'general') ?>');
 				});
 				refreshTime();
 			}
@@ -132,7 +141,7 @@ require('bar.php');
 <?php echo $header_bar; ?>
 	<div id="content">
 		<div id="header">
-			<div class="heading">One-On-One Reporting Room</div>
+			<div class="heading">Meeting Room</div>
 		</div>
 		<div id="live"></div>
 		<div id="inner" style="text-align:center">

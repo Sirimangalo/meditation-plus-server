@@ -23,6 +23,10 @@ a {
 	padding:0px 100px;
 }
 
+.inner {
+	padding:0px 100px;
+}
+
 #content {
 	margin:40px auto ;
 	padding-bottom:40px;
@@ -112,6 +116,7 @@ a {
 	padding:20px 0;
 	font-weight:bold;
 	font-size:28px;
+	text-align:center;
 }
 
 .subheading {
@@ -141,7 +146,7 @@ td {
 	margin-top:20px;
 }
 
-#live_feed {
+#live_feed, .yellow-box {
 	text-align:center;
 	padding:10px;
 	border-radius:10px;
@@ -524,9 +529,20 @@ span.uncommitted {
 	font-weight:bold;
 }
 
+.pointer {
+	cursor:pointer;
+}
+
 #appointment-schedule {
 	width:100%;
 	text-align:center;
+}
+
+#appointment-schedule td {
+	height:40px;
+	border-radius:6px;
+	vertical-align:middle;
+	font-weight:bold;
 }
 
 .appoint-avail,.appoint-open {
