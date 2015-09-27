@@ -77,16 +77,15 @@ function refreshTime() {
 		
 		window.setTimeout(function() {refreshTime() },1000);
 
-		if(++seq % 10 == 0 && !G_static) {
-			if(++seq % 60 == 0){
-				listVersion = -1;
-				chatVersion = -1;
-				seq = 0;
-			}
+		if(++seq % 5 == 0 && !G_static) {
 				
 			submitData();
 		}
-		
+		if(++seq % 60 == 0){
+			listVersion = -1;
+			chatVersion = -1;
+			seq = 0;
+		}
 }
 
 function submitData(submit,formid) {
@@ -214,70 +213,7 @@ function submitData(submit,formid) {
 		var latestChatTime = 0;
 		
 		chats += '<table id="chat-table">';
-		for(var i = 0; i < chatObj.length; i++) {
-			var then = chatObj[i].time-2;
-			
-			latestChatTime = chatObj[i].time;
-			
-			var date = new Date(chatObj[i].time*1000);
 
-			var now = Math.round(new Date().getTime()/1000);
-
-			var ela = now - then;
-			
-			var time = '';
-			
-			if (ela < 5)
-				time = 'now'; 
-			else if(ela < 60)
-				time = ela + 's&nbsp;ago'; 
-			else if(ela < 60*60)
-				time = Math.floor(ela/60) + 'm&nbsp;ago'; 
-			else if(ela < 60*60*24)
-				time = Math.floor(ela/60/60) + 'h&nbsp;ago'; 
-			else if(ela < 60*60*24*7)
-				time = Math.floor(ela/60/60/24) + 'd&nbsp;ago'; 
-			else {
-				time = date.getUTCDate()+'/'+(date.getUTCMonth()+1)+'/'+date.getUTCFullYear().toString().substring(2);
-			}
-			
-			var chat_username = chatObj[i].username;
-			
-			chatUsers[chat_username] = true;
-			
-			chat_username = chat_username.replace(' ','&nbsp;');
-
-			// get age color
-			
-			// establish max age = 3 hours or #150
-			
-			var maxAge = 60*60*3;
-			var maxColor = 150;
-
-			// check if greater
-			var elaAge = ela;
-			if(elaAge > maxAge)
-				elaAge = maxAge;
-			
-			// get elapsed time as color
-			
-			var ageColor = Math.round(maxColor*elaAge/maxAge);
-
-			// convert decimal to hex
-			
-			var hexColor = ageColor.toString(16);
-			
-			if(hexColor.length == 1)
-				hexColor = 0+hexColor;
-			
-			var hexColorString = '#'+hexColor+hexColor+hexColor;
-
-			if(elaAge < 20)
-				hexColorString = 'green';
-
-			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chat_username+'">'+chat_username+'</a>:&nbsp;</span>'+formatChatMessage(chatObj[i].message)+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
-
-		}
 		
 		var output = '<table id="listt"><tr><td class="thead">Currently</td><td class="thead">Name</td><td class="thead">Country</td><td class="thead">Walking</td><td class="thead">Sitting</td><td class="thead">+1</td></tr>';
 		
@@ -385,6 +321,79 @@ function submitData(submit,formid) {
 			output += '<tr'+opacity+'><td>'+(me && current == 'finished' ?'<a href="javascript:void()" onclick="submitData(true,\'change_type\')">':'')+'<img src="'+ current_status + '" height="16" title="'+current+'">'+(me && current == 'finished'?'</a>':'')+'</td><td class="medname'+(me?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+user+'">' + user + '</a></td><td class="medcountry">'+(obj[i].country?'<img title="'+user+' is from '+countries[obj[i].country]+'" src="images/flags/16/'+obj[i].country.toLowerCase()+'.png">':'')+'</td><td>' + walkOut +'</td><td>' + sitOut +'</td><td>' + anumodana +'</td></tr>';
 		}
 		
+		// chats 
+		
+				for(var i = 0; i < chatObj.length; i++) {
+			var then = chatObj[i].time-2;
+			
+			latestChatTime = chatObj[i].time;
+			
+			var date = new Date(chatObj[i].time*1000);
+
+			var now = Math.round(new Date().getTime()/1000);
+
+			var ela = now - then;
+			
+			var time = '';
+			
+			if (ela < 5)
+				time = 'now'; 
+			else if(ela < 60)
+				time = ela + 's&nbsp;ago'; 
+			else if(ela < 60*60)
+				time = Math.floor(ela/60) + 'm&nbsp;ago'; 
+			else if(ela < 60*60*24)
+				time = Math.floor(ela/60/60) + 'h&nbsp;ago'; 
+			else if(ela < 60*60*24*7)
+				time = Math.floor(ela/60/60/24) + 'd&nbsp;ago'; 
+			else {
+				time = date.getUTCDate()+'/'+(date.getUTCMonth()+1)+'/'+date.getUTCFullYear().toString().substring(2);
+			}
+			
+			var chat_username = chatObj[i].username;
+			
+			chatUsers[chat_username] = true;
+			
+			chat_username = chat_username.replace(' ','&nbsp;');
+
+			// get age color
+			
+			// establish max age = 3 hours or #150
+			
+			var maxAge = 60*60*3;
+			var maxColor = 150;
+
+			// check if greater
+			var elaAge = ela;
+			if(elaAge > maxAge)
+				elaAge = maxAge;
+			
+			// get elapsed time as color
+			
+			var ageColor = Math.round(maxColor*elaAge/maxAge);
+
+			// convert decimal to hex
+			
+			var hexColor = ageColor.toString(16);
+			
+			if(hexColor.length == 1)
+				hexColor = 0+hexColor;
+			
+			var hexColorString = '#'+hexColor+hexColor+hexColor;
+
+			if(elaAge < 20)
+				hexColorString = 'green';
+
+			var textMsg = formatChatMessage(chatObj[i].message);
+
+			textMsg = textMsg.replace(/^q:/i,'<img class="smilie" src="images/'+(medList[chatObj[i].username]?'green':'orange')+'_q.png" title="Question - start your post with Q:">');
+
+
+			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chat_username+'">'+chat_username+'</a>:&nbsp;</span>'+textMsg+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
+
+		}
+		
+		
 		// timer ringing
 		
 		if(!imMeditating && (imWalking || imSitting)) { // sitting done
@@ -453,27 +462,29 @@ function submitData(submit,formid) {
 
 		var sched = result.schedule;
 		var nextEvent = -1;
-		var nowHour = now.getUTCHours();
-		var nowMin = now.getUTCMinutes();
-		var timeLeft = 24*60;
-		var nowTime = nowHour*60 + nowMin;
-		
-		for(var i = 0; i < sched.length; i++) {
+
+		if(sched) {
+			var nowHour = now.getUTCHours();
+			var nowMin = now.getUTCMinutes();
+			var timeLeft = 24*60;
+			var nowTime = nowHour*60 + nowMin;
 			
-			var eHour = parseInt(sched[i].time.substring(0,2).replace(/^0/,''));
-			var eMin = parseInt(sched[i].time.substring(2,4).replace(/^0/,''));
-			
-			var eTime = eMin + eHour * 60;
-			if((eTime > nowTime && eTime - nowTime < timeLeft)) {
-				timeLeft = eTime - nowTime;
-				nextEvent = i;
-			}
-			else if(eTime < nowTime && eTime + 24*60 - nowTime < timeLeft) {
-				timeLeft = eTime + 24*60 - nowTime;
-				nextEvent = i;
+			for(var i = 0; i < sched.length; i++) {
+				
+				var eHour = parseInt(sched[i].time.substring(0,2).replace(/^0/,''));
+				var eMin = parseInt(sched[i].time.substring(2,4).replace(/^0/,''));
+				
+				var eTime = eMin + eHour * 60;
+				if((eTime > nowTime && eTime - nowTime < timeLeft)) {
+					timeLeft = eTime - nowTime;
+					nextEvent = i;
+				}
+				else if(eTime < nowTime && eTime + 24*60 - nowTime < timeLeft) {
+					timeLeft = eTime + 24*60 - nowTime;
+					nextEvent = i;
+				}
 			}
 		}
-		
 
 		if(result.live != 'false' && !isLive) {
 			$('#live_feed').html('<a href="'+result.live+'">Audio is live. Click here for live audio dhamma.<br/>'+result.live+'</a><br/><audio controls><source src="'+result.live+'" type="audio/mpeg">Your browser does not support HTML5 audio.</audio>');		

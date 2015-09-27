@@ -87,22 +87,13 @@ require('bar.php');
 			function loaded() {
 
 				var webrtc = new SimpleWebRTC({
-					// the id/element dom element that will hold "our" video
-					localVideoEl: 'localVideo',
-					// the id/element dom element that will hold remote videos
-					remoteVideosEl: 'remotesVideos',
-					media: {
-						video: {
-							mandatory: {
-								maxFrameRate: 15,
-								maxWidth: 320,
-								maxHeight: 240
-							}
-						},
-						audio: true
-					},
-					// immediately ask for camera access
-					autoRequestMedia: true
+				  // the id/element dom element that will hold "our" video
+				  localVideoEl: 'localVideo',
+				  // the id/element dom element that will hold remote videos
+				  remoteVideosEl: 'remotesVideos',
+				  // immediately ask for camera access
+				  autoRequestMedia: true,
+				  url:'http://signalserver.sirimangalo.org:8888/'
 				});
 
 				// we have to wait until it's ready

@@ -16,7 +16,7 @@ require('bar.php');
 	<link rel="Shortcut Icon" type="image/x-icon" href="http://www.sirimangalo.org/favicon.ico" />
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script src="tz.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
 	<script>
 <?php
 
@@ -53,19 +53,16 @@ require('bar.php');
 						Book an appointment using the table below by clicking on the appropriate box. For local time conversion, hover the mouse over the times on the left-hand side.
 					</li>
 					<li>
-						When the time for your meeting arrives, you will see a special link in a yellow box below this text inviting you to enter the one-on-one meeting room.
+						When the time for your meeting arrives, you will see a green button in a yellow box below this text inviting you to enter a one-on-one video conversation using <a class="link bold" href="https://hangouts.google.com/">Google Hangouts</a> (please visit <a class="link bold" href="https://hangouts.google.com/">https://hangouts.google.com/</a> to make sure you are able to use this functionality.
 					</li>
 					<li>
 						<b>Please note that if you miss an appointment without notifying us, your reservation will be cancelled.</b>
 					</li>
 					<li>
-						In order to book an appointment, you must be logged in and have set an email address on <a href="profile.php">your profile page</a>.
+						In order to book an appointment, you must be logged in and have set an email address on <a class="link bold" href="profile.php">your profile page</a>.
 					</li>
 					<li>
 						You will need headphones and a microphone, and preferably a webcam as well.
-					</li>
-					<li>
-						<b>This feature may not work with Internet Explorer or Safari.</b>
 					</li>
 				</ul>				
 			</div>
@@ -75,12 +72,16 @@ require('bar.php');
 				</div>
 				<div id="meeting-link">
 					<div class="p" style="text-align:center">
-						<a id="meeting-room" class="link bold" href="meeting.php" target="_blank">Click here to enter the meeting room.</a>
+						<!--<a id="meeting-room" class="link bold" href="meeting.php" target="_blank">Click here to enter the meeting room.</a>-->
+						Click the button below to call using Google Hangouts: 
+					</div>
+					<div class="p" style="text-align:center">
+						<div id="hangout-button"></div>
 					</div>
 				</div>
 			</div>
 			<div class="p" style="text-align:center">
-				<a id="meeting-room-generic" class="link bold" href="meeting.php" target="_blank">Click here to enter the general-purpose group lounge.</a>
+				<a id="meeting-room-generic" class="link bold" href="meeting.php" target="_blank">Click here to enter the public meeting room (not for one-on-one sessions).</a>
 			</div>
 		</div>
 		<div id="live"></div>

@@ -1,4 +1,5 @@
 function loaded() {
+
 	submitData(false);
 	refreshTime();
 }
@@ -24,25 +25,38 @@ function refreshTime() {
 		var myTime = 'The time now is:<br/><br/><b id="now">'+hour+':'+minute+':'+second + ' UTC, ' + dow[d.getUTCDay()] + ', ' + monthNames[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', '+d.getUTCFullYear()+'</b><br/><i>('+lhour+':'+lminute+':'+lsecond+', ' + dow[d.getDay()] + ', ' + monthNames[d.getMonth()] + ' ' + d.getDate() + ', '+d.getFullYear()+' your time)</i>';
 
 		$('#live').html(myTime);
-		if(meetingMember != '') {
-			$('#meeting').show();
-			$('#meeting-user').html('Currently scheduled: <a class="link bold" target="_blank" href="profile.php?user='+meetingMember+'">'+meetingMember+'</a>.');
-			if(meetingRoom != '') {
-				$('#meeting-room').attr('href','meeting.php?room='+meetingRoom); 
-				$('#meeting-link').show();
+		
+		if(!G_static) {
+			
+			if(meetingMember && meetingMember != '') {
+				$('#meeting').show();
+				$('#meeting-user').html('Currently scheduled: <a class="link bold" target="_blank" href="profile.php?user='+meetingMember+'">'+meetingMember+'</a>.');
+
+				if(meetingRoom != '') {
+					$('#meeting-room').attr('href','meeting.php?room='+meetingRoom); 
+
+					gapi.hangout.render('hangout-button', {
+						'render': 'createhangout',
+						'invites': [{'id' : 'yuttadhammo@gmail.com', 'invite_type' : 'EMAIL'}],
+						'initial_apps': [{'app_id' : '211383333638', 'start_data' : 'dQw4w9WgXcQ', 'app_type' : 'ROOM_APP' }],
+						'widget_size': 175
+					});
+				}
+				else {
+					$('#meeting').hide();
+				}
+
 			}
-			else {
+			else
 				$('#meeting').hide();
+
+
+			if(++seq % 10 == 0) {
+				submitData('');
 			}
 		}
-		else
-			$('#meeting').hide();
-
+		
 		window.setTimeout(function() {refreshTime() },1000);
-
-		if(++seq % 30 == 0 && !G_static) {
-			submitData('');
-		}
 
 }
 
@@ -121,7 +135,7 @@ function submitData(serializedData) {
 					
 					// meeting room hash
 					
-					if(obj[atime][i]['room'] && i == d.getUTCDay() && mmins < mins && mins - mmins < 30) {
+					if(obj[atime][i]['room'] && i == d.getUTCDay() && mmins <= mins && mins - mmins < 30) {
 						meetingRoom = obj[atime][i]['room'];
 						meetingMember = obj[atime][i]['username'];
 					}
@@ -130,7 +144,7 @@ function submitData(serializedData) {
 					var func;
 					if(logged_user && !(a['username']) && !reserves[logged_user])
 						func = ' onclick="changeAppointment(\''+i+'\',\''+atime+'\',\''+logged_user+'\')"';
-					else if(logged_user && a['username'] == logged_user)
+					else if(logged_user && a['username'] == logged_user || isAdmin)
 						func = ' onclick="changeAppointment(\''+i+'\',\''+atime+'\',\''+a['username']+'\')"';
 					else
 						func = '';

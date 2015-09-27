@@ -31,11 +31,9 @@ if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') {
 	}
 }
 
-if(!isset($can_edit)) {
-	$can_edit = loggedIn() && ($_SESSION['username'] == $_POST['profile'] || in_array($_SESSION['username'],$admin));
-}
+$can_edit =  $can_edit || loggedIn() && ($_SESSION['username'] == $_POST['profile'] || in_array($_SESSION['username'],$admin));
 
-$sql="SELECT u.uid, u.username, u.show_email, u.website, u.description, u.country, u.img, e.email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM users AS u LEFT JOIN users AS e ON u.uid = e.uid AND ".($can_edit?"1":"u.show_email=1")." LEFT JOIN sessions ON u.uid = sessions.uid AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 week ago'))."' WHERE u.username='".(isset($profile)?$profile:$_POST['profile'])."'";
+$sql="SELECT u.uid, u.username, u.show_email, u.website, u.description, u.country, u.img, e.email, UNIX_TIMESTAMP(start) AS start, walking, sitting, UNIX_TIMESTAMP(end) AS end FROM users AS u LEFT JOIN users AS e ON u.uid = e.uid AND ".($can_edit ? "1" : "u.show_email=1")." LEFT JOIN sessions ON u.uid = sessions.uid AND start > '".gmdate('Y-m-d H:i:s',strtotime('1 week ago'))."' WHERE u.username='".(isset($profile)?$profile:$_POST['profile'])."'";
 
 $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 

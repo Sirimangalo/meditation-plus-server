@@ -4,6 +4,7 @@ require_once('config.php');
 $isMe = true;
 
 $edit = false;
+
 $can_edit = false;
 
 $profilePage = true;
@@ -31,8 +32,10 @@ if(isset($_GET['user'])) {
 }
 else if(isset($_SESSION['username'])) {
 	$profile = $_SESSION['username'];
-	if(isset($_GET['edit']))
+	if(isset($_GET['edit'])) {
 		$edit = true;
+		$can_edit = true;
+	}
 	else
 		$can_edit = true;
 }
@@ -40,6 +43,10 @@ else
 	die('You are not logged in');
 
 require('profiledb.php');
+
+if(isset($_POST['form_id']) && $_POST['form_id'] == 'profile') // edited, return to profile
+	header('Location:'.preg_replace('/[?&]edit/','',"http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"));
+
 require('countries.php');
 
 require('bar.php');
@@ -128,6 +135,7 @@ if($edit) {
 					?>"></select>
 					<hr/>
 					<input type="submit" name="submit" value="Submit">
+					<input type="button" name="cancel" value="Cancel" onclick="window.location.search=window.location.search.replace(/[?&]edit/,'')">
 					<input type="hidden" name="old_name" value="<?php echo $profile; ?>">
 					<input type="hidden" name="uid" value="<?php echo $profilea['uid']; ?>">
 					<input type="hidden" name="form_id" value="profile">
@@ -137,7 +145,7 @@ if($edit) {
 else {
 ?>
 		<div id="header">
-			<div class="heading"><?php if($profilea['country']) echo '<img id="profile-header-flag" src="images/flags/48/'.strtolower($profilea['country']).'.png">';?><?php echo $profile; if($can_edit) echo ' <a href="javascript:void()" title="edit profile" onclick="window.location.search+=\'&edit\';"><img src="edit.png"></a>'; ?></div>
+			<div class="heading"><?php if($profilea['country']) echo '<img id="profile-header-flag" src="images/flags/48/'.strtolower($profilea['country']).'.png">';?><?php echo $profile; if($can_edit) echo ' <a href="javascript:void()" title="edit profile" onclick="window.location.search+=\''.(isset($_GET['user'])?'&':'?').'edit\';"><img src="edit.png"></a>'; ?></div>
 			<div id="profile-img"><?php 
 			if(@$profilea['img']) {
 				echo '<img src="'.$profilea['img'].'" width="100px" height="100px">';
