@@ -37,14 +37,37 @@ function getNewChats($last = 0) {
 	global $con;
 	
 	$chata = [];
+	$anu_chat = [];
+	$cids = '';
 	
-	$sql="(SELECT cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats, users WHERE chats.uid=users.uid".($last != 0?" AND time > '".gmdate('Y-m-d H:i:s',$last)."'":"")." ORDER BY time DESC LIMIT 100) ORDER BY time ASC;";
+	$sql="(SELECT chats.cid, chats.uid AS uid, username, country, UNIX_TIMESTAMP(time) as time, message FROM chats JOIN users ON chats.uid=users.uid".($last != 0?" WHERE time > '".gmdate('Y-m-d H:i:s',$last)."'":"")." ORDER BY time DESC LIMIT 100) ORDER BY time ASC;";
 	
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	
 	while($row = mysqli_fetch_assoc($query)) {
+		$row['anu'] = @$anu_chat[$row['cid']];
 		$chata[] = $row;
+		$cids .= (strlen($cids)?',':'').$row['cid'];
 	}
+
+	if(count($chata) > 0) {
+
+		$sqla =  "SELECT cid,COUNT(uid) AS anu FROM anumodana_chat WHERE cid IN (".$cids.") GROUP BY cid";
+
+		$querya = mysqli_query($con, $sqla) or trigger_error("Query Failed: " . mysqli_error($con)); 
+		
+		if(mysqli_affected_rows($con) > 0) {
+		
+			while($row = mysqli_fetch_assoc($querya)) {
+				$anu_chat[$row['cid']] = $row['anu'];
+				//error_log($row['cid'].' '.$row['anu']);
+			}
+			
+			foreach($chata as $idx => $val) {
+				$chata[$idx]['anu'] = $anu_chat[$val['cid']];
+			}
+		}
+	}		
 	return $chata;
 }
 
@@ -86,6 +109,9 @@ function getSchedule() {
 	$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
 	$schedule = [];
 	while($row = mysqli_fetch_assoc($query)) {
+		// DST
+	        $row['time'] = ''.((int)$row['time']+100);
+        	$row['time'] = (strlen($row['time']) < 4?'0':'').$row['time'];
 		$schedule[] = $row;
 	}
 	return $schedule;
@@ -172,6 +198,22 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 				$success = 1;
 			}
 		}
+		else if(strpos($_POST['form_id'],'anuchat_') === 0) {
+			$fci = explode('_',$_POST['form_id']);
+			$cid = (int) $fci[1];
+			$chat_user = mysqli_real_escape_string($con,$fci[2]);
+			
+			if(uid > -1 && cid > -1) {
+
+				$sql = "INSERT INTO anumodana_chat (`uid`, `cid`) SELECT uid, ".$cid." FROM users WHERE username = '".$chat_user."'"; 
+				$query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_error($con)); 
+
+				$newChat = true;
+				$chata = getNewChats(0);
+
+				$success = 1;
+			}
+		}
 		else if($_POST['form_id'] == 'timeform') {
 			// time form
 
@@ -239,7 +281,7 @@ if(isset($_POST['form_id']) && $_POST['form_id'] != "") {
 			$success = 1;
 		}
 		else if(strpos($_POST['form_id'],'anumed_') === 0) {
-			// anumodana chat form
+			// anumodana form
 			
 			$sid = (int)substr($_POST['form_id'],7);
 						

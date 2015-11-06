@@ -132,6 +132,10 @@ function submitData(submit,formid) {
 		// Note: we disable elements AFTER the form data has been serialized.
 		// Disabled form elements will not be serialized.
 		$inputs.prop("disabled", true);
+		
+		if(formid == 'chatform' || /^delchat_/.test(formid))
+			lastChatTime = 0;
+		
 	}
 	
 	serializedData += (serializedData.length > 0?'&':'')+(logged_user?"username="+logged_user:'');
@@ -323,7 +327,7 @@ function submitData(submit,formid) {
 		
 		// chats 
 		
-				for(var i = 0; i < chatObj.length; i++) {
+		for(var i = 0; i < chatObj.length; i++) {
 			var then = chatObj[i].time-2;
 			
 			latestChatTime = chatObj[i].time;
@@ -339,13 +343,13 @@ function submitData(submit,formid) {
 			if (ela < 5)
 				time = 'now'; 
 			else if(ela < 60)
-				time = ela + 's&nbsp;ago'; 
+				time = ela + 's'; 
 			else if(ela < 60*60)
-				time = Math.floor(ela/60) + 'm&nbsp;ago'; 
+				time = Math.floor(ela/60) + 'm'; 
 			else if(ela < 60*60*24)
-				time = Math.floor(ela/60/60) + 'h&nbsp;ago'; 
+				time = Math.floor(ela/60/60) + 'h'; 
 			else if(ela < 60*60*24*7)
-				time = Math.floor(ela/60/60/24) + 'd&nbsp;ago'; 
+				time = Math.floor(ela/60/60/24) + 'd'; 
 			else {
 				time = date.getUTCDate()+'/'+(date.getUTCMonth()+1)+'/'+date.getUTCFullYear().toString().substring(2);
 			}
@@ -389,9 +393,14 @@ function submitData(submit,formid) {
 			textMsg = textMsg.replace(/^q:/i,'<img class="smilie" src="images/'+(medList[chatObj[i].username]?'green':'orange')+'_q.png" title="Question - start your post with Q:">');
 
 
-			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chat_username+'">'+chat_username+'</a>:&nbsp;</span>'+textMsg+'</td>'+(logged_user == 'Yuttadhammo'?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</td></tr>';
+			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chatObj[i].username+'">'+chat_username+'</a>:&nbsp;</span><span class="chat-message">'+textMsg+'</span></td>'+(logged_user?'<td class="anu-chat"><a href="javascript:void()" onclick="submitData(true,\'anuchat_'+chatObj[i].cid+'_'+logged_user+'\')"><table class="anu-chat-table"><tr><td><img src="/images/left_hand.png" height="16"></td><td><span class="anu-number">'+(chatObj[i].anu?chatObj[i].anu:'')+'</span></td><td><img src="/images/right_hand.png" height="16"></td></tr></table></a></td>':'')+(isAdmin?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</tr>';
 
 		}
+		
+		// change colour of Q button
+		
+		$('#question-button').css('background-image','url("images/'+(medList[logged_user]?'green':'orange')+'_q.png")');
+		$('#question-button').attr('title','add question tag to message'+(medList[logged_user]?'':' - you haven\'t been meditating!'));
 		
 		
 		// timer ringing
@@ -446,7 +455,9 @@ function submitData(submit,formid) {
 		chatd.html(chats);
 
 		if(lastChatTime < latestChatTime) {
-			chatd.scrollTop(chatd.prop("scrollHeight"));
+			if(chatd.scrollTop() >= chatd.prop("scrollHeight") - 20 || chatd.scrollTop() == 0)
+				chatd.scrollTop(chatd.prop("scrollHeight"));
+				
 			lastChatTime = latestChatTime;
 		}
 		else
@@ -462,7 +473,7 @@ function submitData(submit,formid) {
 
 		var sched = result.schedule;
 		var nextEvent = -1;
-
+		var nextTime = "";
 		if(sched) {
 			var nowHour = now.getUTCHours();
 			var nowMin = now.getUTCMinutes();
@@ -474,14 +485,17 @@ function submitData(submit,formid) {
 				var eHour = parseInt(sched[i].time.substring(0,2).replace(/^0/,''));
 				var eMin = parseInt(sched[i].time.substring(2,4).replace(/^0/,''));
 				
+
 				var eTime = eMin + eHour * 60;
 				if((eTime > nowTime && eTime - nowTime < timeLeft)) {
 					timeLeft = eTime - nowTime;
 					nextEvent = i;
+					nextTime = (eHour < 10 ? "0":"") +eHour+sched[i].time.substring(2,4);
 				}
 				else if(eTime < nowTime && eTime + 24*60 - nowTime < timeLeft) {
 					timeLeft = eTime + 24*60 - nowTime;
 					nextEvent = i;
+					nextTime = (eHour < 10 ? "0":"") +eHour+sched[i].time.substring(2,4);
 				}
 			}
 		}
@@ -491,7 +505,7 @@ function submitData(submit,formid) {
 			isLive = true;
 		}
 		else if(nextEvent > -1  && !isLive) { // scheduled event
-			$('#live_feed').html('Live stream currently offline. Next broadcast is <b>'+sched[nextEvent].title+'</b> at <b>'+sched[nextEvent].time+'h UTC</b> ('+(timeLeft > 60 ? Math.floor(timeLeft/60)+'h'+(timeLeft % 60 != 0?' and '+timeLeft % 60+'m':'') :timeLeft+'m')+' from now). Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks.');
+			$('#live_feed').html('Live stream currently offline. Next broadcast is <b>'+sched[nextEvent].title+'</b> at <b>'+nextTime+'h UTC</b> ('+(timeLeft > 60 ? Math.floor(timeLeft/60)+'h'+(timeLeft % 60 != 0?' and '+timeLeft % 60+'m':'') :timeLeft+'m')+' from now). Visit our <a class="link" href="/live" target="_blank">live stream archive</a> for past talks.');
 			isLive = false;
 		}
 		else if (result.live == 'false' && isLive) {
@@ -508,7 +522,7 @@ function submitData(submit,formid) {
 		}
 		if(loggedOut.length > 0) {
 			
-			var loggedOutString = '<span id="logged-in-users-pre">Logged in users:</span> '+loggedOut.join(', ');
+			var loggedOutString = '<span id="logged-in-users-pre">Logged in users:</span> '+loggedOut.sort().join(', ');
 			$('#logged-users-shell').html(loggedOutString);
 		}
 		
@@ -675,8 +689,8 @@ function validateForm(id) {
 		if(!logged_user) {
 			error = 'Please log in first';
 		}
-		if(message.indexOf() > 1000) {
-			error = 'chat message max 400 char';
+		if(message.length > 1000) {
+			error = 'chat message max 1000 char';
 		}
 		if(message.length < 1) {
 			error = 'must input chat message';
@@ -762,6 +776,13 @@ function stopTimer() {
 
 	document.getElementById("audio-"+whichAudio).pause();
 	document.getElementById("audio-"+whichAudio).setAttribute("currentTime",0);
+}
+
+function addQuestionTag() {
+	var val = $('#message').val();
+	val = $('#message').val().replace(/^q: */i,'');
+	$('#message').focus(); //sets focus to element
+	$('#message').val('Q: '+val);
 }
 
 function dAlert(s) {

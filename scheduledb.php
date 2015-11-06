@@ -3,7 +3,7 @@
 require_once('config.php');
 
 
-if(isset($_POST['form_id'])	&& loggedIn() && in_array($_SESSION['username'],$admin)) {
+if(isset($_POST['form_id']) && loggedIn() && in_array($_SESSION['username'],$admin)) {
 		if($_POST['form_id'] == 'schedule_create') {
 
 			$time = mysqli_real_escape_string($con,$_POST['time']);
@@ -55,6 +55,9 @@ $query = mysqli_query($con, $sql) or trigger_error("Query Failed: " . mysqli_err
 
 $schedule = [];
 while($row = mysqli_fetch_assoc($query)) {
+	// DST
+	$row['time'] = ''.((int)$row['time']+100);
+	$row['time'] = (strlen($row['time']) < 4?'0':'').$row['time'];
 	$schedule[] = $row;
 }
 

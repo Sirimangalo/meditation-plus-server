@@ -26,6 +26,7 @@ require('bar.php');
 		
 	if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
 		echo '
+		var isAdmin = '.(in_array($_SESSION['username'],$admin)?'true':'false').';
 		var logged_user = \''.$_SESSION['username'].'\';';
 	}
 	else
@@ -62,7 +63,10 @@ require('bar.php');
 				</div>
 				<div id="chat-form-frame">
 					<pform id="chatform">
-						<input name="message" id="message"><input id="chat-button" type="button" onclick="submitData(true,'chatform')" value="Send"><input id="smilie-button" type="button" onclick="openSmilies()" value=":)">
+						<input name="message" id="message">
+						<input id="chat-button" type="button" onclick="submitData(true,'chatform')" value="Send">
+						<input id="smilie-button" type="button" onclick="openSmilies()" value=":)">
+						<input title="add question tag to message" type="button" id="question-button" onclick="addQuestionTag()">
 					</pform>
 					<div id="smilie-box"></div>
 				</div>

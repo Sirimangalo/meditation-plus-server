@@ -224,6 +224,20 @@ td {
 	color:green;
 }
 
+.anu-chat {
+	width:30px;
+	text-align:center;
+}
+.anu-chat-table {
+	display:inline-block;
+	padding-top:5px;
+	border-collapse: collapse;
+}
+.anu-chat-table td {
+	padding:0px;
+	margin:0px;
+}
+
 #chatframe {
 	border:solid #AAA 1px;
 	width:600px;
@@ -253,7 +267,7 @@ td {
 
 .chattime {
 	font-style:italic;
-	font-size:14px;
+	font-size:11px;
 	text-align:right;
 	width:1px;
 	vertical-align:top;
@@ -266,6 +280,9 @@ td {
 .chatname-me, .medname-me {
 	color:blue;
 	font-size:14px;
+}
+.chat-message {
+	word-wrap: break-word;
 }
 .chatmessage {
 	vertical-align:top;
@@ -295,8 +312,22 @@ td {
 	width:100%;
 	text-align:center;
 }
+#question-button{
+    padding: 0px;
+    margin: 3px 0px 0px 2px;
+    background-image: url("images/green_q.png");
+    background-color: transparent;
+    width: 20px;
+    border: medium none;
+    height: 20px;
+    position:absolute;
+    left:0;
+    top:0;
+	cursor:pointer;
+}
 #message{
-	width:510px;
+	width:480px;
+	margin-left:22px;
 }
 #chat-button{
 	width:56px;

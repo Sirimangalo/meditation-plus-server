@@ -1,6 +1,6 @@
 <?php
 
-error_log('post '.$_SERVER["REMOTE_ADDR"]);
+//error_log('post '.$_SERVER["REMOTE_ADDR"]);
 
 if($_POST['submit'] == 'Login') {
 	require('config.php');

@@ -80,9 +80,6 @@ require('bar.php');
 					</div>
 				</div>
 			</div>
-			<div class="p" style="text-align:center">
-				<a id="meeting-room-generic" class="link bold" href="meeting.php" target="_blank">Click here to enter the public meeting room (not for one-on-one sessions).</a>
-			</div>
 		</div>
 		<div id="live"></div>
 		<div id="">

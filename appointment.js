@@ -1,4 +1,10 @@
 function loaded() {
+	gapi.hangout.render('hangout-button', {
+		'render': 'createhangout',
+		'invites': [{'id' : 'yuttadhammo@gmail.com', 'invite_type' : 'EMAIL'}],
+		'initial_apps': [{'app_id' : '211383333638', 'start_data' : 'dQw4w9WgXcQ', 'app_type' : 'ROOM_APP' }],
+		'widget_size': 175
+	});
 
 	submitData(false);
 	refreshTime();
@@ -35,12 +41,6 @@ function refreshTime() {
 				if(meetingRoom != '') {
 					$('#meeting-room').attr('href','meeting.php?room='+meetingRoom); 
 
-					gapi.hangout.render('hangout-button', {
-						'render': 'createhangout',
-						'invites': [{'id' : 'yuttadhammo@gmail.com', 'invite_type' : 'EMAIL'}],
-						'initial_apps': [{'app_id' : '211383333638', 'start_data' : 'dQw4w9WgXcQ', 'app_type' : 'ROOM_APP' }],
-						'widget_size': 175
-					});
 				}
 				else {
 					$('#meeting').hide();

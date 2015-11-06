@@ -11,6 +11,11 @@ if(isset($_POST['form_id']) && loggedIn()) {
 		
 		$day = mysqli_real_escape_string($con,$_POST['day']);
 		$time = mysqli_real_escape_string($con,$_POST['time']);
+		
+		// DST 
+		$time = "".((int)$time-100);
+		$time = (strlen($time) == 3 ? "0":"").$time;
+
 		$username = mysqli_real_escape_string($con,$_POST['username']);
 
 		// try deleting if already set for this user at this date and time
@@ -40,6 +45,10 @@ while($row = mysqli_fetch_assoc($query)) {
 
 $adata = [];
 foreach ($appointments as $i => $c) {
+
+	$c['time'] = ((int) $c['time'] + 100).'';
+	 
+
 	$adata[$c['time']][$c['day']] = $c;
 	if(in_array($_SESSION['username'],$admin) || $adata[$c['time']][$c['day']]['username'] == $_SESSION['username'])
 		$adata[$c['time']][$c['day']]['room'] = sha1(md5(SALT1 . $adata[$c['time']][$c['day']]['username'] . $c['time'] . $c['day'] . SALT2));
