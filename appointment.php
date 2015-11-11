@@ -53,7 +53,10 @@ require('bar.php');
 						Book an appointment using the table below by clicking on the appropriate box. For local time conversion, hover the mouse over the times on the left-hand side.
 					</li>
 					<li>
-						When the time for your meeting arrives, you will see a green button in a yellow box below this text inviting you to enter a one-on-one video conversation using <a class="link bold" href="https://hangouts.google.com/">Google Hangouts</a> (please visit <a class="link bold" href="https://hangouts.google.com/">https://hangouts.google.com/</a> to make sure you are able to use this functionality.
+						When the time for your meeting arrives, you will see a green button in a yellow box below this text inviting you to enter a one-on-one video conversation using <a class="link bold" href="https://hangouts.google.com/">Google Hangouts</a> (please visit <a class="link bold" href="https://hangouts.google.com/">https://hangouts.google.com/</a> to make sure you are able to use this functionality.)
+					</li>
+					<li>
+						<b>You must initiate the hangout yourself</b> by pressing the button below and inviting the teacher when prompted to do so. You will not receive a call from the teacher.
 					</li>
 					<li>
 						<b>Please note that if you miss an appointment without notifying us, your reservation will be cancelled.</b>
