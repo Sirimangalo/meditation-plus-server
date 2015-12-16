@@ -172,7 +172,7 @@ function submitData(serializedData) {
 					else
 						userlink = '<i>available</i>';
 
-					output += '<td'+func+' class="appoint-'+style+'">'+userlink+'</td>';
+					output += '<td'+func+' class="appoint-'+style+'"><div>'+userlink+'</div></td>';
 				}
 				else
 					output += '<td class="appoint-empty"></td>';

@@ -575,6 +575,12 @@ span.uncommitted {
 	vertical-align:middle;
 	font-weight:bold;
 }
+#appointment-schedule div {
+	overflow:hidden;
+	text-overflow:ellipsis;
+	display:inline-block;
+	width:80px;
+}
 
 .appoint-avail,.appoint-open {
 	background-color:#99FF99;

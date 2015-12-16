@@ -45,15 +45,12 @@ smilies['(happy)'] = ['Happy','images/emoticon-00142-happy.png','images/emoticon
 smilies['(smirk)'] = ['Smirking','images/emoticon-00143-smirk.png','images/emoticon-00143-smirk.gif'];
 smilies['(nod)'] = ['Nodding','images/emoticon-00144-nod.png','images/emoticon-00144-nod.gif'];
 smilies['(shake)'] = ['Shaking','images/emoticon-00145-shake.png','images/emoticon-00145-shake.gif'];
-smilies['(punch)'] = ['Punch','images/emoticon-00146-punch.png','images/emoticon-00146-punch.gif'];
 smilies['(emo)'] = ['Emo','images/emoticon-00147-emo.png','images/emoticon-00147-emo.gif'];
 smilies['(highfive)'] = ['High Five','images/highfive.png','images/highfive.png'];
 smilies['(facepalm)'] = ['Face Palm','images/facepalm.png','images/facepalm.png'];
 smilies['(fingers)'] = ['Fingers Crossed','images/fingerscrossed.png','images/fingerscrossed.png'];
 smilies['(lalala)'] = ['Lalala','images/lalala.png','images/lalala.png'];
 smilies['(waiting)'] = ['Waiting','images/waiting.png','images/waiting.png'];
-smilies['(fubar)'] = ['Fubar','images/emoticon-00181-fubar.png','images/emoticon-00181-fubar.gif'];
-smilies['(swear)'] = ['Swearing','images/emoticon-00183-swear.png','images/emoticon-00183-swear.gif'];
 smilies['(tmi)'] = ['TMI','images/emoticon-00184-tmi.png','images/emoticon-00184-tmi.gif'];
 smilies['(rock)'] = ['Rock','images/emoticon-00178-rock.png','images/emoticon-00178-rock.gif'];
 
@@ -82,7 +79,6 @@ smilies['(pizza)'] = ['Pizza','images/emoticon-00163-pizza.png','images/emoticon
 smilies['(cash)'] = ['Cash','images/emoticon-00164-cash.png','images/emoticon-00164-cash.gif'];
 smilies['(muscle)'] = ['Muscle','images/emoticon-00165-muscle.png','images/emoticon-00165-muscle.gif'];
 smilies['(^)'] = ['Cake','images/emoticon-00166-cake.png','images/emoticon-00166-cake.gif'];
-smilies['(d)'] = ['Drink','images/emoticon-00168-drink.png','images/emoticon-00168-drink.gif'];
 smilies['(dance)'] = ['Dance','images/emoticon-00169-dance.png','images/emoticon-00169-dance.gif'];
 smilies['(ninja)'] = ['Ninja','images/emoticon-00170-ninja.png','images/emoticon-00170-ninja.gif'];
 smilies['(*)'] = ['Star','images/emoticon-00171-star.png','images/emoticon-00171-star.gif'];
@@ -92,13 +88,6 @@ smilies['(poolparty)'] = ['Poolparty','images/emoticon-00182-poolparty.png','ima
 smilies['(heidy)'] = ['Heidy','images/emoticon-00185-heidy.png','images/emoticon-00185-heidy.gif'];
 smilies['(tumbleweed)'] = ['Tumbleweed','images/tumbleweed.png','images/tumbleweed.png'];
 smilies['(wfh)'] = ['Working From Home','images/wfh.png','images/wfh.png'];
-
-//smilies['(finger)'] = ['Finger','images/emoticon-00173-middlefinger.png','images/emoticon-00173-middlefinger.gif'];
-//smilies['(bandit)'] = ['Bandit','images/emoticon-00174-bandit.png','images/emoticon-00174-bandit.gif'];
-//smilies['(drunk)'] = ['Drunk','images/emoticon-00175-drunk.png','images/emoticon-00175-drunk.gif'];
-//smilies['(smoking)'] = ['Smoking','images/emoticon-00176-smoke.png','images/emoticon-00176-smoke.gif'];
-//smilies['(beer)'] = ['Beer','images/emoticon-00167-beer.png','images/emoticon-00167-beer.gif'];
-//smilies['(mooning)'] = ['Mooning','images/emoticon-00172-mooning.png','images/emoticon-00172-mooning.gif'];
 
 var unicode_smilies = [];
 
