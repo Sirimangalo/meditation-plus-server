@@ -391,9 +391,11 @@ function submitData(submit,formid) {
 			var textMsg = formatChatMessage(chatObj[i].message);
 
 			textMsg = textMsg.replace(/^q:/i,'<img class="smilie" src="images/'+(medList[chatObj[i].username]?'green':'orange')+'_q.png" title="Question - start your post with Q:">');
+            
+            // checking isAdmin variable which could have been set out of this file scope
+            var chkIsAdmin = typeof isAdmin !== 'undefined' ? isAdmin : false;
 
-
-			chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chatObj[i].username+'">'+chat_username+'</a>:&nbsp;</span><span class="chat-message">'+textMsg+'</span></td>'+(logged_user?'<td class="anu-chat"><a href="javascript:void()" onclick="submitData(true,\'anuchat_'+chatObj[i].cid+'_'+logged_user+'\')"><table class="anu-chat-table"><tr><td><img src="/images/left_hand.png" height="16"></td><td><span class="anu-number">'+(chatObj[i].anu?chatObj[i].anu:'')+'</span></td><td><img src="/images/right_hand.png" height="16"></td></tr></table></a></td>':'')+(isAdmin?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</tr>';
+            chats += '<tr class="achat" style="color:'+hexColorString+'"><td class="chattime"><span>'+time+'</span></td><td class="chat-message-shell"><span class="chatname'+(chatObj[i].me=='true'?'-me':'')+'"><a class="noline" target="_blank" href="/profile.php?user='+chatObj[i].username+'">'+chat_username+'</a>:&nbsp;</span><span class="chat-message">'+textMsg+'</span></td>'+(logged_user?'<td class="anu-chat"><a href="javascript:void()" onclick="submitData(true,\'anuchat_'+chatObj[i].cid+'_'+logged_user+'\')"><table class="anu-chat-table"><tr><td><img src="/images/left_hand.png" height="16"></td><td><span class="anu-number">'+(chatObj[i].anu?chatObj[i].anu:'')+'</span></td><td><img src="/images/right_hand.png" height="16"></td></tr></table></a></td>':'')+(chkIsAdmin?'<td class="del-chat"><a href="javascript:void()" onclick="submitData(true,\'delchat_'+chatObj[i].cid+'\')">x</a></td>':'')+'</tr>';
 
 		}
 		
