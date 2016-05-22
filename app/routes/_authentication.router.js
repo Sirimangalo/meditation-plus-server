@@ -1,8 +1,9 @@
 import User from '../models/user.model.js';
+import jwt from 'jsonwebtoken';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
-export default (app, router, passport, auth, admin) => {
+export default (app, router, passport, admin) => {
 
   /**
    * @api {get} /auth/loggedIn Check if logged in
@@ -59,8 +60,12 @@ export default (app, router, passport, auth, admin) => {
         // Set HTTP status code `200 OK`
         res.status(200);
 
-        // Return the user object
-        res.send(req.user);
+        // FIXME: Move secret to config.json
+        let token = jwt.sign(req.user, '#### CHANGE THIS ####', {
+            expiresIn: "1h"
+        });
+        // Return the token
+        res.json({ token });
       });
 
     }) (req, res, next);
@@ -117,14 +122,6 @@ export default (app, router, passport, auth, admin) => {
     // `401` to be intercepted and reroute the user to the appropriate
     // page
     res.sendStatus(401);
-  });
-
-  // Route to get the current user
-  // The `auth` middleware was passed in to this function from `routes.js`
-  router.get('/auth/user', auth, (req, res) => {
-
-    // Send response in JSON to allow disassembly of object by functions
-    res.json(req.user);
   });
 
   /**

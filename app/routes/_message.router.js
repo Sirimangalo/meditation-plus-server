@@ -2,10 +2,10 @@ import Message from '../models/message.model.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
-export default (app, router, auth) => {
+export default (app, router) => {
 
   /**
-   * @api {get} /message Get chat history
+   * @api {get} /api/message Get chat history
    * @apiName ListMessages
    * @apiGroup Message
    *
@@ -13,7 +13,7 @@ export default (app, router, auth) => {
    * @apiSuccess {String}   messages.text Message body
    * @apiSuccess {User}     messages.user The posting user
    */
-  router.get('/message', auth, (req, res) => {
+  router.get('/api/message', (req, res) => {
         Message
           .find()
           .populate('user', 'local.username')
@@ -27,13 +27,13 @@ export default (app, router, auth) => {
     });
 
   /**
-   * @api {post} /message Post a new message
+   * @api {post} /api/message Post a new message
    * @apiName AddMessage
    * @apiGroup Message
    *
    * @apiParam {String} text Message body
    */
-  router.post('/message', auth, (req, res) => {
+  router.post('/api/message', (req, res) => {
       Message.create({
         text: req.body.text,
         user: req.user,

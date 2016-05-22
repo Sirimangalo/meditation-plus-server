@@ -24,8 +24,16 @@ import express from 'express';
 import socketio from 'socket.io';
 // Load Node http module
 import http from 'http';
+// CORS support
+import cors from 'cors';
+// JWT Support
+import expressJwt from 'express-jwt';
+
 // Create our app with Express
 let app = express();
+// Enable CORS
+app.use(cors());
+
 // Create a Node server for our Express app
 let server = http.createServer(app);
 // Integrate Socket.io
@@ -70,9 +78,6 @@ if (process.env.NODE_ENV === 'development' ||
   // Log every request to the console
   app.use(morgan('dev'));
 
-// Read cookies (needed for authentication)
-app.use(cookieParser());
-
 // ## Get all data/stuff of the body (POST) parameters
 
 // Parse application/json
@@ -88,21 +93,7 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(express.static(__dirname + '/dist'));
 
 // ## Passport JS
-
-// Session secret
-app.use(session({
-
-  secret : process.env.SESSION_SECRET,
-
-  resave : true,
-
-  saveUninitialized : true
-}));
-
 app.use(passport.initialize());
-
-// Persistent login sessions
-app.use(passport.session());
 
 // ## Routes
 
@@ -115,6 +106,11 @@ import routes from './app/routes';
 
 // Pass in instances of the express app, router, and passport
 routes(app, router, passport);
+
+// We are going to protect /api routes with JWT
+// FIXME: Move secret to config.json
+app.use('/api', expressJwt({ secret: '#### CHANGE THIS ####' }));
+app.use('/', router);
 
 // ### Ignition Phase
 

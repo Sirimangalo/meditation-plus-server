@@ -14,16 +14,6 @@ export default (app, router, passport) => {
     next();
   });
 
-  // Define a middleware function to be used for all secured routes
-  let auth = (req, res, next) => {
-
-    if (!req.isAuthenticated())
-      res.sendStatus(401);
-
-    else
-      next();
-  };
-
   // Define a middleware function to be used for all secured administration
   // routes
   let admin = (req, res, next) => {
@@ -43,15 +33,12 @@ export default (app, router, passport) => {
 
   // Pass in our Express app and Router.
   // Also pass in auth & admin middleware and Passport instance
-  authRoutes(app, router, passport, auth, admin);
+  authRoutes(app, router, passport, admin);
 
   // #### RESTful API Routes
 
-  messageRoutes(app, router, auth);
-  meditationRoutes(app, router, auth);
-
-  // All of our routes will be prefixed with /api
-  app.use('/api', router);
+  messageRoutes(app, router);
+  meditationRoutes(app, router);
 
   // ### Frontend Routes
 
