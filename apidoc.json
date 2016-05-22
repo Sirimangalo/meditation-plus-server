@@ -1,0 +1,10 @@
+{
+  "name": "meditation-plus-server",
+  "version": "0.1.0",
+  "description": "RESTful API Meditation+ Server",
+  "title": "REST API Meditation+ Server",
+  "template": {
+    "withCompare": false,
+    "withGenerator": false
+  }
+}
