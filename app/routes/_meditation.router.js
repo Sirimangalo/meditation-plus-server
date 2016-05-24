@@ -5,30 +5,65 @@ let ObjectId = require('mongoose').Types.ObjectId;
 export default (app, router) => {
 
   /**
-   * @api {get} /api/meditation Get meditation data
+   * @api {get} /api/meditation Get meditation data of last two hours
    * @apiName ListMeditations
    * @apiGroup Meditation
    *
-   * @apiSuccess {Object[]} meditations           List of recent sessions
-   * @apiSuccess {Number}   meditations.walking   Time of walking
-   * @apiSuccess {Number}   meditations.sitting   Time of sitting
-   * @apiSuccess {Date}     meditations.end       End of meditation
-   * @apiSuccess {Date}     meditations.createdAt Start of meditation
-   * @apiSuccess {Object}   meditations.user      The meditating User
+   * @apiSuccess {Object[]} meditations             List of recent sessions
+   * @apiSuccess {Number}   meditations.walking     Time of walking
+   * @apiSuccess {Number}   meditations.sitting     Time of sitting
+   * @apiSuccess {Date}     meditations.end         End of meditation
+   * @apiSuccess {Date}     meditations.createdAt   Start of meditation
+   * @apiSuccess {Object}   meditations.user        The meditating User
+   * @apiSuccess {Number}   meditations.walkingLeft Remaining minutes of walking
+   * @apiSuccess {Number}   meditations.sittingLeft Remaining minutes of sitting
+   * @apiSuccess {String}   meditations.status      "walking", "sitting" or "done"
    */
   router.get('/api/meditation', (req, res) => {
-        Meditation
-          .find({
-            end: { $gt: Date.now() }
-          })
-          .populate('user', 'local.username')
-          .exec((err, todo) => {
-            if(err)
-              res.send(err);
+    Meditation
+      .find({
+        // two hours in ms
+        end: { $gt: Date.now() - 7.2E6 }
+      })
+      .populate('user', 'local.username')
+      .lean()
+      .exec((err, result) => {
+        if(err) {
+          res.send(err);
+          return;
+        }
 
-            else
-              res.json(todo);
-          });
+        // Add remaining walking and sitting time to entries
+        result.map((entry) => {
+          // calculate remaining time
+          let timeElapsed = Math.floor((new Date().getTime() - entry.createdAt) / 1000 / 60);
+
+          // calculate remaining walking time
+          let walkingLeft = entry.walking - timeElapsed;
+          if (walkingLeft < 0)
+            walkingLeft = 0;
+          entry.walkingLeft = walkingLeft;
+
+          // calculate remaining sitting time
+          let sittingLeft = walkingLeft === 0 ? entry.walking + entry.sitting - timeElapsed : entry.sitting;
+          if (sittingLeft < 0)
+            sittingLeft = 0;
+          entry.sittingLeft = sittingLeft;
+
+          // calculate current status
+          if (walkingLeft > 0) {
+            entry.status = 'walking';
+          } else if (sittingLeft > 0) {
+            entry.status = 'sitting';
+          } else {
+            entry.status = 'done';
+          }
+
+          return entry;
+        });
+
+        res.json(result);
+      });
     });
 
   /**
