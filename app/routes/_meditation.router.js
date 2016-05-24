@@ -18,6 +18,7 @@ export default (app, router) => {
    * @apiSuccess {Number}   meditations.walkingLeft Remaining minutes of walking
    * @apiSuccess {Number}   meditations.sittingLeft Remaining minutes of sitting
    * @apiSuccess {String}   meditations.status      "walking", "sitting" or "done"
+   * @apiSuccess {Number}   meditations.likes       Count of +1s
    */
   router.get('/api/meditation', (req, res) => {
     Meditation
@@ -59,12 +60,15 @@ export default (app, router) => {
             entry.status = 'done';
           }
 
+          // just return like
+          entry.likes = entry.likes.length;
+
           return entry;
         });
 
         res.json(result);
       });
-    });
+  });
 
   /**
    * @api {post} /api/meditation Start a new meditation session
@@ -75,19 +79,62 @@ export default (app, router) => {
    * @apiParam {Number} walking Walking time
    */
   router.post('/api/meditation', (req, res) => {
-      let total = parseInt(req.body.sitting, 10) + parseInt(req.body.walking, 10);
+    let total = parseInt(req.body.sitting, 10) + parseInt(req.body.walking, 10);
 
-      Meditation.create({
-        sitting: req.body.sitting,
-        walking: req.body.walking,
-        end: new Date(new Date().getTime() + total * 60000),
-        user: req.user._doc
-      }, (err, message) => {
+    Meditation.create({
+      sitting: req.body.sitting,
+      walking: req.body.walking,
+      end: new Date(new Date().getTime() + total * 60000),
+      user: req.user._doc
+    }, (err, message) => {
+      if (err) {
+        res.status(400).send(err);
+      }
+
+      res.json(message);
+    });
+  });
+
+  /**
+   * @api {post} /api/meditation/like Add +1 to a meditation session
+   * @apiName LikeMeditation
+   * @apiGroup Meditation
+   *
+   * @apiParam {String} session ObjectID of the meditation session
+   */
+  router.post('/api/meditation/like', (req, res) => {
+    Meditation.findById(req.body.session, (err, entry) => {
+      if (err || entry.user == req.user._doc._id) {
         if (err) {
-          res.status(400).send(err);
+          res.status(400).send(err)
+          return;
         }
 
-        res.json(message);
+        res.sendStatus(400);
+        return;
+      }
+
+      // check if already liked
+      for (let like of entry.likes) {
+        if (like == req.user._doc._id) {
+          console.log('already liked');
+          res.sendStatus(400);
+          return;
+        }
+      }
+
+      // add like
+      if (typeof entry.likes === 'undefined') {
+        entry.likes = [];
+      }
+      entry.likes.push(req.user._doc);
+      entry.save((err) => {
+        if (err) {
+          res.status(500).send(err);
+        }
+
+        res.sendStatus(204);
       });
     });
+  });
 };
