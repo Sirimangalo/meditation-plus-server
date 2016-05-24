@@ -46,7 +46,7 @@ export default (app, router) => {
         sitting: req.body.sitting,
         walking: req.body.walking,
         end: new Date(new Date().getTime() + total * 60000),
-        user: req.user
+        user: req.user._doc
       }, (err, message) => {
         if (err) {
           res.status(400).send(err);
