@@ -26,7 +26,7 @@ export default (app, router) => {
         // two hours in ms
         end: { $gt: Date.now() - 7.2E6 }
       })
-      .populate('user', 'local.username')
+      .populate('user', 'local.username profileImageUrl')
       .lean()
       .exec((err, result) => {
         if(err) {

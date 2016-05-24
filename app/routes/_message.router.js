@@ -16,7 +16,7 @@ export default (app, router) => {
   router.get('/api/message', (req, res) => {
         Message
           .find()
-          .populate('user', 'local.username')
+          .populate('user', 'local.username profileImageUrl')
           .exec((err, todo) => {
             if(err)
               res.send(err);
