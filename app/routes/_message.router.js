@@ -36,7 +36,7 @@ export default (app, router) => {
   router.post('/api/message', (req, res) => {
       Message.create({
         text: req.body.text,
-        user: req.user,
+        user: req.user._doc,
       }, (err, message) => {
         if (err) {
           res.send(err, 400);
