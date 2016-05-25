@@ -5,6 +5,9 @@
   "author": "",
   "homepage": "",
   "license": "MIT",
+  "scripts": {
+    "docs": "./node_modules/apidoc/bin/apidoc -i app -o doc/"
+  },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.1",
@@ -22,6 +25,7 @@
     "socket.io": "^1.4.6"
   },
   "devDependencies": {
+    "apidoc": "^0.16.1",
     "babel-cli": "^6.8.0",
     "babel-core": "^6.8.0",
     "babel-loader": "^6.2.4",
