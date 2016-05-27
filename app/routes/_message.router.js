@@ -1,7 +1,5 @@
 import Message from '../models/message.model.js';
 
-let ObjectId = require('mongoose').Types.ObjectId;
-
 export default (app, router) => {
 
   /**

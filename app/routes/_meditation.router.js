@@ -1,7 +1,5 @@
 import Meditation from '../models/meditation.model.js';
 
-let ObjectId = require('mongoose').Types.ObjectId;
-
 export default (app, router) => {
 
   /**
