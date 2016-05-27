@@ -26,6 +26,9 @@ export default (app, router, passport, admin) => {
    *
    * @apiParam {String} username Username
    * @apiParam {String} password Password
+   *
+   * @apiSuccess {String} token Jwt
+   * @apiSuccess {String} id    User id
    */
   router.post('/auth/login', (req, res, next) => {
     // Call `authenticate()` from within the route handler, rather than
@@ -65,7 +68,10 @@ export default (app, router, passport, admin) => {
             expiresIn: "1h"
         });
         // Return the token
-        res.json({ token });
+        res.json({
+          token,
+          id: user._id
+        });
       });
 
     }) (req, res, next);
