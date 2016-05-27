@@ -18,10 +18,12 @@ export default (app, router) => {
    * @apiSuccess {String}     profileImageUrl   The url of the profile image
    */
   router.get('/api/profile', (req, res) => {
-    let user = req.user._doc;
-    delete user.local['password'];
-    delete user['__v'];
-    res.json(user);
+    User.findOne(req.user._doc._id, (err, doc) => {
+      if (err) return res.status(400).send(err);
+      delete doc.local['password'];
+      delete doc['__v'];
+      return res.json(doc);
+    });
   });
 
   /**
@@ -43,8 +45,6 @@ export default (app, router) => {
 
     User.findOneAndUpdate(req.user._doc._id, req.body, {}, (err, doc) => {
       if (err) return res.status(400).send(err);
-
-      console.log('updated user', req.user._doc._id, 'with', req.body);
       return res.sendStatus(200);
     });
   });

@@ -5,6 +5,7 @@ import authRoutes from './routes/_authentication.router.js';
 
 import messageRoutes from './routes/_message.router.js';
 import meditationRoutes from './routes/_meditation.router.js';
+import profileRoutes from './routes/_profile.router.js';
 
 export default (app, router, passport) => {
 
@@ -39,6 +40,7 @@ export default (app, router, passport) => {
 
   messageRoutes(app, router);
   meditationRoutes(app, router);
+  profileRoutes(app, router);
 
   // ### Frontend Routes
 

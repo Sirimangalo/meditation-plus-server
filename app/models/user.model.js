@@ -23,7 +23,7 @@ let userSchema = mongoose.Schema({
   description: String,
   website: String,
   country: String,
-  profileImgUrl: String
+  profileImageUrl: String
 });
 
 // ## Methods
