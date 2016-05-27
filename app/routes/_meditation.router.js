@@ -77,20 +77,44 @@ export default (app, router) => {
    * @apiParam {Number} walking Walking time
    */
   router.post('/api/meditation', (req, res) => {
-    let total = parseInt(req.body.sitting, 10) + parseInt(req.body.walking, 10);
+    // parse input and normalize
+    let walking = parseInt(req.body.walking, 10);
+    if (walking > 120) walking = 120;
+    if (walking < 0) walking = 0;
+    let sitting = parseInt(req.body.sitting, 10);
+    if (sitting > 120) sitting = 120;
+    if (sitting < 0) sitting = 0;
+    let total = sitting + walking;
 
-    Meditation.create({
-      sitting: req.body.sitting,
-      walking: req.body.walking,
-      end: new Date(new Date().getTime() + total * 60000),
-      user: req.user._doc
-    }, (err, message) => {
-      if (err) {
-        res.status(400).send(err);
+    // check if user is already meditating
+    Meditation.findOne({
+      end: { $gt: Date.now() },
+      user: req.user._doc._id
+    }).exec((err, meditation) => {
+      if (meditation) {
+        // user is already meditation
+        // --> delete entry
+        meditation.remove((err, removed) => {
+          if (err) res.send(500, err);
+        });
       }
 
-      res.json(message);
+      Meditation.create({
+        sitting: sitting,
+        walking: walking,
+        end: new Date(new Date().getTime() + total * 60000),
+        user: req.user._doc
+      }, (err, meditation) => {
+        if (err) {
+          res.status(400).send(err);
+        }
+
+        res.json(meditation);
+      });
+
     });
+
+
   });
 
   /**
