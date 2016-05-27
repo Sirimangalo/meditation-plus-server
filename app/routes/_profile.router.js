@@ -27,7 +27,7 @@ export default (app, router) => {
   /**
    * @api {put} /api/profile Update profile
    * @apiName UpdateProfile
-   * @apiGroup Profilei
+   * @apiGroup Profile
    * @apiDescription Updating the profile of the currently logged in user.
    *
    * @apiParam {Boolean}    showEmail       Show email publicly
