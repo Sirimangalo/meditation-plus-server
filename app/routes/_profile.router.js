@@ -1,4 +1,6 @@
 import User from '../models/user.model.js';
+import Meditation from '../models/meditation.model.js';
+import moment from 'moment';
 
 export default (app, router) => {
 
@@ -37,12 +39,13 @@ export default (app, router) => {
    * @apiGroup Profile
    * @apiDescription Get the profile data of a user.
    *
-   * @apiSuccess {Object}     local           Details for local authentication
-   * @apiSuccess {String}     local.username  Username
-   * @apiSuccess {String}     local.email     Email address (if public)
-   * @apiSuccess {String}     description     Profile description
-   * @apiSuccess {String}     website         Website
-   * @apiSuccess {String}     country         Country
+   * @apiSuccess {Object}     local             Details for local authentication
+   * @apiSuccess {String}     local.username    Username
+   * @apiSuccess {String}     local.email       Email address (if public)
+   * @apiSuccess {String}     description       Profile description
+   * @apiSuccess {String}     website           Website
+   * @apiSuccess {String}     country           Country
+   * @apiSuccess {Object}     meditations       Last week meditation times
    * @apiSuccess {String}     profileImageUrl   The url of the profile image
    */
   router.get('/api/profile/:username', (req, res) => {
@@ -54,12 +57,45 @@ export default (app, router) => {
       .exec((err, doc) => {
         if (err) return res.status(400).send(err);
         if (!doc) return res.sendStatus(404);
+
+        // remove sensitive data
         delete doc.local['password'];
         delete doc['__v'];
         if (!doc.showEmail) {
           delete doc.local['email'];
         }
-        return res.json(doc);
+
+        // adds weekly meditation data
+        let endOfWeek = Date.now();
+        let startOfWeek = Date.now() - 6.048E8;
+
+        doc.meditations = {};
+
+        // iterate days
+        for (let day = startOfWeek; day <= endOfWeek; day += 8.64E7) {
+          doc.meditations[moment(day).format('Do')] = 0;
+        }
+
+        Meditation
+          .find({
+            // 1 week
+            end: { $lt: endOfWeek, $gt: startOfWeek },
+            user: doc._id
+          })
+          .lean()
+          .exec((err, result) => {
+            if(err) {
+              res.send(err);
+              return;
+            }
+
+            // sum meditation time
+            result.map((entry) => {
+              doc.meditations[moment(entry.createdAt).format('Do')] += entry.sitting + entry.walking;
+            });
+
+            return res.json(doc);
+          });
       });
   });
 
