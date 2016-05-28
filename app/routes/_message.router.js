@@ -1,5 +1,7 @@
 import Message from '../models/message.model.js';
 
+import moment from 'moment';
+
 export default (app, router) => {
 
   /**
@@ -7,20 +9,29 @@ export default (app, router) => {
    * @apiName ListMessages
    * @apiGroup Message
    *
-   * @apiSuccess {Object[]} messages      List of recent messages.
-   * @apiSuccess {String}   messages.text Message body
-   * @apiSuccess {User}     messages.user The posting user
+   * @apiSuccess {Object[]} messages           List of recent messages.
+   * @apiSuccess {String}   messages.text      Message body
+   * @apiSuccess {Date}     messages.createdAt Date of creation
+   * @apiSuccess {String}   messages.ago       Relative time of creation as string
+   * @apiSuccess {User}     messages.user      The posting user
    */
   router.get('/api/message', (req, res) => {
         Message
           .find()
           .populate('user', 'local.username profileImageUrl')
-          .exec((err, todo) => {
-            if(err)
-              res.send(err);
+          .lean()
+          .exec((err, messages) => {
+            if(err) {
+              res.status(500).send(err);
+              return;
+            }
 
-            else
-              res.json(todo);
+            messages.map(message => {
+              message.ago = moment(message.createdAt).fromNow();
+              return message;
+            });
+
+            res.json(messages);
           });
     });
 

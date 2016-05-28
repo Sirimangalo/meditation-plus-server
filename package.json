@@ -19,6 +19,7 @@
     "http": "0.0.0",
     "jsonwebtoken": "^7.0.0",
     "method-override": "^2.3.5",
+    "moment": "^2.13.0",
     "mongoose": "^4.4.17",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
