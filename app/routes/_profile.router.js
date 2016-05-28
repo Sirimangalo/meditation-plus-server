@@ -32,6 +32,38 @@ export default (app, router) => {
   });
 
   /**
+   * @api {get} /api/profile/:username Get profile details of a user
+   * @apiName ShowProfile
+   * @apiGroup Profile
+   * @apiDescription Get the profile data of a user.
+   *
+   * @apiSuccess {Object}     local           Details for local authentication
+   * @apiSuccess {String}     local.username  Username
+   * @apiSuccess {String}     local.email     Email address (if public)
+   * @apiSuccess {String}     description     Profile description
+   * @apiSuccess {String}     website         Website
+   * @apiSuccess {String}     country         Country
+   * @apiSuccess {String}     profileImageUrl   The url of the profile image
+   */
+  router.get('/api/profile/:username', (req, res) => {
+    User
+      .findOne({
+        'local.username': req.params.username
+      })
+      .lean()
+      .exec((err, doc) => {
+        if (err) return res.status(400).send(err);
+        if (!doc) return res.sendStatus(404);
+        delete doc.local['password'];
+        delete doc['__v'];
+        if (!doc.showEmail) {
+          delete doc.local['email'];
+        }
+        return res.json(doc);
+      });
+  });
+
+  /**
    * @api {put} /api/profile Update profile
    * @apiName UpdateProfile
    * @apiGroup Profile
