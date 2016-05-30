@@ -1,4 +1,5 @@
 import Meditation from '../models/meditation.model.js';
+import moment from 'moment';
 
 export default (app, router) => {
 
@@ -158,5 +159,41 @@ export default (app, router) => {
         res.sendStatus(204);
       });
     });
+  });
+
+  /**
+   * @api {get} /api/meditation/times Get meditation minutes per hour
+   * @apiName GetMeditationTimes
+   * @apiGroup Meditation
+   * @apiDescription Meditation minues per day hour of the last 30 days.
+   *
+   * @apiSuccess {Object[]} meditationTimes Assoc. array of meditation times
+   */
+  router.get('/api/meditation/times', (req, res) => {
+    Meditation
+      .find({
+        // 30 days in ms
+        end: { $gt: Date.now() - 2.592E9 }
+      })
+      .lean()
+      .exec((err, result) => {
+        if(err) {
+          res.send(err);
+          return;
+        }
+
+        // initialize times
+        let times = {};
+        for (let i = 0; i < 24; i++) {
+          times[i] = 0;
+        }
+
+        // Sum meditation times
+        result.map((entry) => {
+          times[moment(entry.createdAt).format('H')] += entry.sitting + entry.walking;
+        });
+
+        res.json(times);
+      });
   });
 };
