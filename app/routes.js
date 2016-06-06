@@ -45,10 +45,8 @@ export default (app, router, passport) => {
   // ### Frontend Routes
 
   // Route to handle all Angular requests
-  //app.get('*', (req, res) => {
-
-    // Load our src/app.html file
+  router.get('*', (req, res) => {
     //** Note that the root is set to the parent of this folder, ie the app root **
-   // res.sendFile('/dist/index.html', { root: __dirname + "/../"});
-  //});
+   res.sendFile('/dist/index.html', { root: __dirname + "/../"});
+  });
 };
