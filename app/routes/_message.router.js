@@ -51,6 +51,7 @@ export default (app, router, io) => {
           res.send(err, 400);
         }
 
+        // add user details for response and broadcast
         message.populate('user', 'local.username profileImageUrl', (err, message) => {
           if (err) {
             res.send(err, 500);
@@ -62,7 +63,7 @@ export default (app, router, io) => {
           io.sockets.emit('message', leanObject);
 
           res.json(leanObject);
-        })
+        });
       });
     });
 };
