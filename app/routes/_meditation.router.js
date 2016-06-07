@@ -110,18 +110,10 @@ export default (app, router, io) => {
           res.status(400).send(err);
         }
 
-        // add user details for response and broadcast
-        meditation.populate('user', 'local.username profileImageUrl', (err, meditation) => {
-          if (err) {
-            res.send(err, 500);
-          }
+        // sending broadcast WebSocket meditation
+        io.sockets.emit('meditation', 'no content');
 
-          let leanObject = meditation.toObject();
-          // sending broadcast WebSocket meditation
-          io.sockets.emit('meditation', leanObject);
-
-          res.json(leanObject);
-        });
+        res.json(meditation);
       });
 
     });
@@ -166,6 +158,8 @@ export default (app, router, io) => {
         if (err) {
           res.status(500).send(err);
         }
+        // sending broadcast WebSocket meditation
+        io.sockets.emit('meditation', 'no content');
 
         res.sendStatus(204);
       });
