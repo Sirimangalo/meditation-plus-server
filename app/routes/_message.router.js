@@ -56,10 +56,12 @@ export default (app, router, io) => {
             res.send(err, 500);
           }
 
+          let leanObject = message.toObject();
+          leanObject.ago = moment(leanObject.createdAt).fromNow();
           // sending broadcast WebSocket message
-          io.sockets.emit('message', message);
+          io.sockets.emit('message', leanObject);
 
-          res.json(message);
+          res.json(leanObject);
         })
       });
     });
