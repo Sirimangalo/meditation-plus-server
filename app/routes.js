@@ -41,7 +41,7 @@ export default (app, router, passport, io) => {
 
   messageRoutes(app, router, io);
   commitmentRoutes(app, router);
-  meditationRoutes(app, router);
+  meditationRoutes(app, router, io);
   profileRoutes(app, router);
 
   // ### Frontend Routes

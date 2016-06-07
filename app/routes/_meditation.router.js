@@ -1,7 +1,7 @@
 import Meditation from '../models/meditation.model.js';
 import moment from 'moment';
 
-export default (app, router) => {
+export default (app, router, io) => {
 
   /**
    * @api {get} /api/meditation Get meditation data of last two hours
@@ -110,7 +110,18 @@ export default (app, router) => {
           res.status(400).send(err);
         }
 
-        res.json(meditation);
+        // add user details for response and broadcast
+        meditation.populate('user', 'local.username profileImageUrl', (err, meditation) => {
+          if (err) {
+            res.send(err, 500);
+          }
+
+          let leanObject = meditation.toObject();
+          // sending broadcast WebSocket meditation
+          io.sockets.emit('meditation', leanObject);
+
+          res.json(leanObject);
+        });
       });
 
     });
