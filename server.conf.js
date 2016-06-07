@@ -105,11 +105,11 @@ let router = express.Router();
 import routes from './app/routes';
 
 // Pass in instances of the express app, router, and passport
-routes(app, router, passport);
+routes(app, router, passport, io);
 
 // We are going to protect /api routes with JWT
 // FIXME: Move secret to config.json
-app.use('/api', expressJwt({ secret: '#### CHANGE THIS ####' }));
+app.use('/api', expressJwt({ secret: process.env.SESSION_SECRET }));
 app.use('/', router);
 
 // ### Ignition Phase

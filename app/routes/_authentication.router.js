@@ -63,8 +63,7 @@ export default (app, router, passport, admin) => {
         // Set HTTP status code `200 OK`
         res.status(200);
 
-        // FIXME: Move secret to config.json
-        let token = jwt.sign(req.user, '#### CHANGE THIS ####', {
+        let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
             expiresIn: "1h"
         });
         // Return the token

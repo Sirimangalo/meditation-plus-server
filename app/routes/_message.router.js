@@ -2,7 +2,7 @@ import Message from '../models/message.model.js';
 
 import moment from 'moment';
 
-export default (app, router) => {
+export default (app, router, io) => {
 
   /**
    * @api {get} /api/message Get chat history
@@ -51,7 +51,16 @@ export default (app, router) => {
           res.send(err, 400);
         }
 
-        res.json(message);
+        message.populate('user', 'local.username profileImageUrl', (err, message) => {
+          if (err) {
+            res.send(err, 500);
+          }
+
+          // sending broadcast WebSocket message
+          io.sockets.emit('message', message);
+
+          res.json(message);
+        })
       });
     });
 };

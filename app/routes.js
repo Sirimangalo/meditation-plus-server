@@ -8,7 +8,7 @@ import commitmentRoutes from './routes/_commitment.router.js';
 import meditationRoutes from './routes/_meditation.router.js';
 import profileRoutes from './routes/_profile.router.js';
 
-export default (app, router, passport) => {
+export default (app, router, passport, io) => {
 
   // ### Express Middlware to use for all requests
   router.use((req, res, next) => {
@@ -39,7 +39,7 @@ export default (app, router, passport) => {
 
   // #### RESTful API Routes
 
-  messageRoutes(app, router);
+  messageRoutes(app, router, io);
   commitmentRoutes(app, router);
   meditationRoutes(app, router);
   profileRoutes(app, router);
