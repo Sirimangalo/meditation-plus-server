@@ -6,4 +6,4 @@ require("babel-register");
 // *gulpfile.js*
 
 // Load gulp configuration
-var conf = require('./config/gulpfile.conf.js');
+var conf = require('./src/config/gulpfile.conf.js');
