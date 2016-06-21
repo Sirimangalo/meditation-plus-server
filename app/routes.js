@@ -7,6 +7,7 @@ import messageRoutes from './routes/_message.router.js';
 import commitmentRoutes from './routes/_commitment.router.js';
 import meditationRoutes from './routes/_meditation.router.js';
 import profileRoutes from './routes/_profile.router.js';
+import appointmentRoutes from './routes/_appointment.router.js';
 
 export default (app, router, passport, io) => {
 
@@ -43,12 +44,13 @@ export default (app, router, passport, io) => {
   commitmentRoutes(app, router);
   meditationRoutes(app, router, io);
   profileRoutes(app, router);
+  appointmentRoutes(app, router, io);
 
   // ### Frontend Routes
 
   // Route to handle all Angular requests
   router.get('*', (req, res) => {
     //** Note that the root is set to the parent of this folder, ie the app root **
-   res.sendFile('/dist/index.html', { root: __dirname + "/../"});
+   res.sendFile('/client/index.html', { root: __dirname + "/../"});
   });
 };
