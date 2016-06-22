@@ -4,6 +4,43 @@ import moment from 'moment';
 export default (app, router, io) => {
 
   /**
+   * Calculates the remaining meditation time for a session.
+   * Adds properties sittingLeft, walkingLeft and status.
+   *
+   * @param  {Meditation} entry Meditation object
+   * @return {Meditation}       Modified meditation object
+   */
+  function calculateRemainingTime(entry) {
+    // calculate remaining time
+    let timeElapsed = Math.floor((new Date().getTime() - entry.createdAt) / 1000 / 60);
+
+    // calculate remaining walking time
+    let walkingLeft = entry.walking - timeElapsed;
+    if (walkingLeft < 0)
+      walkingLeft = 0;
+    entry.walkingLeft = walkingLeft;
+
+    // calculate remaining sitting time
+    let sittingLeft = walkingLeft === 0 ? entry.walking + entry.sitting - timeElapsed : entry.sitting;
+    if (sittingLeft < 0)
+      sittingLeft = 0;
+    entry.sittingLeft = sittingLeft;
+
+    // calculate current status
+    if (walkingLeft > 0) {
+      entry.status = 'walking';
+    } else if (sittingLeft > 0) {
+      entry.status = 'sitting';
+    } else {
+      entry.status = 'done';
+    }
+
+    entry.likes = entry.likes.length;
+
+    return entry;
+  }
+
+  /**
    * @api {get} /api/meditation Get meditation data of last two hours
    * @apiName ListMeditations
    * @apiGroup Meditation
@@ -19,54 +56,22 @@ export default (app, router, io) => {
    * @apiSuccess {String}   meditations.status      "walking", "sitting" or "done"
    * @apiSuccess {Number}   meditations.likes       Count of +1s
    */
-  router.get('/api/meditation', (req, res) => {
-    Meditation
-      .find({
-        // two hours in ms
-        end: { $gt: Date.now() - 7.2E6 }
-      })
-      .populate('user', 'local.username profileImageUrl')
-      .lean()
-      .exec((err, result) => {
-        if(err) {
-          res.send(err);
-          return;
-        }
+  router.get('/api/meditation', async (req, res) => {
+    try {
+      let result = await Meditation
+        .find({
+          // two hours in ms
+          end: { $gt: Date.now() - 7.2E6 }
+        })
+        .populate('user', 'local.username profileImageUrl')
+        .lean()
+        .exec();
 
-        // Add remaining walking and sitting time to entries
-        result.map((entry) => {
-          // calculate remaining time
-          let timeElapsed = Math.floor((new Date().getTime() - entry.createdAt) / 1000 / 60);
-
-          // calculate remaining walking time
-          let walkingLeft = entry.walking - timeElapsed;
-          if (walkingLeft < 0)
-            walkingLeft = 0;
-          entry.walkingLeft = walkingLeft;
-
-          // calculate remaining sitting time
-          let sittingLeft = walkingLeft === 0 ? entry.walking + entry.sitting - timeElapsed : entry.sitting;
-          if (sittingLeft < 0)
-            sittingLeft = 0;
-          entry.sittingLeft = sittingLeft;
-
-          // calculate current status
-          if (walkingLeft > 0) {
-            entry.status = 'walking';
-          } else if (sittingLeft > 0) {
-            entry.status = 'sitting';
-          } else {
-            entry.status = 'done';
-          }
-
-          // just return like
-          entry.likes = entry.likes.length;
-
-          return entry;
-        });
-
-        res.json(result);
-      });
+      // Add remaining walking and sitting time to entries
+      res.json(result.map(calculateRemainingTime));
+    } catch (err) {
+      res.send(err);
+    }
   });
 
   /**
@@ -77,7 +82,7 @@ export default (app, router, io) => {
    * @apiParam {Number} sitting Sitting time
    * @apiParam {Number} walking Walking time
    */
-  router.post('/api/meditation', (req, res) => {
+  router.post('/api/meditation', async (req, res) => {
     // parse input and normalize
     let walking = req.body.walking ? parseInt(req.body.walking, 10) : 0;
     if (walking > 120) walking = 120;
@@ -87,37 +92,37 @@ export default (app, router, io) => {
     if (sitting < 0) sitting = 0;
     let total = sitting + walking;
 
-    // check if user is already meditating
-    Meditation.findOne({
-      end: { $gt: Date.now() },
-      user: req.user._doc._id
-    }).exec((err, meditation) => {
+    try {
+      // check if user is already meditating
+      const meditation = await Meditation
+        .findOne({
+          end: { $gt: Date.now() },
+          user: req.user._doc._id
+        })
+        .exec();
+
       if (meditation) {
         // user is already meditation
         // --> delete entry
-        meditation.remove((err, removed) => {
-          if (err) res.send(500, err);
-        });
+        await meditation.remove();
       }
 
-      Meditation.create({
+      const created = await Meditation.create({
         sitting: sitting,
         walking: walking,
         end: new Date(new Date().getTime() + total * 60000),
         user: req.user._doc
-      }, (err, meditation) => {
-        if (err) {
-          res.status(400).send(err);
-        }
-
-        // sending broadcast WebSocket meditation
-        io.sockets.emit('meditation', 'no content');
-
-        res.json(meditation);
       });
 
-    });
+      // sending broadcast WebSocket meditation
+      io.sockets.emit('meditation', 'no content');
 
+      res.json(created);
+    } catch (err) {
+      res
+        .status(err.name === 'ValidationError' ? 400 : 500)
+        .send(err);
+    }
 
   });
 
@@ -128,24 +133,17 @@ export default (app, router, io) => {
    *
    * @apiParam {String} session ObjectID of the meditation session
    */
-  router.post('/api/meditation/like', (req, res) => {
-    Meditation.findById(req.body.session, (err, entry) => {
-      if (err || entry.user == req.user._doc._id) {
-        if (err) {
-          res.status(400).send(err)
-          return;
-        }
-
-        res.sendStatus(400);
-        return;
+  router.post('/api/meditation/like', async (req, res) => {
+    try {
+      let entry = await Meditation.findById(req.body.session);
+      if (entry.user == req.user._doc._id) {
+        return res.sendStatus(400);
       }
 
       // check if already liked
       for (let like of entry.likes) {
         if (like == req.user._doc._id) {
-          console.log('already liked');
-          res.sendStatus(400);
-          return;
+          return res.sendStatus(400);
         }
       }
 
@@ -154,16 +152,14 @@ export default (app, router, io) => {
         entry.likes = [];
       }
       entry.likes.push(req.user._doc);
-      entry.save((err) => {
-        if (err) {
-          res.status(500).send(err);
-        }
-        // sending broadcast WebSocket meditation
-        io.sockets.emit('meditation', 'no content');
+      await entry.save();
+      // sending broadcast WebSocket meditation
+      io.sockets.emit('meditation', 'no content');
 
-        res.sendStatus(204);
-      });
-    });
+      res.sendStatus(204);
+    } catch (err) {
+      res.status(500).send(err);
+    }
   });
 
   /**
@@ -174,31 +170,30 @@ export default (app, router, io) => {
    *
    * @apiSuccess {Object[]} meditationTimes Assoc. array of meditation times
    */
-  router.get('/api/meditation/times', (req, res) => {
-    Meditation
-      .find({
-        // 30 days in ms
-        end: { $gt: Date.now() - 2.592E9 }
-      })
-      .lean()
-      .exec((err, result) => {
-        if(err) {
-          res.send(err);
-          return;
-        }
+  router.get('/api/meditation/times', async (req, res) => {
+    try {
+      const result = await Meditation
+        .find({
+          // 30 days in ms
+          end: { $gt: Date.now() - 2.592E9 }
+        })
+        .lean()
+        .exec();
 
-        // initialize times
-        let times = {};
-        for (let i = 0; i < 24; i++) {
-          times[i] = 0;
-        }
+      // initialize times
+      let times = {};
+      for (let i = 0; i < 24; i++) {
+        times[i] = 0;
+      }
 
-        // Sum meditation times
-        result.map((entry) => {
-          times[moment(entry.createdAt).format('H')] += entry.sitting + entry.walking;
-        });
-
-        res.json(times);
+      // Sum meditation times
+      result.map(entry => {
+        times[moment(entry.createdAt).format('H')] += entry.sitting + entry.walking;
       });
+
+      res.json(times);
+    } catch (err) {
+      res.send(err);
+    }
   });
 };
