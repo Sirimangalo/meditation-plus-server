@@ -62,7 +62,9 @@ export default (app, router, io) => {
 
       res.json(leanObject);
     } catch (err) {
-      res.status(400).send(err);
+      res
+        .status(err.name === 'ValidationError' ? 400 : 500)
+        .send(err);
     }
   });
 
