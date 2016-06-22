@@ -19,18 +19,21 @@ export default (app, router) => {
    * @apiSuccess {String}     country         Country
    * @apiSuccess {String}     profileImageUrl   The url of the profile image
    */
-  router.get('/api/profile', (req, res) => {
-    User
-      .findOne({
-        _id: req.user._doc._id
-      })
-      .lean()
-      .exec((err, doc) => {
-        if (err) return res.status(400).send(err);
-        delete doc.local['password'];
-        delete doc['__v'];
-        return res.json(doc);
-      });
+  router.get('/api/profile', async (req, res) => {
+    try {
+      let doc = await User
+        .findOne({
+          _id: req.user._doc._id
+        })
+        .lean()
+        .exec();
+
+      delete doc.local['password'];
+      delete doc['__v'];
+      res.json(doc);
+    } catch (err) {
+      res.status(400).send(err);
+    }
   });
 
   /**
@@ -48,55 +51,52 @@ export default (app, router) => {
    * @apiSuccess {Object}     meditations       Last week meditation times
    * @apiSuccess {String}     profileImageUrl   The url of the profile image
    */
-  router.get('/api/profile/:username', (req, res) => {
-    User
-      .findOne({
-        'local.username': req.params.username
-      })
-      .lean()
-      .exec((err, doc) => {
-        if (err) return res.status(400).send(err);
-        if (!doc) return res.sendStatus(404);
+  router.get('/api/profile/:username', async (req, res) => {
+    try {
+      let doc = await User
+        .findOne({
+          'local.username': req.params.username
+        })
+        .lean()
+        .exec();
 
-        // remove sensitive data
-        delete doc.local['password'];
-        delete doc['__v'];
-        if (!doc.showEmail) {
-          delete doc.local['email'];
-        }
+      if (!doc) return res.sendStatus(404);
 
-        // adds weekly meditation data
-        let endOfWeek = Date.now();
-        let startOfWeek = Date.now() - 6.048E8;
+      // remove sensitive data
+      delete doc.local['password'];
+      delete doc['__v'];
+      if (!doc.showEmail) {
+        delete doc.local['email'];
+      }
 
-        doc.meditations = {};
+      // adds weekly meditation data
+      let endOfWeek = Date.now();
+      let startOfWeek = Date.now() - 6.048E8;
 
-        // iterate days
-        for (let day = startOfWeek; day <= endOfWeek; day += 8.64E7) {
-          doc.meditations[moment(day).format('Do')] = 0;
-        }
+      doc.meditations = {};
 
-        Meditation
-          .find({
-            // 1 week
-            end: { $lt: endOfWeek, $gt: startOfWeek },
-            user: doc._id
-          })
-          .lean()
-          .exec((err, result) => {
-            if(err) {
-              res.send(err);
-              return;
-            }
+      // iterate days
+      for (let day = startOfWeek; day <= endOfWeek; day += 8.64E7) {
+        doc.meditations[moment(day).format('Do')] = 0;
+      }
+      let result = await Meditation
+        .find({
+          // 1 week
+          end: { $lt: endOfWeek, $gt: startOfWeek },
+          user: doc._id
+        })
+        .lean()
+        .exec();
 
-            // sum meditation time
-            result.map((entry) => {
-              doc.meditations[moment(entry.createdAt).format('Do')] += entry.sitting + entry.walking;
-            });
-
-            return res.json(doc);
-          });
+      // sum meditation time
+      result.map(entry => {
+        doc.meditations[moment(entry.createdAt).format('Do')] += entry.sitting + entry.walking;
       });
+
+      res.json(doc);
+    } catch (err) {
+      res.status(400).send(err);
+    }
   });
 
   /**
@@ -111,14 +111,16 @@ export default (app, router) => {
    * @apiParam {String}     country         Country
    * @apiParam {String}     profileImageUrl   The url of the profile image
    */
-  router.put('/api/profile', (req, res) => {
+  router.put('/api/profile', async (req, res) => {
     // remove readonly data
     if (req.body.local) delete req.body.local;
     if (req.body._id) delete req.body._id;
 
-    User.findOneAndUpdate(req.user._doc._id, req.body, {}, (err, doc) => {
-      if (err) return res.status(400).send(err);
-      return res.sendStatus(200);
-    });
+    try {
+      await User.findOneAndUpdate(req.user._doc._id, req.body, {});
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(400).send(err);
+    }
   });
 };
