@@ -14,14 +14,26 @@ export default (app, router, io) => {
    */
   router.get('/api/appointment', async (req, res) => {
     try {
+      let json = {
+        hours: [],
+        appointments: []
+      };
       const result = await Appointment
         .find()
         .populate('user', 'local.username profileImageUrl')
         .lean()
         .exec();
-      res.json(result);
+
+      result.map(entry => {
+        if (!json.hours.includes(entry.hour)) {
+          json.hours.push(entry.hour);
+        }
+        json.appointments.push(entry);
+      });
+
+      res.json(json);
     } catch (err) {
-      res.send(err);
+      res.status(400).send(err);
     }
   });
 
@@ -36,17 +48,19 @@ export default (app, router, io) => {
     try {
       // check if user is already meditating
       let appointment = await Appointment
-        .findById(req.params('id'))
+        .findById(req.params.id)
         .exec();
 
+      if (!appointment) return res.sendStatus(404);
+
       // check if another user is registered
-      if (appointment.user && appointment.user._id !== req.user._doc._id) {
-        return res.send(400, 'another user is registered');
+      if (appointment.user && appointment.user != req.user._doc._id) {
+        return res.status(400).send('another user is registered');
       }
 
       // toggle registration for current user
       appointment.user = appointment.user
-        && appointment.user._id === req.user._doc._id
+        && appointment.user == req.user._doc._id
         ? null
         : req.user._doc;
 
@@ -56,7 +70,7 @@ export default (app, router, io) => {
 
       res.sendStatus(204);
     } catch (err) {
-      res.send(err);
+      res.status(400).send(err);
     }
   });
 };
