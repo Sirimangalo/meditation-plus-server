@@ -45,14 +45,14 @@ export default (app, router, io) => {
     try {
       let message = await Message.create({
         text: req.body.text,
-        user: req.user._doc,
+        user: req.user._doc
       });
 
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
         'local.username profileImageUrl'
-      ).execPopulate()
+      ).execPopulate();
 
       let leanObject = populated.toObject();
       leanObject.ago = moment(leanObject.createdAt).fromNow();
