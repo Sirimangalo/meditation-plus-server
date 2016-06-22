@@ -64,7 +64,7 @@ export default (app, router, passport, admin) => {
         res.status(200);
 
         let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
-            expiresIn: "1h"
+          expiresIn: '1h'
         });
         // Return the token
         res.json({
