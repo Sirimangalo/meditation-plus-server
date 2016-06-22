@@ -12,19 +12,17 @@ export default (app, router, io) => {
    * @apiSuccess {Number}   appointments.weekDay     Number of week day
    * @apiSuccess {Object}   appointments.user        The meditating User
    */
-  router.get('/api/appointment', (req, res) => {
-    appointment
-      .find()
-      .populate('user', 'local.username profileImageUrl')
-      .lean()
-      .exec((err, result) => {
-        if(err) {
-          res.send(err);
-          return;
-        }
-
-        res.json(result);
-      });
+  router.get('/api/appointment', async (req, res) => {
+    try {
+      const result = await Appointment
+        .find()
+        .populate('user', 'local.username profileImageUrl')
+        .lean()
+        .exec();
+      res.json(result);
+    } catch (err) {
+      res.send(err);
+    }
   });
 
   /**
@@ -34,18 +32,16 @@ export default (app, router, io) => {
    *
    * @apiParam {String} id Appointment ID
    */
-  router.post('/api/appointment/:id/register', (req, res) => {
-    // check if user is already meditating
-    appointment.findById(req.params('id')).exec((err, appointment) => {
-      if (err) {
-        res.send(404, err);
-        return;
-      }
+  router.post('/api/appointment/:id/register', async (req, res) => {
+    try {
+      // check if user is already meditating
+      let appointment = await Appointment
+        .findById(req.params('id'))
+        .exec();
 
       // check if another user is registered
       if (appointment.user && appointment.user._id !== req.user._doc._id) {
-        res.send(400, 'another user is registered');
-        return;
+        return res.send(400, 'another user is registered');
       }
 
       // toggle registration for current user
@@ -54,13 +50,13 @@ export default (app, router, io) => {
         ? null
         : req.user._doc;
 
-      appointment.save(err => {
-        if (err) res.status(500).send(err);
-        // sending broadcast WebSocket for taken/fred appointment
-        io.sockets.emit('appointment', appoitment)
+      await appointment.save();
+      // sending broadcast WebSocket for taken/fred appointment
+      io.sockets.emit('appointment', appointment);
 
-        res.sendStatus(204);
-      });
-    });
+      res.sendStatus(204);
+    } catch (err) {
+      res.send(err);
+    }
   });
 };
