@@ -90,7 +90,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Override with the X-HTTP-Method-Override header in the request. Simulate DELETE/PUT
 app.use(methodOverride('X-HTTP-Method-Override'));
 // Set the static files location /public/img will be /img for users
-app.use(express.static(__dirname + '/dist'));
+app.use(express.static(__dirname + '/client'));
 
 // ## Passport JS
 app.use(passport.initialize());
@@ -111,7 +111,6 @@ routes(app, router, passport, io);
 // FIXME: Move secret to config.json
 app.use('/api', expressJwt({ secret: process.env.SESSION_SECRET }));
 app.use('/', router);
-
 // ### Ignition Phase
 
 server.listen(port);
