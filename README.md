@@ -38,9 +38,3 @@ The `server.conf.js` file is expecting certain `environment` `variables` to be s
 
 You should definitely change your `SESSION_SECRET` for even the most lackadaisical development effort.
 ```
-
-## Todo
-
-- [ ] Wordpress integration
-- [ ] Commitments
-- [ ] Appointments
