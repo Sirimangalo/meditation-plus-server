@@ -33,6 +33,7 @@ export default (app, router, io) => {
 
       res.json(json);
     } catch (err) {
+      console.log('Appointment Error', err);
       res.status(400).send(err);
     }
   });
