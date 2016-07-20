@@ -117,7 +117,12 @@ export default (app, router) => {
     if (req.body._id) delete req.body._id;
 
     try {
-      await User.findOneAndUpdate(req.user._doc._id, req.body, {});
+      let user = await User.findById(req.user._doc._id);
+      for (const key of Object.keys(req.body)) {
+        user[key] = req.body[key];
+      }
+      await user.save();
+
       res.sendStatus(200);
     } catch (err) {
       res.status(400).send(err);
