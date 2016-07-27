@@ -1,0 +1,22 @@
+dist: trusty
+language: node_js
+node_js:
+- '5.12'
+before_install:
+- openssl aes-256-cbc -K $encrypted_649f128e279d_key -iv $encrypted_649f128e279d_iv
+  -in deploy_key.enc -out deploy_key -d
+before_script:
+- npm install
+script:
+- npm run lint
+- npm run docs
+- npm run build
+after_success:
+  if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
+  [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    chmod 600 deploy-key;
+    mv deploy-key ~/.ssh/id_rsa;
+    tar -czf transfer.tgz dist;
+    scp -o "StrictHostKeyChecking no" package.tgz jenkins@159.203.18.58/var/www/meditation-plus;
+    ssh -o "StrictHostKeyChecking no" jenkins@159.203.18.58 'cd /var/www/meditation-plus; tar -xzf transfer.tgz; rm transfer.tgz';
+  fi
