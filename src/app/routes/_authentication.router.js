@@ -69,7 +69,8 @@ export default (app, router, passport, admin) => {
         // Return the token
         res.json({
           token,
-          id: user._id
+          id: user._id,
+          role: user.role ? user.role : 'ROLE_USER'
         });
       });
 
