@@ -21,7 +21,7 @@ export default (app, router, passport, io) => {
   // routes
   let admin = (req, res, next) => {
 
-    if (!req.isAuthenticated() || req.user.role !== 'admin')
+    if (!req.isAuthenticated() || req.user._doc.role !== 'ROLE_ADMIN')
       res.sendStatus(401);
 
     else
@@ -41,7 +41,7 @@ export default (app, router, passport, io) => {
   // #### RESTful API Routes
 
   messageRoutes(app, router, io);
-  commitmentRoutes(app, router);
+  commitmentRoutes(app, router, admin);
   meditationRoutes(app, router, io);
   profileRoutes(app, router);
   appointmentRoutes(app, router, io);

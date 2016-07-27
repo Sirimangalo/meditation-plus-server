@@ -1,6 +1,6 @@
 import Commitment from '../models/commitment.model.js';
 
-export default (app, router) => {
+export default (app, router, admin) => {
 
   /**
    * @api {get} /api/commitment Get all commitments
@@ -25,6 +25,67 @@ export default (app, router) => {
       res.send(err);
     }
   });
+
+   /**
+   * @api {get} /api/commitment/:id Get single commitment
+   * @apiName GetCommitment
+   * @apiGroup Commitment
+   *
+   * @apiSuccess {String}   type        "daily", "weekly", ("monthly")
+   * @apiSuccess {Number}   minutes     Minutes of meditation per type
+   */
+  router.get('/api/commitment/:id', admin, async (req, res) => {
+    try {
+      const result = await Commitment
+        .findOne({ _id: req.params.id })
+        .lean()
+        .then();
+
+      res.json(result);
+    } catch (err) {
+      res.send(err);
+    }
+  });
+
+   /**
+   * @api {put} /api/commitment/:id Update commitment
+   * @apiName UpdateCommitment
+   * @apiGroup Commitment
+   */
+  router.put('/api/commitment/:id', admin, async (req, res) => {
+    try {
+      let commitment = await Commitment.findById(req.params.id);
+      for (const key of Object.keys(req.body)) {
+        commitment[key] = req.body[key];
+      }
+      await commitment.save();
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /api/commitment Add new commitment
+   * @apiName AddCommitment
+   * @apiGroup Commitment
+   */
+  router.post('/api/commitment', admin, async (req, res) => {
+    try {
+      let commitment = await Commitment.create({
+        type: req.body.type,
+        minutes: req.body.minutes
+      });
+
+      res.sendStatus(201);
+    } catch (err) {
+      res
+        .status(err.name === 'ValidationError' ? 400 : 500)
+        .send(err);
+    }
+  });
+
 
   /**
    * @api {post} /api/commitment/:id/commit Commit Commitment
@@ -82,6 +143,24 @@ export default (app, router) => {
       res.sendStatus(400);
     } catch (err) {
       res.status(400).send(err);
+    }
+  });
+
+  /**
+   * @api {delete} /api/commitment/:id Deletes commitment
+   * @apiName DeleteCommitment
+   * @apiGroup Commitment
+   */
+  router.delete('/api/commitment/:id', admin, async (req, res) => {
+    try {
+      const result = await Commitment
+        .find({ _id: req.params.id })
+        .remove()
+        .exec();
+
+      res.json(result);
+    } catch (err) {
+      res.send(err);
     }
   });
 };

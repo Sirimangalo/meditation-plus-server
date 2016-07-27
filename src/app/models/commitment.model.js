@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 
 let commitmentSchema = mongoose.Schema({
-  type: String, // daily, weekly, (monthly)
-  minutes: Number,
+  type: { // daily, weekly, (monthly)
+    type: String,
+    required: true
+  },
+  minutes: { type: Number, required: true },
   users: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
