@@ -1,3 +1,5 @@
+[![Travis CI](https://api.travis-ci.org/Sirimangalo/meditation-plus-server.svg)](https://travis-ci.org/Sirimangalo/meditation-plus-server)
+[![Dependency Status](https://david-dm.org/Sirimangalo/meditation-plus-server.svg)](https://david-dm.org/Sirimangalo/meditation-plus-server)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 # REST API for Meditation+ [![Join Slack](https://img.shields.io/badge/slack-join-brightgreen.svg)](https://sirimangaloteam.slack.com)
