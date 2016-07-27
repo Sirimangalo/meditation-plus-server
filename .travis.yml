@@ -13,8 +13,8 @@ script:
 after_success:
   if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
   [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    chmod 600 deploy-key;
-    mv deploy-key ~/.ssh/id_rsa;
+    chmod 600 deploy_key;
+    mv deploy_key ~/.ssh/id_rsa;
     tar -czf transfer.tgz dist;
     scp -o "StrictHostKeyChecking no" package.tgz jenkins@159.203.18.58/var/www/meditation-plus;
     ssh -o "StrictHostKeyChecking no" jenkins@159.203.18.58 'cd /var/www/meditation-plus; tar -xzf transfer.tgz; rm transfer.tgz';
