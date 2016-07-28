@@ -20,6 +20,9 @@ export default (app, router, io) => {
       };
       const result = await Appointment
         .find()
+        .sort({
+          hour: 'asc'
+        })
         .populate('user', 'local.username profileImageUrl')
         .lean()
         .exec();
