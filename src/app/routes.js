@@ -44,7 +44,7 @@ export default (app, router, passport, io) => {
   commitmentRoutes(app, router, admin);
   meditationRoutes(app, router, io);
   profileRoutes(app, router);
-  appointmentRoutes(app, router, io);
+  appointmentRoutes(app, router, io, admin);
 
   // ### Frontend Routes
 
