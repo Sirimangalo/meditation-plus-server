@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import Meditation from '../models/meditation.model.js';
 import moment from 'moment';
+import md5 from 'md5';
 
 export default (app, router) => {
 
@@ -17,7 +18,7 @@ export default (app, router) => {
    * @apiSuccess {String}     description     Profile description
    * @apiSuccess {String}     website         Website
    * @apiSuccess {String}     country         Country
-   * @apiSuccess {String}     profileImageUrl   The url of the profile image
+   * @apiSuccess {String}     gravatarHash    Hash for Gravatar
    */
   router.get('/api/profile', async (req, res) => {
     try {
@@ -30,6 +31,7 @@ export default (app, router) => {
 
       delete doc.local['password'];
       delete doc['__v'];
+
       res.json(doc);
     } catch (err) {
       res.status(400).send(err);
@@ -49,7 +51,7 @@ export default (app, router) => {
    * @apiSuccess {String}     website           Website
    * @apiSuccess {String}     country           Country
    * @apiSuccess {Object}     meditations       Last week meditation times
-   * @apiSuccess {String}     profileImageUrl   The url of the profile image
+   * @apiSuccess {String}     gravatarHash      Hash for Gravatar
    */
   router.get('/api/profile/:username', async (req, res) => {
     try {
@@ -109,7 +111,7 @@ export default (app, router) => {
    * @apiParam {String}     description     Profile description
    * @apiParam {String}     website         Website
    * @apiParam {String}     country         Country
-   * @apiParam {String}     profileImageUrl   The url of the profile image
+   * @apiParam {String}     gravatarHash    Hash for Gravatar
    */
   router.put('/api/profile', async (req, res) => {
     // remove readonly data
@@ -128,6 +130,7 @@ export default (app, router) => {
       for (const key of Object.keys(req.body)) {
         user[key] = req.body[key];
       }
+      user.gravatarHash = md5(user.local.email);
       await user.save();
 
       res.sendStatus(200);

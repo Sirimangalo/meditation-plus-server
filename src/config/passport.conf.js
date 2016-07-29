@@ -9,6 +9,8 @@ import LocalStrategy from 'passport-local';
 // Load user model
 import User from '../app/models/user.model.js';
 
+import md5 from 'md5';
+
 export default (passport) => {
 
   // Define length boundariess for expected parameters
@@ -235,6 +237,9 @@ export default (passport) => {
           // Hash password with model method
           newUser.local.password = newUser.generateHash(password);
 
+          // Generate hash for Gravatar
+          newUser.gravatarHash = md5(newUser.local.email);
+
           // Save the new user
           newUser.save((err) => {
 
@@ -349,9 +354,23 @@ export default (passport) => {
 
           { loginMessage : 'Invalid password entered.' });
       }
-
       // Otherwise all is well; return successful user
-      return done(null, user);
+
+      // Generate hash for Gravatar if not present
+      if (!user.gravatarHash) {
+        user.gravatarHash = md5(user.local.email);
+
+        // Save the new user
+        user.save((err) => {
+
+          if (err)
+            throw err;
+
+          return done(null, user);
+        });
+      } else {
+        return done(null, user);
+      }
     });
   }));
 };

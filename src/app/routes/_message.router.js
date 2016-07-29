@@ -19,7 +19,7 @@ export default (app, router, io) => {
     try {
       let messages = await Message
         .find()
-        .populate('user', 'local.username profileImageUrl')
+        .populate('user', 'local.username gravatarHash')
         .lean()
         .then();
 
@@ -51,7 +51,7 @@ export default (app, router, io) => {
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
-        'local.username profileImageUrl'
+        'local.username gravatarHash'
       ).execPopulate();
 
       let leanObject = populated.toObject();

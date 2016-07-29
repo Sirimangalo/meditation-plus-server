@@ -23,7 +23,7 @@ let userSchema = mongoose.Schema({
   description: String,
   website: String,
   country: String,
-  profileImageUrl: String
+  gravatarHash: String
 });
 
 // ## Methods
