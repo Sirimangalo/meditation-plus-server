@@ -118,6 +118,13 @@ export default (app, router) => {
 
     try {
       let user = await User.findById(req.user._doc._id);
+
+      // change password if set
+      if (req.body.newPassword) {
+        user.local.password = user.generateHash(req.body.newPassword);
+        delete req.body.newPassword;
+      }
+
       for (const key of Object.keys(req.body)) {
         user[key] = req.body[key];
       }
