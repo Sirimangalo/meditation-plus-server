@@ -16,7 +16,7 @@ export default (app, router, admin) => {
     try {
       const result = await Commitment
         .find()
-        .populate('users', 'local.username profileImageUrl')
+        .populate('users', 'local.username gravatarHash')
         .lean()
         .then();
 

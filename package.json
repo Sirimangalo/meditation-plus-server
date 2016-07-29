@@ -21,6 +21,7 @@
     "express-session": "^1.13.0",
     "http": "0.0.0",
     "jsonwebtoken": "^7.0.0",
+    "md5": "^2.1.0",
     "method-override": "^2.3.5",
     "moment": "^2.13.0",
     "mongoose": "^4.4.17",
