@@ -240,6 +240,10 @@ export default (passport) => {
           // Generate hash for Gravatar
           newUser.gravatarHash = md5(newUser.local.email);
 
+          // Generate activation token
+          newUser.local.active = false;
+          newUser.local.activateToken = newUser.generateToken();
+
           // Save the new user
           newUser.save((err) => {
 
@@ -335,25 +339,31 @@ export default (passport) => {
 
       // If no user is found, return a message
       if (!user) {
-
-        return done(null,
-
+        return done(
+          null,
           false,
-
-          { loginMessage : 'That user was not found. ' +
-          'Please enter valid user credentials.' }
+          { loginMessage : 'Invalid credentials.' }
         );
       }
 
       // If the user is found but the password is incorrect
       if (!user.validPassword(password)) {
-
-        return done(null,
-
+        return done(
+          null,
           false,
-
-          { loginMessage : 'Invalid password entered.' });
+          { loginMessage : 'Invalid credentials.' }
+        );
       }
+
+      // Check if user is active
+      if (!user.local.active) {
+        return done(
+          null,
+          false,
+          { loginMessage: 'This user account is disabled.' }
+        );
+      }
+
       // Otherwise all is well; return successful user
 
       // Generate hash for Gravatar if not present

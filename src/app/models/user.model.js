@@ -10,13 +10,17 @@ import mongoose from 'mongoose';
 // Import library to hash passwords
 import bcrypt from 'bcrypt-nodejs';
 
+import crypto from 'crypto';
+
 // Define the schema for the showcase item
 let userSchema = mongoose.Schema({
 
   local : {
     username : { type : String, unique : true },
     password : String,
-    email : { type : String, unique : true }
+    email : { type : String, unique : true },
+    active: Boolean,
+    activateToken: { type : String, unique : true }
   },
   role : { type : String },
   showEmail: Boolean,
@@ -33,6 +37,11 @@ userSchema.methods.generateHash = function(password) {
 
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
+
+// Generate activation token
+userSchema.methods.generateToken = function() {
+  return crypto.randomBytes(64).toString('hex');
+}
 
 // ### Check if password is valid
 userSchema.methods.validPassword = function(password) {
