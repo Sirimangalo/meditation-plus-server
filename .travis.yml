@@ -18,8 +18,8 @@ after_success:
     chmod 600 deploy_key
     mv deploy_key ~/.ssh/id_rsa
     touch dist/version.json
-    echo "{ \"version\": \"$TRAVIS_TAG\" }" > dist/assets/version.json
+    echo "{ \"version\": \"$TRAVIS_TAG\" }" > dist/version.json
     tar -czf transfer.tgz dist
     scp -o "StrictHostKeyChecking no" transfer.tgz jenkins@159.203.18.58:/var/www/meditation-plus
-    ssh -o "StrictHostKeyChecking no" jenkins@159.203.18.58 'cd /var/www/meditation-plus; cp config/config.json ./; rm -rf !(client|config.json); tar -xzf transfer.tgz  --strip 1; mv config.json config/config.json; rm transfer.tgz'
+    ssh -o "StrictHostKeyChecking no" jenkins@159.203.18.58 'cd /var/www/meditation-plus; cp config/config.json /tmp/config.json; rm -rf !(client); tar -xzf transfer.tgz  --strip 1; mv /tmp/config.json config/config.json; rm transfer.tgz'
   fi
