@@ -11,11 +11,15 @@ script:
 - npm run docs
 - npm run build
 after_success:
-  if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
-  [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    chmod 600 deploy_key;
-    mv deploy_key ~/.ssh/id_rsa;
-    tar -czf transfer.tgz dist;
-    scp -o "StrictHostKeyChecking no" package.tgz jenkins@159.203.18.58/var/www/meditation-plus;
-    ssh -o "StrictHostKeyChecking no" jenkins@159.203.18.58 'cd /var/www/meditation-plus; tar -xzf transfer.tgz; rm transfer.tgz';
+- |
+  if ([ ! -z "$TRAVIS_TAG" ]) &&
+    [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    echo "Deploying $TRAVIS_TAG to server"
+    chmod 600 deploy_key
+    mv deploy_key ~/.ssh/id_rsa
+    touch dist/version.json
+    echo "{ \"version\": \"$TRAVIS_TAG\" }" > dist/assets/version.json
+    tar -czf transfer.tgz dist
+    scp -o "StrictHostKeyChecking no" transfer.tgz jenkins@159.203.18.58:/var/www/meditation-plus
+    ssh -o "StrictHostKeyChecking no" jenkins@159.203.18.58 'cd /var/www/meditation-plus; cp config/config.json ./; rm -rf !(client|config.json); tar -xzf transfer.tgz  --strip 1; mv config.json config/config.json; rm transfer.tgz'
   fi
