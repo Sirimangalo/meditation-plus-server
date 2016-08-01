@@ -165,7 +165,7 @@ gulp.task('serve', ['serve:watch']);
 // and restarts the server whenever a change is detected
 gulp.task('serve:watch', () => {
   nodemon({
-    script : 'server.js',
+    script : 'src/server.js',
     ext : 'js'
   });
 });
