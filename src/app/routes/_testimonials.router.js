@@ -16,6 +16,9 @@ export default (app, router, io) => {
 
       testimonials.map(testimonial => {
         testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
+        if (testimonial.anonymous) {
+          testimonial.user = { local: { username : 'Anonymous' } };
+        }
         return testimonial;
       });
 
