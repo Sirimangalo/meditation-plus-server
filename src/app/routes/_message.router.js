@@ -19,6 +19,7 @@ export default (app, router, io) => {
     try {
       let messages = await Message
         .find()
+        .limit(100)
         .populate('user', 'local.username gravatarHash')
         .lean()
         .then();
