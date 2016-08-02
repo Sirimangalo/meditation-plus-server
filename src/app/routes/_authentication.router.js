@@ -1,5 +1,6 @@
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
+import expressJwt from 'express-jwt';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -64,7 +65,7 @@ export default (app, router, passport, admin) => {
         res.status(200);
 
         let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
-          expiresIn: '1h'
+          expiresIn: '7d'
         });
         // Return the token
         res.json({
@@ -75,6 +76,35 @@ export default (app, router, passport, admin) => {
       });
 
     }) (req, res, next);
+  });
+
+  /**
+   * @api {post} /auth/refresh Refresh current JWT
+   * @apiName RefreshToken
+   * @apiGroup Auth
+   */
+  router.post(
+    '/auth/refresh',
+    expressJwt({ secret: process.env.SESSION_SECRET }),
+    (req, res, next) => {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    res.status(200);
+
+    delete req.user.exp;
+
+    let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
+      expiresIn: '7d'
+    });
+
+    // Return the new token
+    res.json({
+      token,
+      id: req.user._id,
+      role: req.user.role ? req.user.role : 'ROLE_USER'
+    });
   });
 
   /**
