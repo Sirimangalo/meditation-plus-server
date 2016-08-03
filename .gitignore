@@ -71,6 +71,8 @@ npm-debug.log
 
 # IDE #
 .idea/
+*.sublime-project
+*.sublime-workspace
 
 # Temporary Files #
 .tmp

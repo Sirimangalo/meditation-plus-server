@@ -25,7 +25,7 @@ export default (app, router, passport, admin) => {
    * @apiName Login
    * @apiGroup Auth
    *
-   * @apiParam {String} username Username
+   * @apiParam {String} email Email
    * @apiParam {String} password Password
    *
    * @apiSuccess {String} token Jwt
@@ -112,7 +112,7 @@ export default (app, router, passport, admin) => {
    * @apiName SignUp
    * @apiGroup Auth
    *
-   * @apiParam {String} username Username
+   * @apiParam {String} email Email
    * @apiParam {String} password Password
    */
   router.post('/auth/signup', (req, res, next) => {
@@ -170,13 +170,7 @@ export default (app, router, passport, admin) => {
   router.delete('/auth/delete/:uid', admin, (req, res) => {
 
     User.remove({
-
-      // Model.find `$or` Mongoose condition
-      $or : [
-        { 'local.username' : req.params.uid },
-        { 'local.email' : req.params.uid },
-        { '_id' : ObjectId(req.params.uid) }
-      ]
+      '_id' : ObjectId(req.params.uid)
     }, (err) => {
 
       // If there are any errors, return them
