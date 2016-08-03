@@ -20,7 +20,7 @@ export default (app, router, io) => {
       let messages = await Message
         .find()
         .limit(100)
-        .populate('user', 'local.username gravatarHash')
+        .populate('user', 'name gravatarHash')
         .lean()
         .then();
 
@@ -52,7 +52,7 @@ export default (app, router, io) => {
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
-        'local.username gravatarHash'
+        'name gravatarHash'
       ).execPopulate();
 
       let leanObject = populated.toObject();

@@ -23,7 +23,7 @@ export default (app, router, io, admin) => {
         .sort({
           hour: 'asc'
         })
-        .populate('user', 'local.username gravatarHash')
+        .populate('user', 'name gravatarHash')
         .lean()
         .exec();
 

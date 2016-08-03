@@ -15,7 +15,7 @@ export default (io) => {
 
   io.on('connection', socket => {
 
-    console.log('a user connected', socket.decoded_token._doc.local.username);
+    console.log('a user connected:', socket.decoded_token._doc._id);
 
     socket.on('disconnect', () => {
       console.log('a user disconnected');

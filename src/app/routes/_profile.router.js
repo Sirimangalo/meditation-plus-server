@@ -3,6 +3,8 @@ import Meditation from '../models/meditation.model.js';
 import moment from 'moment';
 import md5 from 'md5';
 
+let ObjectId = require('mongoose').Types.ObjectId;
+
 export default (app, router) => {
 
   /**
@@ -12,8 +14,8 @@ export default (app, router) => {
    * @apiDescription Get the profile data of the currently logged in user.
    *
    * @apiSuccess {Object}     local           Details for local authentication
-   * @apiSuccess {String}     local.username  Username
    * @apiSuccess {String}     local.email     Email address
+   * @apiSuccess {String}     name            Name
    * @apiSuccess {Boolean}    showEmail       Show email publicly
    * @apiSuccess {String}     description     Profile description
    * @apiSuccess {String}     website         Website
@@ -39,25 +41,26 @@ export default (app, router) => {
   });
 
   /**
-   * @api {get} /api/profile/:username Get profile details of a user
+   * @api {get} /api/profile/:id Get profile details of a user
    * @apiName ShowProfile
    * @apiGroup Profile
    * @apiDescription Get the profile data of a user.
    *
    * @apiSuccess {Object}     local             Details for local authentication
-   * @apiSuccess {String}     local.username    Username
    * @apiSuccess {String}     local.email       Email address (if public)
+   * @apiSuccess {String}     name              Name
    * @apiSuccess {String}     description       Profile description
    * @apiSuccess {String}     website           Website
    * @apiSuccess {String}     country           Country
    * @apiSuccess {Object}     meditations       Last week meditation times
    * @apiSuccess {String}     gravatarHash      Hash for Gravatar
    */
-  router.get('/api/profile/:username', async (req, res) => {
+  router.get('/api/profile/:id', async (req, res) => {
     try {
+      console.log('find by', req.params);
       let doc = await User
         .findOne({
-          'local.username': req.params.username
+          '_id': ObjectId(req.params.id)
         })
         .lean()
         .exec();

@@ -13,27 +13,14 @@ import md5 from 'md5';
 
 export default (passport) => {
 
-  // Define length boundariess for expected parameters
+  // Define length boundaries for expected parameters
   let bounds = {
-
-    username : {
-
-      minLength : 3,
-
-      maxLength : 16
-    },
-
     password : {
-
       minLength : 8,
-
       maxLength : 128
     },
-
     email : {
-
       minLength : 5,
-
       maxLength : 256
     }
   };
@@ -66,13 +53,8 @@ export default (passport) => {
 
   // ## Serialize User
   passport.serializeUser((user, done) => {
-
     let sessionUser = {
-
       _id : user._id,
-
-      username : user.local.username,
-
       role : user.role
     };
 
@@ -99,8 +81,8 @@ export default (passport) => {
 
   passport.use('local-signup', new LocalStrategy({
 
-    // By default, the local strategy uses username and password
-    usernameField : 'username',
+    // By default, the local strategy uses email and password
+    usernameField : 'email',
 
     passwordField : 'password',
 
@@ -108,13 +90,13 @@ export default (passport) => {
     passReqToCallback : true
   },
 
-  (req, username, password, done) => {
+  (req, email, password, done) => {
 
     // ## Data Checks
 
-    // If the length of the username string is too long/short,
+    // If the length of the email string is too long/short,
     // invoke verify callback
-    if(!checkLength(username, bounds.username.minLength, bounds.username.maxLength)) {
+    if(!checkLength(email, bounds.email.minLength, bounds.email.maxLength)) {
 
       // ### Verify Callback
 
@@ -125,7 +107,7 @@ export default (passport) => {
         false,
 
         // Return info message object
-        { signupMessage : 'Invalid username length.' }
+        { signupMessage : 'Invalid email length.' }
       );
     }
 
@@ -146,25 +128,8 @@ export default (passport) => {
       );
     }
 
-    // If the length of the email string is too long/short,
-    // invoke verify callback
-    if(!checkLength(req.body.email, bounds.email.minLength, bounds.email.maxLength)) {
-
-      // ### Verify Callback
-
-      // Invoke `done` with `false` to indicate authentication
-      // failure
-      return done(null,
-
-        false,
-
-        // Return info message object
-        { signupMessage : 'Invalid email length.' }
-      );
-    }
-
     // If the string is not a valid email...
-    if(!validateEmail(req.body.email)) {
+    if(!validateEmail(email)) {
 
       // ### Verify Callback
 
@@ -183,20 +148,13 @@ export default (passport) => {
     // User.findOne will not fire unless data is sent back
     process.nextTick(() => {
 
-      // Find a user whose email or username is the same as the passed
+      // Find a user whose email or email is the same as the passed
       // in data
 
       // We are checking to see if the user trying to login already
       // exists
       User.findOne({
-
-        // Model.find `$or` Mongoose condition
-        $or : [
-
-          { 'local.username' : username },
-
-          { 'local.email' : req.body.email }
-        ]
+        'local.email' : email
       }, (err, user) => {
 
         // If there are any errors, return the error
@@ -215,24 +173,24 @@ export default (passport) => {
             false,
 
             // Return info message object
-            { signupMessage : 'That username/email is already ' +
+            { signupMessage : 'That email is already ' +
             'taken.' }
           );
 
         } else {
 
-          // If there is no user with that email or username...
+          // If there is no user with that email or email...
 
           // Create the user
           let newUser = new User();
 
           // Set the user's local credentials
 
-          // Combat case sensitivity by converting username and
+          // Combat case sensitivity by converting email and
           // email to lowercase characters
-          newUser.local.username = username.toLowerCase();
+          newUser.local.email = email.toLowerCase();
 
-          newUser.local.email = req.body.email.toLowerCase();
+          newUser.name = req.body.name;
 
           // Hash password with model method
           newUser.local.password = newUser.generateHash(password);
@@ -262,25 +220,24 @@ export default (passport) => {
 
   passport.use('local-login', new LocalStrategy({
 
-    // By default, local strategy uses username and password
-    usernameField : 'username',
-
+    // By default, local strategy uses email and password
+    usernameField : 'email',
     passwordField : 'password',
 
     // Allow the entire request to be passed back to the callback
     passReqToCallback : true
   },
 
-  (req, username, password, done) => {
+  (req, email, password, done) => {
 
     // ## Data Checks
 
-    // If the length of the username string is too long/short,
+    // If the length of the email string is too long/short,
     // invoke verify callback.
     // Note that the check is against the bounds of the email
     // object. This is because emails can be used to login as
     // well.
-    if(!checkLength(username, bounds.username.minLength, bounds.email.maxLength)) {
+    if(!checkLength(email, bounds.email.minLength, bounds.email.maxLength)) {
 
       // ### Verify Callback
 
@@ -291,7 +248,7 @@ export default (passport) => {
         false,
 
         // Return info message object
-        { loginMessage : 'Invalid username/email length.' }
+        { loginMessage : 'Invalid email length.' }
       );
     }
 
@@ -312,20 +269,13 @@ export default (passport) => {
       );
     }
 
-    // Find a user whose email or username is the same as the passed
+    // Find a user whose email or email is the same as the passed
     // in data
 
-    // Combat case sensitivity by converting username to lowercase
+    // Combat case sensitivity by converting email to lowercase
     // characters
     User.findOne({
-
-      // Model.find `$or` Mongoose condition
-      $or : [
-
-        { 'local.username' : username.toLowerCase() },
-
-        { 'local.email' : username.toLowerCase() }
-      ]
+      'local.email' : email.toLowerCase()
     }, (err, user) => {
 
       // If there are any errors, return the error before anything

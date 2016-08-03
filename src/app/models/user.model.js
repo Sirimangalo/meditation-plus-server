@@ -14,10 +14,10 @@ import bcrypt from 'bcrypt-nodejs';
 let userSchema = mongoose.Schema({
 
   local : {
-    username : { type : String, unique : true },
     password : String,
     email : { type : String, unique : true }
   },
+  name: String,
   role : { type : String },
   showEmail: Boolean,
   description: String,
