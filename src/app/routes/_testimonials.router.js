@@ -14,13 +14,15 @@ export default (app, router, io) => {
         .lean()
         .then();
 
-      testimonials.map(testimonial => {
-        testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
-        if (testimonial.anonymous) {
-          testimonial.user = { local: { username : 'Anonymous' } };
-        }
-        return testimonial;
-      });
+      testimonials = testimonials
+        .map(testimonial => {
+          testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
+          if (testimonial.anonymous) {
+            testimonial.user = { local: { username : 'Anonymous' } };
+          }
+          return testimonial;
+        })
+        .reverse();
 
       res.json(testimonials);
     } catch (err) {
@@ -34,7 +36,7 @@ export default (app, router, io) => {
         text: req.body.text,
         user: req.user._doc,
         anonymous: req.body.anonymous,
-        reviewed: false
+        reviewed: true
       });
 
       // add user details for response and broadcast
