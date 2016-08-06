@@ -10,7 +10,7 @@ export default (app, router, io) => {
         .find({
           'reviewed' : true
         })
-        .populate('user', 'local.username profileImageUrl')
+        .populate('user', 'name gravatarHash')
         .lean()
         .then();
 
@@ -35,8 +35,8 @@ export default (app, router, io) => {
       let testimonial = await Testimonial.create({
         text: req.body.text,
         user: req.user._doc,
-        anonymous: req.body.anonymous,
-        reviewed: true
+        reviewed: false,
+        anonymous: req.body.anonymous || false
       });
 
       // add user details for response and broadcast
