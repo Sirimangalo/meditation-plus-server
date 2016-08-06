@@ -18,7 +18,7 @@ export default (app, router, io) => {
         .map(testimonial => {
           testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
           if (testimonial.anonymous) {
-            testimonial.user = { local: { username : 'Anonymous' } };
+            testimonial.user = { name : 'Anonymous' };
           }
           return testimonial;
         })
@@ -42,11 +42,12 @@ export default (app, router, io) => {
       // add user details for response and broadcast
       let populated = await testimonial.populate(
         'user',
-        'local.username profileImageUrl'
+        'name gravatarHash'
       ).execPopulate();
 
+
       let leanObject = populated.toObject();
-      leanObject.ago = moment(leanObject.createdAt).fromNow();
+      // leanObject.ago = moment(leanObject.createdAt).fromNow();
 
       // sending broadcast WebSocket testimonial
       io.sockets.emit('testimonial', leanObject);
