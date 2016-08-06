@@ -17,11 +17,11 @@ let userSchema = mongoose.Schema({
     password : String,
     email : { type : String, unique : true }
   },
-  name: String,
+  name: { type: String, maxlength: 30 },
   role : { type : String },
   showEmail: Boolean,
-  description: String,
-  website: String,
+  description: { type: String, maxlength: 300 },
+  website: { type: String, maxlength: 100 },
   country: String,
   gravatarHash: String
 });
