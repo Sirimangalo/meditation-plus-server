@@ -110,7 +110,7 @@ export default (app, router, io, admin) => {
    */
   router.post('/api/appointment/:id/register', async (req, res) => {
     try {
-      // check if user is already meditating
+      // gets appointment
       let appointment = await Appointment
         .findById(req.params.id)
         .exec();
@@ -120,6 +120,19 @@ export default (app, router, io, admin) => {
       // check if another user is registered
       if (appointment.user && appointment.user != req.user._doc._id) {
         return res.status(400).send('another user is registered');
+      }
+
+      if (!appointment.user) {
+        // check if user is already in another appointment
+        const otherAppointment = await Appointment
+          .findOne({
+            user: req.user._doc._id
+          })
+          .exec();
+
+        if (otherAppointment) {
+          throw Exception('Only one appointment per user');
+        }
       }
 
       // toggle registration for current user
