@@ -35,7 +35,7 @@ export default (app, router, io) => {
       let testimonial = await Testimonial.create({
         text: req.body.text,
         user: req.user._doc,
-        reviewed: false,
+        reviewed: false, // default: false
         anonymous: req.body.anonymous || false
       });
 
@@ -54,8 +54,14 @@ export default (app, router, io) => {
 
       res.json(leanObject);
     } catch (err) {
+      let errStatus = 500;
+
+      if (err.name == 'ValidationError' || err.name == 'MongoError'){
+        errStatus = 400;
+      }
+
       res
-        .status(err.name === 'ValidationError' ? 400 : 500)
+        .status(errStatus)
         .send(err);
     }
   });
