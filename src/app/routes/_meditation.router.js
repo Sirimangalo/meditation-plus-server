@@ -127,6 +127,49 @@ export default (app, router, io) => {
   });
 
   /**
+   * @api {post} /api/meditation/stop Stops a meditation session
+   * @apiName StopMeditation
+   * @apiGroup Meditation
+   */
+  router.post('/api/meditation/stop', async (req, res) => {
+    try {
+      // find user's session
+      let meditation = await Meditation
+        .findOne({
+          end: { $gt: Date.now() },
+          user: req.user._doc._id
+        })
+        .exec();
+
+      if (!meditation) {
+        return res.sendStatus(400);
+      }
+
+      const oldEnd = moment(meditation.end);
+      const newEnd = moment();
+      const diff = moment.duration(oldEnd.diff(newEnd));
+      let minutes = diff.asMinutes();
+
+      for (; minutes > 0; minutes--) {
+        if (meditation.walking > 0) {
+          meditation.walking--;
+        } else {
+          meditation.sitting--;
+        }
+      }
+
+      meditation.end = Date.now();
+      await meditation.save();
+      // sending broadcast WebSocket meditation
+      io.sockets.emit('meditation', 'no content');
+    } catch (err) {
+      res
+        .status(500)
+        .send(err);
+    }
+  });
+
+  /**
    * @api {post} /api/meditation/like Add +1 to a meditation session
    * @apiName LikeMeditation
    * @apiGroup Meditation
