@@ -63,6 +63,7 @@ export default (app, router, io) => {
           // two hours in ms
           end: { $gt: Date.now() - 7.2E6 }
         })
+        .sort([['createdAt', 'descending']])
         .populate('user', 'name gravatarHash')
         .lean()
         .exec();
