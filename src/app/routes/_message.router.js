@@ -19,6 +19,7 @@ export default (app, router, io) => {
     try {
       let messages = await Message
         .find()
+        .sort([['createdAt', 'descending']])
         .limit(100)
         .populate('user', 'name gravatarHash')
         .lean()
@@ -28,6 +29,8 @@ export default (app, router, io) => {
         message.ago = moment(message.createdAt).fromNow();
         return message;
       });
+
+      messages.reverse();
 
       res.json(messages);
     } catch (err) {
