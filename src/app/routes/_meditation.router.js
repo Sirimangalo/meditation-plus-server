@@ -158,8 +158,14 @@ export default (app, router, io) => {
         }
       }
 
-      meditation.end = Date.now();
-      await meditation.save();
+      // remove session when time is 0
+      if (meditation.walking + meditation.sitting < 1) {
+        await meditation.remove();
+      } else {
+        meditation.end = Date.now();
+        await meditation.save();
+      }
+
       // sending broadcast WebSocket meditation
       io.sockets.emit('meditation', 'no content');
     } catch (err) {
