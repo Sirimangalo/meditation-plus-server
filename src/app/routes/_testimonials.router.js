@@ -4,8 +4,9 @@ import moment from 'moment';
 
 export default (app, router, io) => {
 
-  router.get('/api/testimonials', async (req, res) => {
+  router.get('/api/testimonials/:id', async (req, res) => {
     try {
+      let allowUser = true;
       let testimonials = await Testimonial
         .find({
           'reviewed' : false
@@ -17,13 +18,21 @@ export default (app, router, io) => {
 
       testimonials.map(testimonial => {
         testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
+        
+        if (testimonial.user._id == req.params.id){
+          allowUser = false;
+        }
         if (testimonial.anonymous) {
           testimonial.user = { name : 'Anonymous' };
         }
+
         return testimonial;
       })
-      
-      res.json(testimonials);
+
+      res.json({
+        allowUser: allowUser,
+        testimonials: testimonials
+      });
     } catch (err) {
       res.status(500).send(err);
     }
