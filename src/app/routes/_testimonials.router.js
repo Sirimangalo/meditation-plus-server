@@ -8,22 +8,21 @@ export default (app, router, io) => {
     try {
       let testimonials = await Testimonial
         .find({
-          'reviewed' : true
+          'reviewed' : false
         })
+        .sort([['createdAt', 'descending']])
         .populate('user', 'name gravatarHash')
         .lean()
         .then();
 
-      testimonials = testimonials
-        .map(testimonial => {
-          testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
-          if (testimonial.anonymous) {
-            testimonial.user = { name : 'Anonymous' };
-          }
-          return testimonial;
-        })
-        .reverse();
-
+      testimonials.map(testimonial => {
+        testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
+        if (testimonial.anonymous) {
+          testimonial.user = { name : 'Anonymous' };
+        }
+        return testimonial;
+      })
+      
       res.json(testimonials);
     } catch (err) {
       res.status(500).send(err);
