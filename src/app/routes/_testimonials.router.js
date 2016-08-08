@@ -4,30 +4,30 @@ import moment from 'moment';
 
 export default (app, router, io) => {
 
-  router.get('/api/testimonials/:id', async (req, res) => {
+  router.get('/api/testimonials', async (req, res) => {
     try {
+      let userId = req.user._doc._id;
       let allowUser = true;
       let testimonials = await Testimonial
-        .find({
-          'reviewed' : false
-        })
+        .find()
         .sort([['createdAt', 'descending']])
         .populate('user', 'name gravatarHash')
         .lean()
         .then();
 
-      testimonials.map(testimonial => {
-        testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
-        
-        if (testimonial.user._id == req.params.id){
-          allowUser = false;
-        }
-        if (testimonial.anonymous) {
-          testimonial.user = { name : 'Anonymous' };
-        }
 
-        return testimonial;
-      })
+      testimonials = testimonials.filter(testimonial => {
+          testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
+          
+          if (testimonial.user._id == userId){
+            allowUser = false;
+          }
+          if (testimonial.anonymous) {
+            testimonial.user = { name : 'Anonymous' };
+          }
+
+          return testimonial.reviewed;
+      });
 
       res.json({
         allowUser: allowUser,
