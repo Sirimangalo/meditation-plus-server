@@ -41,8 +41,8 @@ export default (app, router, passport, io) => {
 
   // #### RESTful API Routes
 
-  messageRoutes(app, router, io);
   testimonialRoutes(app, router, io);
+  messageRoutes(app, router, io, admin);
   commitmentRoutes(app, router, admin);
   meditationRoutes(app, router, io);
   profileRoutes(app, router);
