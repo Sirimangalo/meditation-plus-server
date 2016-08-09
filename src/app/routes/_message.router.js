@@ -38,9 +38,14 @@ export default (app, router, io, admin) => {
     }
   });
 
-  router.put('/api/message', admin, async (req, res) => {
+  /**
+   * @api {post} /api/message/:id/answer Sets message as answered
+   * @apiName AnswerMessage
+   * @apiGroup Message
+   */
+  router.post('/api/message/:id/answer', admin, async (req, res) => {
     try {
-      let message = await Message.findById(req.body.messageId);
+      let message = await Message.findById(req.params.id);
 
       message.answered = true;
 
@@ -52,7 +57,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-  
+
   /**
    * @api {post} /api/message Post a new message
    * @apiName AddMessage
