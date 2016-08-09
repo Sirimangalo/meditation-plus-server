@@ -2,7 +2,7 @@ import Message from '../models/message.model.js';
 
 import moment from 'moment';
 
-export default (app, router, io) => {
+export default (app, router, io, admin) => {
 
   /**
    * @api {get} /api/message Get chat history
@@ -38,6 +38,21 @@ export default (app, router, io) => {
     }
   });
 
+  router.put('/api/message', admin, async (req, res) => {
+    try {
+      let message = await Message.findById(req.body.messageId);
+
+      message.answered = true;
+
+      await message.save();
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  
   /**
    * @api {post} /api/message Post a new message
    * @apiName AddMessage
