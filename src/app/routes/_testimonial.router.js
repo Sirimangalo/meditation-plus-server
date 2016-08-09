@@ -1,10 +1,19 @@
-import Testimonial from '../models/testimonials.model.js';
+import Testimonial from '../models/testimonial.model.js';
 
 import moment from 'moment';
 
 export default (app, router, io) => {
 
-  router.get('/api/testimonials', async (req, res) => {
+  /**
+   * @api {get} /api/testimonial Get all testimonials
+   * @apiName ListTestimonials
+   * @apiGroup Testimonial
+   *
+   * @apiSuccess {Object[]} testimonials            List of available testimonials
+   * @apiSuccess {String}   commitments.user        User details
+   * @apiSuccess {Boolean}  allowUser               Current user allowed to post?
+   */
+  router.get('/api/testimonial', async (req, res) => {
     try {
       let userId = req.user._doc._id;
       let allowUser = true;
@@ -15,18 +24,14 @@ export default (app, router, io) => {
         .lean()
         .then();
 
-
-      testimonials = testimonials.filter(testimonial => {
-          testimonial.date = moment(testimonial.createdAt).format('D. MMMM Y');
-          
-          if (testimonial.user._id == userId){
+      testimonials = testimonials.filter(test => {
+          if (test.user._id == userId) {
             allowUser = false;
           }
-          if (testimonial.anonymous) {
-            testimonial.user = { name : 'Anonymous' };
-          }
 
-          return testimonial.reviewed;
+          test.user = test.anonymous ? { name : 'Anonymous' } : test.user;
+
+          return test.reviewed;
       });
 
       res.json({
@@ -38,7 +43,12 @@ export default (app, router, io) => {
     }
   });
 
-  router.post('/api/testimonials', async (req, res) => {
+  /**
+   * @api {post} /api/testimonial Adds new testimonial
+   * @apiName AddTestimonial
+   * @apiGroup Testimonial
+   */
+  router.post('/api/testimonial', async (req, res) => {
     try {
       let testimonial = await Testimonial.create({
         text: req.body.text,
@@ -53,9 +63,7 @@ export default (app, router, io) => {
         'name gravatarHash'
       ).execPopulate();
 
-
       let leanObject = populated.toObject();
-      // leanObject.ago = moment(leanObject.createdAt).fromNow();
 
       // sending broadcast WebSocket testimonial
       io.sockets.emit('testimonial', leanObject);
