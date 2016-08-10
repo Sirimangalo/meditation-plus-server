@@ -2,16 +2,15 @@ import Testimonial from '../models/testimonial.model.js';
 
 import moment from 'moment';
 
-export default (app, router, io) => {
+export default (app, router, io, admin) => {
 
   /**
-   * @api {get} /api/testimonial Get all testimonials
-   * @apiName ListTestimonials
+   * @api {get} /api/testimonial Get all reviewed testimonials
+   * @apiName ListReviewedTestimonials
    * @apiGroup Testimonial
    *
    * @apiSuccess {Object[]} testimonials            List of available testimonials
-   * @apiSuccess {String}   commitments.user        User details
-   * @apiSuccess {Boolean}  allowUser               Current user allowed to post?
+   * @apiSuccess {Boolean}  allowUser               Current user allowed to post
    */
   router.get('/api/testimonial', async (req, res) => {
     try {
@@ -36,6 +35,30 @@ export default (app, router, io) => {
 
       res.json({
         allowUser: allowUser,
+        testimonials: testimonials
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {get} /api/testimonial/admin Get all testimonials
+   * @apiName ListAllTestimonials
+   * @apiGroup Testimonial
+   *
+   * @apiSuccess {Object[]} testimonials            List of available testimonials
+   */
+  router.get('/api/testimonial/admin', admin, async (req, res) => {
+    try {
+      let testimonials = await Testimonial
+        .find()
+        .sort([['createdAt', 'descending']])
+        .populate('user', 'name gravatarHash')
+        .lean()
+        .then();
+
+      res.json({
         testimonials: testimonials
       });
     } catch (err) {
@@ -79,6 +102,46 @@ export default (app, router, io) => {
       res
         .status(errStatus)
         .send(err);
+    }
+  });
+
+  /**
+   * @api {put} /api/testimonial/review Toggle review state
+   * @apiName ReviewTestimonial
+   * @apiGroup Testimonial
+   * @apiDescription Toggles the review state of selected testimonial
+   *
+   * @apiParam {Boolean}    id              Testimonial ID
+   */
+  router.put('/api/testimonial/review', async (req, res) => {
+    try {
+      let testimonial = await Testimonial.findById(req.body.id);
+
+      testimonial.reviewed = !testimonial.reviewed;
+      
+      await testimonial.save();
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  /**
+   * @api {delete} /api/testimonial/:id Deletes testimonial
+   * @apiName DeleteTestimonial
+   * @apiGroup Testimonial
+   */
+  router.delete('/api/testimonial/:id', admin, async (req, res) => {
+    try {
+      const result = await Testimonial
+        .find({ _id: req.params.id })
+        .remove()
+        .exec();
+
+      res.json(result);
+    } catch (err) {
+      res.send(err);
     }
   });
 
