@@ -2,7 +2,7 @@ import Testimonial from '../models/testimonial.model.js';
 
 import moment from 'moment';
 
-export default (app, router, io) => {
+export default (app, router, io, admin) => {
 
   /**
    * @api {get} /api/testimonial Get all testimonials
@@ -36,6 +36,23 @@ export default (app, router, io) => {
 
       res.json({
         allowUser: allowUser,
+        testimonials: testimonials
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  router.get('/api/testimonial/admin', admin, async (req, res) => {
+    try {
+      let testimonials = await Testimonial
+        .find()
+        .sort([['createdAt', 'descending']])
+        .populate('user', 'name gravatarHash')
+        .lean()
+        .then();
+
+      res.json({
         testimonials: testimonials
       });
     } catch (err) {
@@ -79,6 +96,35 @@ export default (app, router, io) => {
       res
         .status(errStatus)
         .send(err);
+    }
+  });
+
+
+
+  router.put('/api/testimonial', async (req, res) => {
+    try {
+      let testimonial = await Testimonial.findById(req.body.id);
+
+      testimonial.reviewed = !testimonial.reviewed;
+      
+      await testimonial.save();
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  router.delete('/api/testimonial/:id', admin, async (req, res) => {
+    try {
+      const result = await Testimonial
+        .find({ _id: req.params.id })
+        .remove()
+        .exec();
+
+      res.json(result);
+    } catch (err) {
+      res.send(err);
     }
   });
 
