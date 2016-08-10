@@ -60,8 +60,8 @@ export default (app, router, io) => {
     try {
       let result = await Meditation
         .find({
-          // two hours in ms
-          end: { $gt: Date.now() - 7.2E6 }
+          // three hours in ms
+          end: { $gt: Date.now() - 1.08E7 }
         })
         .sort([['createdAt', 'descending']])
         .populate('user', 'name gravatarHash')
