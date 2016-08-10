@@ -101,7 +101,7 @@ export default (app, router, io, admin) => {
 
 
 
-  router.put('/api/testimonial', async (req, res) => {
+  router.put('/api/testimonial/review', async (req, res) => {
     try {
       let testimonial = await Testimonial.findById(req.body.id);
 
