@@ -9,6 +9,7 @@ import commitmentRoutes from './routes/_commitment.router.js';
 import meditationRoutes from './routes/_meditation.router.js';
 import profileRoutes from './routes/_profile.router.js';
 import appointmentRoutes from './routes/_appointment.router.js';
+import userRoutes from './routes/_user.router.js';
 
 export default (app, router, passport, io) => {
 
@@ -47,6 +48,7 @@ export default (app, router, passport, io) => {
   meditationRoutes(app, router, io);
   profileRoutes(app, router);
   appointmentRoutes(app, router, io, admin);
+  userRoutes(app, router, io, admin);
 
   // ### Frontend Routes
 
