@@ -127,6 +127,11 @@ export default (app, router, io, admin) => {
     }
   });
 
+  /**
+   * @api {delete} /api/testimonial/:id Deletes testimonial
+   * @apiName DeleteTestimonial
+   * @apiGroup Testimonial
+   */
   router.delete('/api/testimonial/:id', admin, async (req, res) => {
     try {
       const result = await Testimonial
