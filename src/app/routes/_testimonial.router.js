@@ -5,13 +5,12 @@ import moment from 'moment';
 export default (app, router, io, admin) => {
 
   /**
-   * @api {get} /api/testimonial Get all testimonials
-   * @apiName ListTestimonials
+   * @api {get} /api/testimonial Get all reviewed testimonials
+   * @apiName ListReviewedTestimonials
    * @apiGroup Testimonial
    *
    * @apiSuccess {Object[]} testimonials            List of available testimonials
-   * @apiSuccess {String}   commitments.user        User details
-   * @apiSuccess {Boolean}  allowUser               Current user allowed to post?
+   * @apiSuccess {Boolean}  allowUser               Current user allowed to post
    */
   router.get('/api/testimonial', async (req, res) => {
     try {
@@ -43,6 +42,13 @@ export default (app, router, io, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/testimonial/admin Get all testimonials
+   * @apiName ListAllTestimonials
+   * @apiGroup Testimonial
+   *
+   * @apiSuccess {Object[]} testimonials            List of available testimonials
+   */
   router.get('/api/testimonial/admin', admin, async (req, res) => {
     try {
       let testimonials = await Testimonial
@@ -99,8 +105,14 @@ export default (app, router, io, admin) => {
     }
   });
 
-
-
+  /**
+   * @api {put} /api/testimonial/review Toggle review state
+   * @apiName ReviewTestimonial
+   * @apiGroup Testimonial
+   * @apiDescription Toggles the review state of selected testimonial
+   *
+   * @apiParam {Boolean}    id              Testimonial ID
+   */
   router.put('/api/testimonial/review', async (req, res) => {
     try {
       let testimonial = await Testimonial.findById(req.body.id);
