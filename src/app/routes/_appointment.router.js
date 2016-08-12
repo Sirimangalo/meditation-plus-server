@@ -168,4 +168,31 @@ export default (app, router, io, admin) => {
       res.send(err);
     }
   });
+
+  /**
+   * @api {delete} /api/appointment/remove/:id Deletes any user from appointment
+   * @apiName DeleteRegistration
+   * @apiGroup Appointment
+   */
+  router.delete('/api/appointment/remove/:id', admin, async (req, res) => {
+    try {
+      // gets appointment
+      let appointment = await Appointment
+        .findById(req.params.id)
+        .exec();
+
+      if (!appointment) return res.sendStatus(404);
+
+      // Remove registration from appointment
+      appointment.user = null;
+
+      await appointment.save();
+      // sending broadcast WebSocket for taken/fred appointment
+      io.sockets.emit('appointment', appointment);
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.send(err);
+    }
+  });
 };
