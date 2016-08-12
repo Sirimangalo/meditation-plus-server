@@ -131,6 +131,9 @@ export default (app, router) => {
       }
 
       for (const key of Object.keys(req.body)) {
+        if (key === 'role') {
+          continue;
+        }
         user[key] = req.body[key];
       }
       user.gravatarHash = md5(user.local.email);
