@@ -68,6 +68,18 @@ export default (app, router, io) => {
         .lean()
         .exec();
 
+      // adds alreadyLiked when the current user already added a like to
+      // this session.
+      result = result.map(val => {
+        for (let like of val.likes) {
+          if (like.toString() === req.user._doc._id) {
+            val.alreadyLiked = true;
+            break;
+          }
+        }
+        return val;
+      });
+
       // Add remaining walking and sitting time to entries
       res.json(result.map(calculateRemainingTime));
     } catch (err) {
