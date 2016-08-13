@@ -28,9 +28,9 @@ import http from 'http';
 import cors from 'cors';
 // JWT Support
 import expressJwt from 'express-jwt';
-
 // Create our app with Express
 let app = express();
+
 // Enable CORS
 app.use(cors());
 
@@ -73,10 +73,8 @@ import passportConf from './config/passport.conf.js';
 // Pass Passport configuration our PassportJS instance
 passportConf(passport);
 
-if (process.env.NODE_ENV === 'development' ||
-    process.env.NODE_ENV === 'test')
-  // Log every request to the console
-  app.use(morgan('dev'));
+// Log requests to console
+app.use(morgan('combined'));
 
 // ## Get all data/stuff of the body (POST) parameters
 
