@@ -74,32 +74,96 @@ export default (app, router) => {
         delete doc.local['email'];
       }
 
-      // adds weekly meditation data
-      let endOfWeek = Date.now();
-      let startOfWeek = Date.now() - 6.048E8;
+      // initialize timespans
+      let today = Date.now();
+      let tenDaysAgo = Date.now() - 8.648E8;
+      let tenWeeksAgo = Date.now() - 6.048E9;
+      let tenMonthsAgo = Date.now() - 2.628E10;
 
-      doc.meditations = {};
+      doc.meditations = {
+        lastMonths: {},
+        lastWeeks: {},
+        lastDays: {},
+        consecutiveDays: [],
+        numberOfSessions: 0,
+        currentConsecutiveDays: 0,
+        totalMeditationTime: 0,
+        averageSessionTime: 0
+      };
+
+      let lastDay = null;
 
       // iterate days
-      for (let day = startOfWeek; day <= endOfWeek; day += 8.64E7) {
-        doc.meditations[moment(day).format('Do')] = 0;
+      for (let day = tenMonthsAgo; day <= today; day += 8.64E7) {
+        doc.meditations.lastMonths[moment(day).format('MMM')] = 0;
+
+        if (day >= tenWeeksAgo) {
+          doc.meditations.lastWeeks[moment(day).format('w')] = 0;
+        }
+        if (day >= tenDaysAgo) {
+          doc.meditations.lastDays[moment(day).format('Do')] = 0;
+        }
       }
       let result = await Meditation
         .find({
-          // 1 week
-          end: { $lt: endOfWeek, $gt: startOfWeek },
+          end: { $lt: today },
           user: doc._id
         })
+        .sort([['createdAt', 'descending']])
         .lean()
         .exec();
 
       // sum meditation time
       result.map(entry => {
-        doc.meditations[moment(entry.createdAt).format('Do')] += entry.sitting + entry.walking;
+        const value = entry.sitting + entry.walking;
+
+        doc.meditations.numberOfSessions++;
+        doc.meditations.totalMeditationTime += value;
+
+        // adding times of last 10 months
+        doc.meditations.lastMonths[moment(entry.createdAt).format('MMM')] += value;
+
+        // adding times of last 10 weeks
+        if (entry.createdAt >= tenWeeksAgo) {
+          doc.meditations.lastWeeks[moment(entry.createdAt).format('w')] += value;
+        }
+
+        // adding times of last 10 days
+        if (entry.createdAt >= tenDaysAgo) {
+          doc.meditations.lastDays[moment(entry.createdAt).format('Do')] += value;
+        }
+
+        // calculate consecutive days
+        if (lastDay) {
+          const duration = moment.duration(
+            moment(lastDay).startOf('day').diff(moment(entry.createdAt).startOf('day'))
+          );
+
+          // only one day ago = consecutive day
+          if (duration.asDays() ===   1) {
+            doc.meditations.currentConsecutiveDays++
+
+            // save 10-steps as badges
+            if (doc.meditations.currentConsecutiveDays % 10 === 0) {
+              doc.meditations.consecutiveDays.push(doc.meditations.currentConsecutiveDays);
+            }
+          } else if (duration.asDays() > 1) {
+            // more than one day ago = reset consecutive days
+            doc.meditations.currentConsecutiveDays = 0;
+          }
+        } else {
+          doc.meditations.currentConsecutiveDays = 1;
+        }
+
+        lastDay = entry.createdAt;
       });
+
+      doc.meditations.averageSessionTime =
+        Math.round(doc.meditations.totalMeditationTime / doc.meditations.numberOfSessions);
 
       res.json(doc);
     } catch (err) {
+      console.log(err);
       res.status(400).send(err);
     }
   });
