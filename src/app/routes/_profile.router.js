@@ -88,8 +88,7 @@ export default (app, router) => {
         numberOfSessions: 0,
         currentConsecutiveDays: 0,
         totalMeditationTime: 0,
-        averageSessionTime: 0,
-        longestSessionTime: 0
+        averageSessionTime: 0
       };
 
       let lastDay = null;
@@ -121,10 +120,6 @@ export default (app, router) => {
         doc.meditations.numberOfSessions++;
         doc.meditations.totalMeditationTime += value;
 
-        if (value > doc.meditations.longestSessionTime) {
-          doc.meditations.longestSessionTime = value;
-        }
-
         // adding times of last 10 months
         doc.meditations.lastMonths[moment(entry.createdAt).format('MMM')] += value;
 
@@ -143,10 +138,6 @@ export default (app, router) => {
           const duration = moment.duration(
             moment(lastDay).startOf('day').diff(moment(entry.createdAt).startOf('day'))
           );
-
-          console.log('lastDay', moment(lastDay).startOf('day').toString());
-          console.log('current', moment(entry.createdAt).startOf('day').toString());
-          console.log('distance is ', duration.asDays());
 
           // only one day ago = consecutive day
           if (duration.asDays() ===   1) {
@@ -169,8 +160,6 @@ export default (app, router) => {
 
       doc.meditations.averageSessionTime =
         Math.round(doc.meditations.totalMeditationTime / doc.meditations.numberOfSessions);
-
-      console.log(doc);
 
       res.json(doc);
     } catch (err) {
