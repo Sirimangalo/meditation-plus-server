@@ -23,6 +23,7 @@ let userSchema = mongoose.Schema({
   description: { type: String, maxlength: 300 },
   website: { type: String, maxlength: 100 },
   country: String,
+  lastActive: Date,
   sound: String,
   gravatarHash: String
 });
