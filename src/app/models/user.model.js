@@ -25,6 +25,7 @@ let userSchema = mongoose.Schema({
   website: { type: String, maxlength: 100 },
   country: String,
   lastActive: Date,
+  lastMeditation: Date,
   sound: String,
   gravatarHash: String
 });

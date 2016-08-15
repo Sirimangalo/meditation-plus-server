@@ -1,4 +1,5 @@
 import Meditation from '../models/meditation.model.js';
+import User from '../models/user.model.js';
 import moment from 'moment';
 
 export default (app, router, io) => {
@@ -126,6 +127,13 @@ export default (app, router, io) => {
         end: new Date(new Date().getTime() + total * 60000),
         user: req.user._doc
       });
+
+      // update users lastMeditation log
+      let user = await User.findById(req.user._doc._id);
+
+      user.lastMeditation = created.end;
+
+      await user.save();
 
       // sending broadcast WebSocket meditation
       io.sockets.emit('meditation', 'no content');

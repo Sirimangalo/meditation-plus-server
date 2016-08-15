@@ -1,4 +1,5 @@
 import Message from '../models/message.model.js';
+import meditatedRecently from './meditatedRecently.js';
 
 import moment from 'moment';
 
@@ -21,12 +22,14 @@ export default (app, router, io, admin) => {
         .find()
         .sort([['createdAt', 'descending']])
         .limit(100)
-        .populate('user', 'name gravatarHash')
+        .populate('user', 'name gravatarHash lastMeditation')
         .lean()
         .then();
 
       messages.map(message => {
         message.ago = moment(message.createdAt).fromNow();
+        message.user.meditator = meditatedRecently(message.user);
+
         return message;
       });
 
