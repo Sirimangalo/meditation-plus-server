@@ -20,6 +20,7 @@ let userSchema = mongoose.Schema({
   name: { type: String, maxlength: 30 },
   role : { type : String },
   showEmail: Boolean,
+  noTabs: Boolean,
   description: { type: String, maxlength: 300 },
   website: { type: String, maxlength: 100 },
   country: String,
