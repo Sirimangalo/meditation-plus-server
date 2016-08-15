@@ -22,6 +22,27 @@ export default (app, router, io, admin) => {
   });
 
   /**
+   * @api {get} /api/user/online Get online user data
+   * @apiName ListOnlineUser
+   * @apiGroup User
+   *
+   * @apiSuccess {Object[]} users List of online user
+   */
+  router.get('/api/user/online', async (req, res) => {
+    try {
+      const result = await User
+        .find({
+          lastActive: { $gt: Date.now() - 120000 }
+        }, 'name gravatarHash _id')
+        .exec();
+
+      res.json(result);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  /**
    * @api {post} /api/user/seach Searches users
    * @apiName SearchUser
    * @apiGroup User

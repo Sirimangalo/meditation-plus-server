@@ -12,10 +12,29 @@ import appointmentRoutes from './routes/_appointment.router.js';
 import userRoutes from './routes/_user.router.js';
 import liveRoutes from './routes/_livestream.router.js';
 
+import User from './models/user.model.js';
+
 export default (app, router, passport, io) => {
 
   // ### Express Middlware to use for all requests
-  router.use((req, res, next) => {
+  router.use(async (req, res, next) => {
+    // update lastActive for user
+    if (req.user) {
+      let user = await User.findById(req.user._doc._id);
+
+      const now = new Date();
+
+      if (!user.lastActive ||
+        (now.getTime() - user.lastActive.getTime()) > 120000) {
+        // sending broadcast WebSocket message when a user switched from offline
+        // to online.
+        io.sockets.emit('user-online', req.user._doc._id);
+      }
+
+      user.lastActive = now;
+      await user.save();
+    }
+
     // Make sure we go to the next routes and don't stop here...
     next();
   });
