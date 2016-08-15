@@ -123,7 +123,7 @@ export default (app, router, io, admin) => {
       }
 
       if (!appointment.user) {
-        // check if user is already in another appointment
+        // check if user is already in another appointment and remove it
         const otherAppointment = await Appointment
           .findOne({
             user: req.user._doc._id
@@ -131,7 +131,8 @@ export default (app, router, io, admin) => {
           .exec();
 
         if (otherAppointment) {
-          throw Exception('Only one appointment per user');
+          otherAppointment.user = null;
+          await otherAppointment.save();
         }
       }
 
