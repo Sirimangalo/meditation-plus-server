@@ -75,10 +75,11 @@ export default (app, router) => {
       }
 
       // initialize timespans
-      let today = Date.now();
-      let tenDaysAgo = Date.now() - 8.648E8;
-      let tenWeeksAgo = Date.now() - 6.048E9;
-      let tenMonthsAgo = Date.now() - 2.628E10;
+      let today = moment();
+      let todayWithoutTime = moment().startOf('day');
+      let tenDaysAgo = moment(todayWithoutTime).subtract(9, 'days');
+      let tenWeeksAgo = moment(todayWithoutTime).subtract(10, 'weeks');
+      let tenMonthsAgo = moment(todayWithoutTime).subtract(10, 'months');
 
       doc.meditations = {
         lastMonths: {},
@@ -94,19 +95,19 @@ export default (app, router) => {
       let lastDay = null;
 
       // iterate days
-      for (let day = tenMonthsAgo; day <= today; day += 8.64E7) {
-        doc.meditations.lastMonths[moment(day).format('MMM')] = 0;
+      for (let day = moment(tenMonthsAgo); day <= todayWithoutTime; day.add(1, 'day')) {
+        doc.meditations.lastMonths[day.format('MMM')] = 0;
 
         if (day >= tenWeeksAgo) {
-          doc.meditations.lastWeeks[moment(day).format('w')] = 0;
+          doc.meditations.lastWeeks[day.format('w')] = 0;
         }
         if (day >= tenDaysAgo) {
-          doc.meditations.lastDays[moment(day).format('Do')] = 0;
+          doc.meditations.lastDays[day.format('Do')] = 0;
         }
       }
       let result = await Meditation
         .find({
-          end: { $lt: today },
+          end: { $lt: today.format('x') },
           user: doc._id
         })
         .sort([['createdAt', 'descending']])
@@ -119,24 +120,25 @@ export default (app, router) => {
 
         doc.meditations.numberOfSessions++;
         doc.meditations.totalMeditationTime += value;
+        const entryDate = moment(entry.createdAt);
 
         // adding times of last 10 months
-        doc.meditations.lastMonths[moment(entry.createdAt).format('MMM')] += value;
+        doc.meditations.lastMonths[entryDate.format('MMM')] += value;
 
         // adding times of last 10 weeks
-        if (entry.createdAt >= tenWeeksAgo) {
-          doc.meditations.lastWeeks[moment(entry.createdAt).format('w')] += value;
+        if (entryDate >= tenWeeksAgo) {
+          doc.meditations.lastWeeks[entryDate.format('w')] += value;
         }
 
         // adding times of last 10 days
-        if (entry.createdAt >= tenDaysAgo) {
-          doc.meditations.lastDays[moment(entry.createdAt).format('Do')] += value;
+        if (entryDate >= tenDaysAgo) {
+          doc.meditations.lastDays[entryDate.format('Do')] += value;
         }
 
         // calculate consecutive days
         if (lastDay) {
           const duration = moment.duration(
-            moment(lastDay).startOf('day').diff(moment(entry.createdAt).startOf('day'))
+            moment(lastDay).startOf('day').diff(moment(entryDate).startOf('day'))
           );
 
           // only one day ago = consecutive day
@@ -155,7 +157,7 @@ export default (app, router) => {
           doc.meditations.currentConsecutiveDays = 1;
         }
 
-        lastDay = entry.createdAt;
+        lastDay = moment(entryDate);
       });
 
       doc.meditations.averageSessionTime =
