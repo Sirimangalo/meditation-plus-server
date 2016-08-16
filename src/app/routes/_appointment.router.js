@@ -21,6 +21,7 @@ export default (app, router, io, admin) => {
       const result = await Appointment
         .find()
         .sort({
+          weekDay: 'asc',
           hour: 'asc'
         })
         .populate('user', 'name gravatarHash')
