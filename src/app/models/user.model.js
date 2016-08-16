@@ -21,6 +21,7 @@ let userSchema = mongoose.Schema({
   role : { type : String },
   showEmail: Boolean,
   noTabs: Boolean,
+  hideStats: Boolean,
   description: { type: String, maxlength: 300 },
   website: { type: String, maxlength: 100 },
   country: String,
