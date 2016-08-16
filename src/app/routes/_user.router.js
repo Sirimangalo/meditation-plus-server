@@ -3,7 +3,7 @@ import User from '../models/user.model.js';
 export default (app, router, io, admin) => {
 
   function meditatedRecently(user) {
-    if (!user || 'meditator' in user || !'lastMeditation' in user || !user.lastMeditation instanceof Date) {
+    if (!user || !'lastMeditation' in user || !user.lastMeditation instanceof Date) {
       return false;
     }
 
