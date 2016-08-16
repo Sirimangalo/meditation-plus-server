@@ -1,8 +1,22 @@
 import Message from '../models/message.model.js';
-
 import moment from 'moment';
 
 export default (app, router, io, admin) => {
+
+  function meditatedRecently(user) {
+    if (!user || 'meditator' in user || !'lastMeditation' in user || !user.lastMeditation instanceof Date) {
+      return false;
+    }
+
+    // calculate hours since last meditation
+    let diff = Math.abs(new Date().getTime() - user.lastMeditation) / 36e5;
+
+    if (diff <= 3) {
+      return true
+    }
+
+    return false;
+  }
 
   /**
    * @api {get} /api/message Get chat history
@@ -21,12 +35,14 @@ export default (app, router, io, admin) => {
         .find()
         .sort([['createdAt', 'descending']])
         .limit(100)
-        .populate('user', 'name gravatarHash')
+        .populate('user', 'name gravatarHash lastMeditation')
         .lean()
         .then();
 
       messages.map(message => {
         message.ago = moment(message.createdAt).fromNow();
+        message.user.meditator = meditatedRecently(message.user);
+
         return message;
       });
 

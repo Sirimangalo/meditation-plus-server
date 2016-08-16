@@ -128,15 +128,12 @@ export default (app, router, io) => {
         user: req.user._doc
       });
 
-      // update users lastMeditation property
+      // update users lastMeditation log
+      let user = await User.findById(req.user._doc._id);
 
-      let user = await User.findById(req.params.id);
-
-      user['lastMeditation'] = created['end'];
+      user.lastMeditation = created.end;
 
       await user.save();
-
-
 
       // sending broadcast WebSocket meditation
       io.sockets.emit('meditation', 'no content');
