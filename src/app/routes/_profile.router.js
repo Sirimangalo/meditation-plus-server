@@ -115,7 +115,7 @@ export default (app, router) => {
           end: { $lt: today.format('x') },
           user: doc._id
         })
-        .sort([['createdAt', 'descending']])
+        .sort([['createdAt', 'ascending']])
         .lean()
         .exec();
 
@@ -143,7 +143,7 @@ export default (app, router) => {
         // calculate consecutive days
         if (lastDay) {
           const duration = moment.duration(
-            moment(lastDay).startOf('day').diff(moment(entryDate).startOf('day'))
+            moment(entryDate).startOf('day').diff(moment(lastDay).startOf('day'))
           );
 
           // only one day ago = consecutive day
@@ -156,7 +156,7 @@ export default (app, router) => {
             }
           } else if (duration.asDays() > 1) {
             // more than one day ago = reset consecutive days
-            doc.meditations.currentConsecutiveDays = 0;
+            doc.meditations.currentConsecutiveDays = 1;
           }
         } else {
           doc.meditations.currentConsecutiveDays = 1;
