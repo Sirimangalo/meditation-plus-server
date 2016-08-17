@@ -75,7 +75,7 @@ export default (app, router) => {
       }
 
       // skip stats for public if hideStats is true
-      if (doc.hideStats && doc._id !== req.user._doc._id) {
+      if (doc.hideStats && doc._id.toString() !== req.user._doc._id) {
         return res.json(doc);
       }
 
