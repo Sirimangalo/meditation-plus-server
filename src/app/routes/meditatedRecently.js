@@ -2,7 +2,7 @@
 * Method for checking if user has meditated recently
 */
 export default (user) => {
-	if (!user || !'lastMeditation' in user || !user.lastMeditation instanceof Date) {
+  if (!user || !'lastMeditation' in user || !user.lastMeditation instanceof Date) {
     return false;
   }
 
