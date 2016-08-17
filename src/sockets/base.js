@@ -11,11 +11,12 @@ export default (io) => {
     handshake: true
   }));
 
+  io.set('transports', ['websocket']);
   io.set('origins', '*:*');
 
   io.on('connection', socket => {
-
     console.log('a user connected:', socket.decoded_token._doc._id);
+    console.log(socket.id + ' connected via ('+ socket.client.conn.transport.constructor.name +')');
 
     socket.on('disconnect', () => {
       console.log('a user disconnected');
