@@ -74,6 +74,11 @@ export default (app, router) => {
         delete doc.local['email'];
       }
 
+      // skip stats for public if hideStats is true
+      if (doc.hideStats && doc._id !== req.user._doc._id) {
+        return res.json(doc);
+      }
+
       // initialize timespans
       let today = moment();
       let todayWithoutTime = moment().startOf('day');
