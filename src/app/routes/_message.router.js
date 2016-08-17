@@ -28,7 +28,10 @@ export default (app, router, io, admin) => {
 
       messages.map(message => {
         message.ago = moment(message.createdAt).fromNow();
-        message.user.meditator = meditatedRecently(message.user);
+
+        if (message.user) {
+          message.user.meditator = meditatedRecently(message.user);
+        }
 
         return message;
       });
@@ -37,6 +40,7 @@ export default (app, router, io, admin) => {
 
       res.json(messages);
     } catch (err) {
+      console.log(err);
       res.status(500).send(err);
     }
   });
