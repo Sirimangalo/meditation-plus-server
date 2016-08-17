@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import meditatedRecently from './meditatedRecently.js';
 
 export default (app, router, io, admin) => {
 
@@ -33,10 +34,14 @@ export default (app, router, io, admin) => {
       const result = await User
         .find({
           lastActive: { $gt: Date.now() - 120000 }
-        }, 'name gravatarHash _id')
+        }, 'name gravatarHash _id lastMeditation')
+        .lean()
         .exec();
 
-      res.json(result);
+      res.json(result.map(user => {
+        user.meditator = meditatedRecently(user);
+        return user;
+      }));
     } catch (err) {
       res.status(400).send(err);
     }
