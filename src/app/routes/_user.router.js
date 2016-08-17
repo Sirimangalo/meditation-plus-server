@@ -34,7 +34,7 @@ export default (app, router, io, admin) => {
       const result = await User
         .find({
           lastActive: { $gt: Date.now() - 120000 }
-        }, 'name gravatarHash _id lastMeditation')
+        }, 'name gravatarHash _id lastMeditation country')
         .lean()
         .exec();
 
