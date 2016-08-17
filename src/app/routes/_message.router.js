@@ -22,7 +22,7 @@ export default (app, router, io, admin) => {
         .find()
         .sort([['createdAt', 'descending']])
         .limit(100)
-        .populate('user', 'name gravatarHash lastMeditation')
+        .populate('user', 'name gravatarHash lastMeditation country')
         .lean()
         .then();
 
@@ -40,7 +40,6 @@ export default (app, router, io, admin) => {
 
       res.json(messages);
     } catch (err) {
-      console.log(err);
       res.status(500).send(err);
     }
   });
