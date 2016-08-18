@@ -81,7 +81,7 @@ export default (app, router, io, admin) => {
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
-        'name gravatarHash'
+        'name gravatarHash country lastMeditation'
       ).execPopulate();
 
       let leanObject = populated.toObject();
