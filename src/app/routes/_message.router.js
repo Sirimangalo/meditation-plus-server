@@ -86,6 +86,7 @@ export default (app, router, io, admin) => {
 
       let leanObject = populated.toObject();
       leanObject.ago = moment(leanObject.createdAt).fromNow();
+      leanObject.user.meditator = meditatedRecently(leanObject.user);
 
       // sending broadcast WebSocket message
       io.sockets.emit('message', leanObject);
