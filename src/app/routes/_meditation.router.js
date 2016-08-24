@@ -258,7 +258,7 @@ export default (app, router, io) => {
 
       // Sum meditation times
       result.map(entry => {
-        times[moment(entry.createdAt).format('H')] += entry.sitting + entry.walking;
+        times[moment.utc(entry.createdAt).format('H')] += entry.sitting + entry.walking;
       });
 
       res.json(times);
