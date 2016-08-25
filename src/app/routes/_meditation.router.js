@@ -121,15 +121,16 @@ export default (app, router, io) => {
         await meditation.remove();
       }
 
+      // update users lastMeditation log
+      let user = await User.findById(req.user._doc._id);
+
       const created = await Meditation.create({
         sitting: sitting,
         walking: walking,
-        end: new Date(new Date().getTime() + total * 60000),
+        end: !user.disableTimer ? new Date(new Date().getTime() + total * 60000) : new Date(new Date().getTime()),
         user: req.user._doc
       });
 
-      // update users lastMeditation log
-      let user = await User.findById(req.user._doc._id);
 
       user.lastMeditation = created.end;
 
