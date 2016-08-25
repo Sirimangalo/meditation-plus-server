@@ -28,7 +28,8 @@ let userSchema = mongoose.Schema({
   lastActive: Date,
   lastMeditation: Date,
   sound: String,
-  gravatarHash: String
+  gravatarHash: String,
+  disableTimer: { type : Boolean, default : false }
 });
 
 // ## Methods
