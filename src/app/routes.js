@@ -4,6 +4,7 @@
 import authRoutes from './routes/_authentication.router.js';
 
 import messageRoutes from './routes/_message.router.js';
+import questionRoutes from './routes/_question.router.js';
 import testimonialRoutes from './routes/_testimonial.router.js';
 import commitmentRoutes from './routes/_commitment.router.js';
 import meditationRoutes from './routes/_meditation.router.js';
@@ -63,7 +64,8 @@ export default (app, router, passport, io) => {
   // #### RESTful API Routes
 
   testimonialRoutes(app, router, io, admin);
-  messageRoutes(app, router, io, admin);
+  messageRoutes(app, router, io);
+  questionRoutes(app, router, io, admin);
   commitmentRoutes(app, router, admin);
   meditationRoutes(app, router, io);
   profileRoutes(app, router);

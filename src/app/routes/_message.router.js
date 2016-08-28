@@ -3,7 +3,7 @@ import meditatedRecently from './meditatedRecently.js';
 
 import moment from 'moment';
 
-export default (app, router, io, admin) => {
+export default (app, router, io) => {
 
   /**
    * @api {get} /api/message Get chat history
@@ -43,26 +43,6 @@ export default (app, router, io, admin) => {
       res.status(500).send(err);
     }
   });
-
-  /**
-   * @api {post} /api/message/:id/answer Sets message as answered
-   * @apiName AnswerMessage
-   * @apiGroup Message
-   */
-  router.post('/api/message/:id/answer', admin, async (req, res) => {
-    try {
-      let message = await Message.findById(req.params.id);
-
-      message.answered = true;
-
-      await message.save();
-
-      res.sendStatus(200);
-    } catch (err) {
-      res.status(400).send(err);
-    }
-  });
-
 
   /**
    * @api {post} /api/message Post a new message
