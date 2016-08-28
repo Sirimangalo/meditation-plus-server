@@ -172,10 +172,10 @@ export default (app, router, io) => {
       let minutes = diff.asMinutes();
 
       for (; minutes > 0; minutes--) {
-        if (meditation.walking > 0) {
-          meditation.walking--;
-        } else {
+        if (meditation.sitting > 0) {
           meditation.sitting--;
+        } else {
+          meditation.walking--;
         }
       }
 
