@@ -197,34 +197,55 @@ export default (app, router, io) => {
   });
 
   /**
-   * @api {post} /api/meditation/like Add +1 to a meditation session
-   * @apiName LikeMeditation
+   * @api {post} /api/meditation/like Add +1 to a all recent meditation sessions
+   * @apiName LikeMeditations
    * @apiGroup Meditation
-   *
-   * @apiParam {String} session ObjectID of the meditation session
    */
   router.post('/api/meditation/like', async (req, res) => {
     try {
-      let entry = await Meditation.findById(req.body.session);
-      if (entry.user == req.user._doc._id) {
-        return res.sendStatus(400);
-      }
+      let result = await Meditation
+        .find({
+          // three hours in ms
+          end: { $gt: Date.now() - 1.08E7 }
+        })
+        .sort([['createdAt', 'descending']])
+        .lean()
+        .exec();
 
-      // check if already liked
-      for (let like of entry.likes) {
-        if (like == req.user._doc._id) {
-          return res.sendStatus(400);
+      let updated = false;
+
+      // walk through entries
+      for (const entry of result) {
+        // checking if entry is already liked by the current user
+        let alreadyLiked = false;
+        for (let like of entry.likes) {
+          if (like.toString() === req.user._doc._id) {
+            alreadyLiked = true;
+            break;
+          }
+        }
+
+        // add like
+        if (!alreadyLiked) {
+          let toUpdate = await Meditation
+            .findById(entry._id)
+            .exec();
+
+          if (typeof toUpdate.likes === 'undefined') {
+            toUpdate.likes = [];
+          }
+
+          toUpdate.likes.push(req.user._doc);
+
+          await toUpdate.save();
+          updated = true;
         }
       }
 
-      // add like
-      if (typeof entry.likes === 'undefined') {
-        entry.likes = [];
+      if (updated) {
+        // sending broadcast WebSocket meditation
+        io.sockets.emit('meditation', 'no content');
       }
-      entry.likes.push(req.user._doc);
-      await entry.save();
-      // sending broadcast WebSocket meditation
-      io.sockets.emit('meditation', 'no content');
 
       res.sendStatus(204);
     } catch (err) {
