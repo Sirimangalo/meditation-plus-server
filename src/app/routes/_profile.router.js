@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import Meditation from '../models/meditation.model.js';
 import moment from 'moment';
 import md5 from 'md5';
+import timezone from '../helper/timezone.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -80,11 +81,11 @@ export default (app, router) => {
       }
 
       // initialize timespans
-      let today = moment().utc();
-      let todayWithoutTime = moment().utc().startOf('day');
-      let tenDaysAgo = moment.utc(todayWithoutTime).subtract(9, 'days');
-      let tenWeeksAgo = moment.utc(todayWithoutTime).subtract(10, 'weeks');
-      let tenMonthsAgo = moment.utc(todayWithoutTime).subtract(10, 'months');
+      let today = timezone(doc, moment());
+      let todayWithoutTime = timezone(doc, moment()).startOf('day');
+      let tenDaysAgo = moment(todayWithoutTime).subtract(9, 'days');
+      let tenWeeksAgo = moment(todayWithoutTime).subtract(10, 'weeks');
+      let tenMonthsAgo = moment(todayWithoutTime).subtract(10, 'months');
 
       doc.meditations = {
         lastMonths: {},
@@ -100,7 +101,7 @@ export default (app, router) => {
       let lastDay = null;
 
       // iterate days
-      for (let day = moment.utc(tenMonthsAgo); day <= todayWithoutTime; day.add(1, 'day')) {
+      for (let day = moment(tenMonthsAgo); day <= todayWithoutTime; day.add(1, 'day')) {
         doc.meditations.lastMonths[day.format('MMM')] = 0;
 
         if (day >= tenWeeksAgo) {
@@ -125,7 +126,7 @@ export default (app, router) => {
 
         doc.meditations.numberOfSessions++;
         doc.meditations.totalMeditationTime += value;
-        const entryDate = moment.utc(entry.createdAt);
+        const entryDate = timezone(doc, entry.createdAt);
 
         // adding times of last 10 months
         doc.meditations.lastMonths[entryDate.format('MMM')] += value;
@@ -143,7 +144,7 @@ export default (app, router) => {
         // calculate consecutive days
         if (lastDay) {
           const duration = moment.duration(
-            moment.utc(entryDate).startOf('day').diff(moment.utc(lastDay).startOf('day'))
+            moment(entryDate).startOf('day').diff(moment(lastDay).startOf('day'))
           );
 
           // only one day ago = consecutive day
@@ -162,7 +163,7 @@ export default (app, router) => {
           doc.meditations.currentConsecutiveDays = 1;
         }
 
-        lastDay = moment.utc(entryDate);
+        lastDay = entryDate;
       });
 
       doc.meditations.averageSessionTime =

@@ -1,6 +1,7 @@
 import Meditation from '../models/meditation.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment';
+import timezone from '../helper/timezone.js';
 
 export default (app, router, io) => {
 
@@ -258,7 +259,7 @@ export default (app, router, io) => {
 
       // Sum meditation times
       result.map(entry => {
-        times[moment.utc(entry.createdAt).format('H')] += entry.sitting + entry.walking;
+        times[timezone(req.user._doc, entry.createdAt).format('H')] += entry.sitting + entry.walking;
       });
 
       res.json(times);
