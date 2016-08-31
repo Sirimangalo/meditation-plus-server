@@ -27,6 +27,7 @@ let userSchema = mongoose.Schema({
   country: String,
   lastActive: Date,
   lastMeditation: Date,
+  lastLike: Date,
   sound: String,
   gravatarHash: String
 });
