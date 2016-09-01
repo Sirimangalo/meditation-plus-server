@@ -11,16 +11,13 @@ import mongoose from 'mongoose';
 let meditationSchema = mongoose.Schema({
   walking: Number,
   sitting: Number,
+  likes: Number,
   end: Date,
   user: {
     type : mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
-  likes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
+  }
 }, {
     timestamps: true
 });

@@ -2,6 +2,7 @@ import Meditation from '../models/meditation.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment';
 import timezone from '../helper/timezone.js';
+let ObjectId = require('mongoose').Types.ObjectId;
 
 export default (app, router, io) => {
 
@@ -37,8 +38,6 @@ export default (app, router, io) => {
       entry.status = 'done';
     }
 
-    entry.likes = entry.likes.length;
-
     return entry;
   }
 
@@ -69,18 +68,6 @@ export default (app, router, io) => {
         .populate('user', 'name gravatarHash country')
         .lean()
         .exec();
-
-      // adds alreadyLiked when the current user already added a like to
-      // this session.
-      result = result.map(val => {
-        for (let like of val.likes) {
-          if (like.toString() === req.user._doc._id) {
-            val.alreadyLiked = true;
-            break;
-          }
-        }
-        return val;
-      });
 
       // Add remaining walking and sitting time to entries
       res.json(result.map(calculateRemainingTime));
@@ -126,7 +113,8 @@ export default (app, router, io) => {
         sitting: sitting,
         walking: walking,
         end: new Date(new Date().getTime() + total * 60000),
-        user: req.user._doc
+        user: req.user._doc,
+        likes: 0
       });
 
       // update users lastMeditation log
@@ -198,34 +186,36 @@ export default (app, router, io) => {
   });
 
   /**
-   * @api {post} /api/meditation/like Add +1 to a meditation session
-   * @apiName LikeMeditation
+   * @api {post} /api/meditation/like Add +1 to a all recent meditation sessions
+   * @apiName LikeMeditations
    * @apiGroup Meditation
-   *
-   * @apiParam {String} session ObjectID of the meditation session
    */
   router.post('/api/meditation/like', async (req, res) => {
     try {
-      let entry = await Meditation.findById(req.body.session);
-      if (entry.user == req.user._doc._id) {
-        return res.sendStatus(400);
-      }
+      let user = await User.findById(req.user._doc._id);
 
-      // check if already liked
-      for (let like of entry.likes) {
-        if (like == req.user._doc._id) {
-          return res.sendStatus(400);
-        }
-      }
+      const lastLike = user.lastLike
+        ? user.lastLike.getTime()
+        : Date.now() - 1.08E7;
 
-      // add like
-      if (typeof entry.likes === 'undefined') {
-        entry.likes = [];
+      const result = await Meditation
+        .where({
+          $and: [
+            { end: { $gt: Date.now() - 1.08E7 } },
+            { createdAt: { $gt: lastLike } }
+          ]
+        })
+        .setOptions({ multi: true })
+        .update({ $inc: { likes: 1 } })
+        .exec();
+
+      user.lastLike = new Date();
+      await user.save();
+
+      if (result.nModified > 0) {
+        // sending broadcast WebSocket meditation
+        io.sockets.emit('meditation', 'no content');
       }
-      entry.likes.push(req.user._doc);
-      await entry.save();
-      // sending broadcast WebSocket meditation
-      io.sockets.emit('meditation', 'no content');
 
       res.sendStatus(204);
     } catch (err) {
