@@ -196,7 +196,7 @@ export default (app, router, io) => {
 
       const lastLike = user.lastLike
         ? user.lastLike.getTime()
-        : Date.now() - 1.08E7;
+        : Date.now() - 2.52E7; // 7 hours
 
       const result = await Meditation
         .where({
