@@ -55,7 +55,7 @@ export default (app, router, io) => {
    * @apiSuccess {Number}   meditations.walkingLeft Remaining minutes of walking
    * @apiSuccess {Number}   meditations.sittingLeft Remaining minutes of sitting
    * @apiSuccess {String}   meditations.status      "walking", "sitting" or "done"
-   * @apiSuccess {Number}   meditations.likes       Count of +1s
+   * @apiSuccess {Number}   meditations.numOfLikes  Count of +1s
    */
   router.get('/api/meditation', async (req, res) => {
     try {
@@ -114,7 +114,7 @@ export default (app, router, io) => {
         walking: walking,
         end: new Date(new Date().getTime() + total * 60000),
         user: req.user._doc,
-        likes: 0
+        numOfLikes: 0
       });
 
       // update users lastMeditation log
@@ -206,7 +206,7 @@ export default (app, router, io) => {
           ]
         })
         .setOptions({ multi: true })
-        .update({ $inc: { likes: 1 } })
+        .update({ $inc: { numOfLikes: 1 } })
         .exec();
 
       user.lastLike = new Date();
