@@ -109,7 +109,7 @@ export default (app, router, io) => {
         await meditation.remove();
       }
 
-      let medStart = new Date(new Date().getTime());
+      let medStart = new Date();
       let medEnd = new Date(new Date().getTime() + total * 60000);
 
       // check if custom session start date/time was requested
@@ -117,22 +117,22 @@ export default (app, router, io) => {
         let newStart = moment.utc(req.body.start).toDate();
         let newEnd = moment.utc(req.body.start).add(total, 'minutes').toDate();
 
-        // check if date is valid
-        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc().toDate()) {
+        // check if date is valid & is not older than 30 days
+        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc().toDate() || newEnd < moment.utc().subtract(30, 'days')) {
           return res.sendStatus(400);
         }
 
         // check if new session time conflicts with existing sessions
         let conflict = await Meditation
           .findOne({
-            user: req.user._doc._id, 
+            user: req.user._doc._id,
             $or: [
               {
-                'start': { $lte: newStart },
+                'createdAt': { $lte: newStart },
                 'end': { $gte: newStart }
               },
               {
-                'start': { $lte: newEnd },
+                'createdAt': { $lte: newEnd },
                 'end': { $gte: newEnd }
               }
             ]
@@ -148,11 +148,11 @@ export default (app, router, io) => {
         medEnd = newEnd;
       }
 
-      
+
       const created = await Meditation.create({
         sitting: sitting,
         walking: walking,
-        start: medStart,
+        createdAt: medStart,
         end: medEnd,
         user: req.user._doc,
         numOfLikes: 0
