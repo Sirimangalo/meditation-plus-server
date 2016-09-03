@@ -109,19 +109,64 @@ export default (app, router, io) => {
         await meditation.remove();
       }
 
+      let medStart = new Date();
+      let medEnd = new Date(new Date().getTime() + total * 60000);
+
+      // check if custom session start date/time was requested
+      if (req.body.start) {
+        let newStart = moment.utc(req.body.start).toDate();
+        let newEnd = moment.utc(req.body.start).add(total, 'minutes').toDate();
+
+        // check if date is valid
+        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc()) {
+          return res.sendStatus(400).json({errMsg: 'The date is invalid.'});;
+        }
+
+        // check if date is not older than 30 days
+        if (newEnd < moment.utc().subtract(30, 'days')) {
+          return res.sendStatus(400).json({errMsg: 'The date is older than 30 days.'});;
+        }
+
+        // check if new session time conflicts with existing sessions
+        let conflict = await Meditation
+          .findOne({
+            user: req.user._doc._id,
+            $or: [
+              {
+                'createdAt': { $lte: newStart },
+                'end': { $gte: newStart }
+              },
+              {
+                'createdAt': { $lte: newEnd },
+                'end': { $gte: newEnd }
+              }
+            ]
+          })
+          .exec();
+
+        if (conflict) {
+          return res.sendStatus(400).json({errMsg: 'There exists a meditation entry that conflicts with your date/time.'});
+        }
+
+        // set custom session date
+        medStart = newStart;
+        medEnd = newEnd;
+      }
+
+
       const created = await Meditation.create({
         sitting: sitting,
         walking: walking,
-        end: new Date(new Date().getTime() + total * 60000),
+        createdAt: medStart,
+        end: medEnd,
         user: req.user._doc,
         numOfLikes: 0
       });
 
-      // update users lastMeditation log
       let user = await User.findById(req.user._doc._id);
 
+      // update users lastMeditation log
       user.lastMeditation = created.end;
-
       await user.save();
 
       // sending broadcast WebSocket meditation
