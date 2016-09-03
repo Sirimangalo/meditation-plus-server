@@ -95,7 +95,6 @@ export default (app, router, io) => {
     let total = sitting + walking;
 
     try {
-      
       // check if user is already meditating
       const meditation = await Meditation
         .findOne({
