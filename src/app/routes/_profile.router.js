@@ -116,7 +116,7 @@ export default (app, router) => {
           end: { $lt: today.format('x') },
           user: doc._id
         })
-        .sort([['createdAt', 'ascending']])
+        .sort([['end', 'ascending']])
         .lean()
         .exec();
 
@@ -126,7 +126,7 @@ export default (app, router) => {
 
         doc.meditations.numberOfSessions++;
         doc.meditations.totalMeditationTime += value;
-        const entryDate = timezone(doc, entry.createdAt);
+        const entryDate = timezone(doc, new Date(entry.end - value * 60000));
 
         // adding times of last 10 months
         doc.meditations.lastMonths[entryDate.format('MMM')] += value;

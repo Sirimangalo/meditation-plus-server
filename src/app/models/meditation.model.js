@@ -12,6 +12,7 @@ let meditationSchema = mongoose.Schema({
   walking: Number,
   sitting: Number,
   numOfLikes: Number,
+  start: Date,
   end: Date,
   user: {
     type : mongoose.Schema.Types.ObjectId,

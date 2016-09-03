@@ -95,6 +95,7 @@ export default (app, router, io) => {
     let total = sitting + walking;
 
     try {
+      
       // check if user is already meditating
       const meditation = await Meditation
         .findOne({
@@ -109,19 +110,59 @@ export default (app, router, io) => {
         await meditation.remove();
       }
 
+      let medStart = new Date(new Date().getTime());
+      let medEnd = new Date(new Date().getTime() + total * 60000);
+
+      // check if custom session start date/time was requested
+      if (req.body.start) {
+        let newStart = moment.utc(req.body.start).toDate();
+        let newEnd = moment.utc(req.body.start).add(total, 'minutes').toDate();
+
+        // check if date is valid
+        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc().toDate()) {
+          return res.sendStatus(400);
+        }
+
+        // check if new session time conflicts with existing sessions
+        let conflict = await Meditation
+          .findOne({
+            user: req.user._doc._id, 
+            $or: [
+              {
+                'start': { $lte: newStart },
+                'end': { $gte: newStart }
+              },
+              {
+                'start': { $lte: newEnd },
+                'end': { $gte: newEnd }
+              }
+            ]
+          })
+          .exec();
+
+        if (conflict) {
+          return res.sendStatus(400);
+        }
+
+        // set custom session date
+        medStart = newStart;
+        medEnd = newEnd;
+      }
+
+      
       const created = await Meditation.create({
         sitting: sitting,
         walking: walking,
-        end: new Date(new Date().getTime() + total * 60000),
+        start: medStart,
+        end: medEnd,
         user: req.user._doc,
         numOfLikes: 0
       });
 
-      // update users lastMeditation log
       let user = await User.findById(req.user._doc._id);
 
+      // update users lastMeditation log
       user.lastMeditation = created.end;
-
       await user.save();
 
       // sending broadcast WebSocket meditation
