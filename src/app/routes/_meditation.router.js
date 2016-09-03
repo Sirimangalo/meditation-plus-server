@@ -118,7 +118,7 @@ export default (app, router, io) => {
         let newEnd = moment.utc(req.body.start).add(total, 'minutes').toDate();
 
         // check if date is valid & is not older than 30 days
-        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc().toDate() || newEnd < moment.utc().subtract(30, 'days')) {
+        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc() || newEnd < moment.utc().subtract(30, 'days')) {
           return res.sendStatus(400);
         }
 
