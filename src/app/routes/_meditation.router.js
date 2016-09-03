@@ -42,6 +42,31 @@ export default (app, router, io) => {
   }
 
   /**
+   * Checks for conflicting meditation data.
+   * @param  {Number} userId          User id
+   * @param  {Date}   first           First date of timespan
+   * @param  {Date}   last            Last date of timespan
+   * @return {Meditation|null}        Found session data
+   */
+  async function findConflictingMeditation(userId, first, last) {
+    return await Meditation
+      .findOne({
+        user: userId,
+        $or: [
+          {
+            'createdAt': { $lte: first },
+            'end': { $gte: first }
+          },
+          {
+            'createdAt': { $lte: last },
+            'end': { $gte: last }
+          }
+        ]
+      })
+      .exec();
+  }
+
+  /**
    * @api {get} /api/meditation Get meditation data of last two hours
    * @apiName ListMeditations
    * @apiGroup Meditation
@@ -119,40 +144,25 @@ export default (app, router, io) => {
 
         // check if date is valid
         if (isNaN(newEnd.getTime()) || newEnd >= moment.utc()) {
-          return res.sendStatus(400).json({errMsg: 'The date is invalid.'});;
+          return res.status(400).json({errMsg: 'The date is invalid.'});;
         }
 
         // check if date is not older than 30 days
         if (newEnd < moment.utc().subtract(30, 'days')) {
-          return res.sendStatus(400).json({errMsg: 'The date is older than 30 days.'});;
+          return res.status(400).json({errMsg: 'The date is older than 30 days.'});;
         }
 
         // check if new session time conflicts with existing sessions
-        let conflict = await Meditation
-          .findOne({
-            user: req.user._doc._id,
-            $or: [
-              {
-                'createdAt': { $lte: newStart },
-                'end': { $gte: newStart }
-              },
-              {
-                'createdAt': { $lte: newEnd },
-                'end': { $gte: newEnd }
-              }
-            ]
-          })
-          .exec();
+        let conflict = await findConflictingMeditation(req.user._doc._id, newStart, newEnd);
 
         if (conflict) {
-          return res.sendStatus(400).json({errMsg: 'There exists a meditation entry that conflicts with your date/time.'});
+          return res.status(400).json({errMsg: 'There exists a meditation entry that conflicts with your date/time.'});
         }
 
         // set custom session date
         medStart = newStart;
         medEnd = newEnd;
       }
-
 
       const created = await Meditation.create({
         sitting: sitting,
@@ -174,11 +184,11 @@ export default (app, router, io) => {
 
       res.json(created);
     } catch (err) {
+      console.log(err);
       res
         .status(err.name === 'ValidationError' ? 400 : 500)
         .send(err);
     }
-
   });
 
   /**
