@@ -118,8 +118,12 @@ export default (app, router, io) => {
         let newEnd = moment.utc(req.body.start).add(total, 'minutes').toDate();
 
         // check if date is valid & is not older than 30 days
-        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc() || newEnd < moment.utc().subtract(30, 'days')) {
-          return res.sendStatus(400);
+        if (isNaN(newEnd.getTime()) || newEnd >= moment.utc()) {
+          return res.sendStatus(400).json({errMsg: 'The date is invalid.'});;
+        }
+
+        if (newEnd < moment.utc().subtract(30, 'days')) {
+          return res.sendStatus(400).json({errMsg: 'The date is older than 30 days.'});;
         }
 
         // check if new session time conflicts with existing sessions
@@ -140,7 +144,7 @@ export default (app, router, io) => {
           .exec();
 
         if (conflict) {
-          return res.sendStatus(400);
+          return res.sendStatus(400).json({errMsg: 'There exists a meditation entry that conflicts with your date/time.'});
         }
 
         // set custom session date
