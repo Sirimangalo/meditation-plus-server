@@ -204,6 +204,10 @@ export default (app, router) => {
       }
 
       for (const key of Object.keys(req.body)) {
+        if (key === 'local' && req.body.local.email) {
+          user.local.email = req.body.local.email;
+          continue;
+        }
         user[key] = req.body[key];
       }
 
