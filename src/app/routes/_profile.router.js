@@ -190,8 +190,9 @@ export default (app, router) => {
    */
   router.put('/api/profile', async (req, res) => {
     // remove readonly data
-    if (req.body.local) delete req.body.local;
+    if (req.body.local.password) delete req.body.local.password;
     if (req.body._id) delete req.body._id;
+    if (req.body.role) delete req.body.role;
 
     try {
       let user = await User.findById(req.user._doc._id);
@@ -203,11 +204,13 @@ export default (app, router) => {
       }
 
       for (const key of Object.keys(req.body)) {
-        if (key === 'role') {
+        if (key === 'local' && req.body.local.email) {
+          user.local.email = req.body.local.email;
           continue;
         }
         user[key] = req.body[key];
       }
+
       user.gravatarHash = md5(user.local.email);
       await user.save();
 
