@@ -27,7 +27,7 @@ let userSchema = mongoose.Schema({
   lastActive: Date,
   lastMeditation: Date,
   lastLike: Date,
-  sound: String,
+  sound: { type: String, default: '/assets/audio/bell1.mp3' },
   gravatarHash: String,
   timezone: String
 });
