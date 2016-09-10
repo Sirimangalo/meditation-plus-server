@@ -6,7 +6,7 @@ import moment from 'moment';
 export default (app, router, io, admin) => {
 
   /**
-   * @api {get} /api/question/:page Get questions
+   * @api {get} /api/question Get questions
    * @apiName ListQuestions
    * @apiGroup Question
    *
