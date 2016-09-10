@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_JOB_NUMBER" = "$TRAVIS_BUILD_NUMBER.1" ]
 then
