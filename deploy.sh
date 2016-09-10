@@ -13,7 +13,7 @@ then
   then
     echo "TEST: Deploying master to test server"
     folder="meditation-plus-test"
-    version=$TRAVIS_BUILD_NUMBER
+    version="$TRAVIS_BUILD_NUMBER.0.0"
   else
     exit
   fi
