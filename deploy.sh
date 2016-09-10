@@ -1,12 +1,15 @@
 #!/bin/bash
 
-if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+if [ "$TRAVIS_PULL_REQUEST" == "false" ]
+then
   # Determine folder and version based on tag or branch
-  if [ ! -z "$TRAVIS_TAG" ]; then
+  if [ ! -z "$TRAVIS_TAG" ]
+  then
     echo "PROD: Deploying $TRAVIS_TAG to server"
     folder = "meditation-plus"
     version = $TRAVIS_TAG
-  else if [ "$TRAVIS_BRANCH" == "master" ]; then
+  elif [ "$TRAVIS_BRANCH" == "master" ]
+  then
     echo "TEST: Deploying master to test server"
     folder = "meditation-plus-test"
     version = $TRAVIS_BUILD_NUMBER
