@@ -1,18 +1,18 @@
 #!/bin/bash
 
-if [ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_JOB_NUMBER" == "$TRAVIS_BUILD_NUMBER.1" ]
+if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_JOB_NUMBER" == "$TRAVIS_BUILD_NUMBER.1" ]
 then
   # Determine folder and version based on tag or branch
   if [ ! -z "$TRAVIS_TAG" ]
   then
     echo "PROD: Deploying $TRAVIS_TAG to server"
-    folder = "meditation-plus"
-    version = $TRAVIS_TAG
+    folder="meditation-plus"
+    version=$TRAVIS_TAG
   elif [ "$TRAVIS_BRANCH" == "master" ]
   then
     echo "TEST: Deploying master to test server"
-    folder = "meditation-plus-test"
-    version = $TRAVIS_BUILD_NUMBER
+    folder="meditation-plus-test"
+    version=$TRAVIS_BUILD_NUMBER
   else
     exit
   fi
@@ -22,7 +22,7 @@ then
   cp -R node_modules dist/node_modules
 
   # Update version
-  npm --no-git-tag-version $version
+  npm --no-git-tag-version "$version"
   cp package.json dist/package.json
 
   tar -czf transfer.tgz dist
