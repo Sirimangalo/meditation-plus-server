@@ -35,8 +35,7 @@ The `server.conf.js` file is expecting certain `environment` `variables` to be s
   # http://randomkeygen.com/
   # Note that you don't need to use specifically
   # this, but it will certainly suffice
-  "SESSION_SECRET" : "355FC4FE9348639B4E4FED1B8E93C"
+  "SESSION_SECRET" : "the session secrect",
+  "YOUTUBE_API_KEY" : "the youtube api key"
 }
-
-You should definitely change your `SESSION_SECRET` for even the most lackadaisical development effort.
 ```

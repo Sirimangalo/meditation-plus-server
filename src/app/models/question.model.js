@@ -4,6 +4,8 @@ let questionSchema = mongoose.Schema({
   text : { type: String, required: true, maxlength: 1000 },
   user : { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   answered: Boolean,
+  answeredAt: Date,
+  videoUrl: String,
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

@@ -1,6 +1,7 @@
 import Question from '../models/question.model.js';
 import meditatedRecently from '../helper/meditatedRecently.js';
-
+import meditatedRecently from './meditatedRecently.js';
+import youtubeHelper from '../helper/youtube.js';
 import moment from 'moment';
 
 export default (app, router, io, admin) => {
@@ -15,15 +16,39 @@ export default (app, router, io, admin) => {
    * @apiSuccess {Date}     questions.createdAt    Date of creation
    * @apiSuccess {String}   questions.ago          Relative time of creation as string
    * @apiSuccess {String}   questions.answered     Is question already answered
+   * @apiSuccess {Date}     questions.answeredAt   When the question was answered
    * @apiSuccess {Number}   questions.likes        Count of likes
    * @apiSuccess {Number}   questions.alreadyLiked Current user gave like?
    * @apiSuccess {User}     questions.user         The posting user
    */
   router.get('/api/question', async (req, res) => {
     try {
+      const filterAnswered = req.query.filterAnswered === 'true';
+      const page = req.query.page || 0;
+
+      // paginate by two weeks
+      const timespanTo = moment().subtract(2 * page, 'weeks');
+      const timespanFrom = moment(timespanTo).subtract(2, 'weeks');
+
       let questions = await Question
-        .find()
-        .sort([['numOfLikes', 'descending'], ['createdAt', 'ascending']])
+        .find(
+          filterAnswered
+          ? {
+            // filter by paginated timespan
+            answeredAt: {
+              $gte: timespanFrom.toDate(),
+              $lte: timespanTo.toDate()
+            }
+          }
+          : {
+            answered: { $ne: true }
+          }
+        )
+        .sort(
+          filterAnswered
+          ? [['answeredAt', 'descending']]
+          : [['numOfLikes', 'descending'], ['createdAt', 'ascending']]
+        )
         .populate('user', 'name gravatarHash lastMeditation country')
         .lean()
         .then();
@@ -90,7 +115,7 @@ export default (app, router, io, admin) => {
   router.post('/api/question/:id/like', async (req, res) => {
     try {
       let entry = await Question.findById(req.params.id);
-      if (entry.user == req.user._doc._id || entry.answered) {
+      if (entry.user == req.user._doc._id || entry.answered || entry.answeredAt) {
         return res.sendStatus(400);
       }
 
@@ -129,7 +154,7 @@ export default (app, router, io, admin) => {
   router.post('/api/question/:id/answer', async (req, res) => {
     try {
       let entry = await Question.findById(req.params.id);
-      if (entry.answered) {
+      if (entry.answered || entry.answeredAt) {
         return res.sendStatus(400);
       }
 
@@ -139,7 +164,22 @@ export default (app, router, io, admin) => {
         return;
       }
 
+      const youtubeData = await youtubeHelper.getLivestreamInfo();
+      // check if broadcast is running and try to set the time this question has been answered
+      if (youtubeData.items.length > 0) {
+        const stream = youtubeData.items[0];
+        const streamStarted = moment(stream.snippet.publishedAt);
+        const now = moment();
+        const duration = moment.duration(now.diff(streamStarted));
+
+        console.log('Stream Started', streamStarted.toString());
+        console.log('Now', now.toString());
+        console.log('Diff in s', Math.round(duration.asSeconds()));
+
+        entry.videoUrl = `https://youtu.be/${stream.id.videoId}?t=${Math.round(duration.asSeconds()) - 5}`;
+      }
       entry.answered = true;
+      entry.answeredAt = new Date();
       await entry.save();
 
       // sending broadcast WebSocket question

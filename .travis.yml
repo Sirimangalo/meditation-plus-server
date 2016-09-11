@@ -12,8 +12,4 @@ script:
 - npm run docs
 - npm run build
 after_success:
-- |
-  if ([ ! -z "$TRAVIS_TAG" ]) &&
-    [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    sh deploy.sh
-  fi
+- sh deploy.sh
