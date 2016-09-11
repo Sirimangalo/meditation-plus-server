@@ -1,6 +1,6 @@
 import Question from '../models/question.model.js';
 import meditatedRecently from './meditatedRecently.js';
-
+import youtubeHelper from '../helper/youtube.js';
 import moment from 'moment';
 
 export default (app, router, io, admin) => {
@@ -163,6 +163,20 @@ export default (app, router, io, admin) => {
         return;
       }
 
+      const youtubeData = await youtubeHelper.getLivestreamInfo();
+      // check if broadcast is running and try to set the time this question has been answered
+      if (youtubeData.items.length > 0) {
+        const stream = youtubeData.items[0];
+        const streamStarted = moment(stream.snippet.publishedAt);
+        const now = moment();
+        const duration = moment.duration(now.diff(streamStarted));
+
+        console.log('Stream Started', streamStarted.toString());
+        console.log('Now', now.toString());
+        console.log('Diff in s', Math.round(duration.asSeconds()));
+
+        entry.videoUrl = `https://youtu.be/${stream.id.videoId}?t=${Math.round(duration.asSeconds()) - 5}`;
+      }
       entry.answered = true;
       entry.answeredAt = new Date();
       await entry.save();

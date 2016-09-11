@@ -5,6 +5,7 @@ let questionSchema = mongoose.Schema({
   user : { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   answered: Boolean,
   answeredAt: Date,
+  videoUrl: String,
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
