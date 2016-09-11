@@ -7,12 +7,12 @@ then
   if [ ! -z "$TRAVIS_TAG" ]
   then
     echo "PROD: Deploying $TRAVIS_TAG to server"
-    folder="meditation-plus"
+    server="meditation.sirimangalo.org"
     version=$TRAVIS_TAG
   elif [ "$TRAVIS_BRANCH" = "master" ]
   then
     echo "TEST: Deploying master to test server"
-    folder="meditation-plus-test"
+    server="meditation-dev.sirimangalo.org"
     version="$TRAVIS_BUILD_NUMBER.0.0"
   else
     exit
@@ -27,6 +27,6 @@ then
   cp package.json dist/package.json
 
   tar -czf transfer.tgz dist
-  scp -o "StrictHostKeyChecking no" transfer.tgz jenkins@159.203.6.130:/var/www/$folder
-  ssh -o "StrictHostKeyChecking no" jenkins@159.203.6.130 "cd /var/www/$folder; cp config/config.json ./; rm -rf app .babelrc config server.conf server.js sockets node_modules package.json; tar -xzf transfer.tgz --strip 1; mv config.json config/config.json; rm transfer.tgz"
+  scp -o "StrictHostKeyChecking no" transfer.tgz jenkins@$server:/var/www/meditation-plus
+  ssh -o "StrictHostKeyChecking no" jenkins@$server "cd /var/www/meditation-plus; cp config/config.json ./; rm -rf app .babelrc config server.conf server.js sockets node_modules package.json; tar -xzf transfer.tgz --strip 1; mv config.json config/config.json; rm transfer.tgz"
 fi
