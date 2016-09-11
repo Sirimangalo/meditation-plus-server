@@ -1,5 +1,5 @@
 import Message from '../models/message.model.js';
-import meditatedRecently from './meditatedRecently.js';
+import meditatedRecently from '../helper/meditatedRecently.js';
 let ObjectId = require('mongoose').Types.ObjectId;
 import moment from 'moment';
 
