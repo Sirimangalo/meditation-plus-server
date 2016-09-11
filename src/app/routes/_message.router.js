@@ -186,7 +186,7 @@ export default (app, router, io) => {
 
       // sending broadcast WebSocket message
       io.sockets.emit('message-update', {
-        message,
+        leanObject,
       });
 
       res.json(leanObject);
@@ -234,7 +234,7 @@ export default (app, router, io) => {
 
       // sending broadcast WebSocket message
       io.sockets.emit('message-update', {
-        message,
+        leanObject,
       });
 
       res.json(leanObject);
