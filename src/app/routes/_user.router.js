@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-import meditatedRecently from './meditatedRecently.js';
+import meditatedRecently from '../helper/meditatedRecently.js';
 
 export default (app, router, io, admin) => {
 

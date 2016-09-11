@@ -1,5 +1,5 @@
 import Question from '../models/question.model.js';
-import meditatedRecently from './meditatedRecently.js';
+import meditatedRecently from '../helper/meditatedRecently.js';
 
 import moment from 'moment';
 
