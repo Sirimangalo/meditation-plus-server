@@ -1,5 +1,4 @@
 import Message from '../models/message.model.js';
-import meditatedRecently from '../helper/meditatedRecently.js';
 let ObjectId = require('mongoose').Types.ObjectId;
 import moment from 'moment';
 
@@ -28,15 +27,6 @@ export default (app, router, io) => {
         .populate('user', 'name gravatarHash lastMeditation country')
         .lean()
         .then();
-
-      // add meditatedRecently to user
-      messages.map(message => {
-        if (message.user) {
-          message.user.meditator = meditatedRecently(message.user);
-        }
-
-        return message;
-      });
 
       messages.reverse();
 
@@ -73,15 +63,6 @@ export default (app, router, io) => {
         .lean()
         .then();
 
-      // add meditatedRecently to user
-      messages.map(message => {
-        if (message.user) {
-          message.user.meditator = meditatedRecently(message.user);
-        }
-
-        return message;
-      });
-
       messages.reverse();
 
       res.json(messages);
@@ -117,17 +98,13 @@ export default (app, router, io) => {
         'name gravatarHash country lastMeditation'
       ).execPopulate();
 
-      let leanObject = populated.toObject();
-      leanObject.ago = moment(leanObject.createdAt).fromNow();
-      leanObject.user.meditator = meditatedRecently(leanObject.user);
-
       // sending broadcast WebSocket message
       io.sockets.emit('message', {
         previous: previousMessage,
-        current: leanObject
+        current: populated
       });
 
-      res.json(leanObject);
+      res.json(populated);
     } catch (err) {
       res
         .status(err.name === 'ValidationError' ? 400 : 500)
@@ -178,18 +155,12 @@ export default (app, router, io) => {
         'name gravatarHash country lastMeditation'
       ).execPopulate();
 
-      let leanObject = populated.toObject();
-      leanObject.ago = moment(leanObject.createdAt).fromNow();
-      if (leanObject.user) {
-        leanObject.user.meditator = meditatedRecently(leanObject.user);
-      }
-
       // sending broadcast WebSocket message
       io.sockets.emit('message-update', {
-        leanObject,
+        populated
       });
 
-      res.json(leanObject);
+      res.json(populated);
     } catch (err) {
       res
         .status(err.name === 'ValidationError' ? 400 : 500)
@@ -226,18 +197,12 @@ export default (app, router, io) => {
         'name gravatarHash country lastMeditation'
       ).execPopulate();
 
-      let leanObject = populated.toObject();
-      leanObject.ago = moment(leanObject.createdAt).fromNow();
-      if (leanObject.user) {
-        leanObject.user.meditator = meditatedRecently(leanObject.user);
-      }
-
       // sending broadcast WebSocket message
       io.sockets.emit('message-update', {
-        leanObject,
+        populated
       });
 
-      res.json(leanObject);
+      res.json(populated);
     } catch (err) {
       res
         .status(err.name === 'ValidationError' ? 400 : 500)

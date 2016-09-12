@@ -1,5 +1,4 @@
 import User from '../models/user.model.js';
-import meditatedRecently from '../helper/meditatedRecently.js';
 
 export default (app, router, io, admin) => {
 
@@ -38,10 +37,7 @@ export default (app, router, io, admin) => {
         .lean()
         .exec();
 
-      res.json(result.map(user => {
-        user.meditator = meditatedRecently(user);
-        return user;
-      }));
+      res.json(result);
     } catch (err) {
       res.status(400).send(err);
     }
