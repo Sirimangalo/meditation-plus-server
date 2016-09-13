@@ -1,5 +1,5 @@
 import Question from '../models/question.model.js';
-import youtubeHelper from '../helper/youtube.js';
+import Broadcast from '../models/broadcast.model.js';
 import moment from 'moment';
 
 export default (app, router, io, admin) => {
@@ -48,6 +48,7 @@ export default (app, router, io, admin) => {
           : [['numOfLikes', 'descending'], ['createdAt', 'ascending']]
         )
         .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('broadcast', 'started videoUrl')
         .lean()
         .then();
 
@@ -158,22 +159,73 @@ export default (app, router, io, admin) => {
         return;
       }
 
-      const youtubeData = await youtubeHelper.getLivestreamInfo();
-      // check if broadcast is running and try to set the time this question has been answered
-      if (youtubeData.items.length > 0) {
-        const stream = youtubeData.items[0];
-        const streamStarted = moment(stream.snippet.publishedAt);
-        const now = moment();
-        const duration = moment.duration(now.diff(streamStarted));
-
-        console.log('Stream Started', streamStarted.toString());
-        console.log('Now', now.toString());
-        console.log('Diff in s', Math.round(duration.asSeconds()));
-
-        entry.videoUrl = `https://youtu.be/${stream.id.videoId}?t=${Math.round(duration.asSeconds()) - 5}`;
-      }
       entry.answered = true;
       entry.answeredAt = new Date();
+      await entry.save();
+
+      // sending broadcast WebSocket question
+      io.sockets.emit('question', 'no content');
+
+      res.sendStatus(204);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /api/question/:id/answering Start answering a question
+   * @apiName AnsweringQuestion
+   * @apiGroup Question
+   *
+   * @apiParam {String} id ObjectID of the question
+   */
+  router.post('/api/question/:id/answering', admin, async (req, res) => {
+    try {
+      let entry = await Question.findById(req.params.id);
+      if (entry.answeringAt || entry.answered || entry.answeredAt) {
+        return res.sendStatus(400);
+      }
+
+      // check if a broadcast is active
+      let broadcast = await Broadcast.findOne({
+        'started': { $ne: null },
+        'ended': { $eq: null }
+      });
+
+      if (broadcast) {
+        entry.broadcast = broadcast._id;
+      }
+
+      entry.answeringAt = new Date();
+      await entry.save();
+
+      // sending broadcast WebSocket question
+      io.sockets.emit('question', 'no content');
+
+      res.sendStatus(204);
+    } catch (err) {
+      console.error('###ERR', err);
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /api/question/:id/unanswering Cancel answering a question
+   * @apiName CancelAnsweringQuestion
+   * @apiGroup Question
+   *
+   * @apiParam {String} id ObjectID of the question
+   */
+  router.post('/api/question/:id/unanswering', admin, async (req, res) => {
+    try {
+      let entry = await Question.findById(req.params.id);
+      if (!entry.answeringAt || entry.answered || entry.answeredAt) {
+        return res.sendStatus(400);
+      }
+
+      entry.broadcast = null;
+      entry.answeringAt = null;
+
       await entry.save();
 
       // sending broadcast WebSocket question
