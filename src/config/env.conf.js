@@ -1,5 +1,3 @@
-// *env.conf.js*
-
 // This is the file where we will configure our Node environmental
 // variables for production
 
@@ -47,29 +45,29 @@ function validateNodeEnvironment() {
 
   switch(process.env.NODE_ENV) {
 
-    case 'development':
+  case 'development':
 
-      console.log(`Node environment set for ${process.env.NODE_ENV}`);
-      break;
+    console.log(`Node environment set for ${process.env.NODE_ENV}`);
+    break;
 
-    case 'production':
+  case 'production':
 
-      console.log(`Node environment set for ${process.env.NODE_ENV}`);
-      break;
+    console.log(`Node environment set for ${process.env.NODE_ENV}`);
+    break;
 
-    case 'test':
+  case 'test':
 
-      console.log(`Node environment set for ${process.env.NODE_ENV}`);
-      break;
+    console.log(`Node environment set for ${process.env.NODE_ENV}`);
+    break;
 
-    default:
+  default:
 
-      console.log('Error: process.env.NODE_ENV should be set to a valid '
-        + ' value such as \'production\', \'development\', or \'test\'.');
-      console.log('Value received: ' + process.env.NODE_ENV);
-      console.log('Defaulting value for: development');
-      process.env.NODE_ENV = 'development';
-      break;
+    console.log('Error: process.env.NODE_ENV should be set to a valid '
+      + ' value such as \'production\', \'development\', or \'test\'.');
+    console.log('Value received: ' + process.env.NODE_ENV);
+    console.log('Defaulting value for: development');
+    process.env.NODE_ENV = 'development';
+    break;
   }
 
   return;
@@ -82,33 +80,33 @@ function validateMongoUri() {
   if (!process.env.MONGO_URI) {
 
     console.log('No value set for MONGO_URI...');
-    console.log('Using the supplied value from config object...')
+    console.log('Using the supplied value from config object...');
 
     switch(process.env.NODE_ENV) {
 
-      case 'development':
+    case 'development':
 
-        process.env.MONGO_URI = config.MONGO_URI.DEVELOPMENT;
-        console.log(`MONGO_URI set for ${process.env.NODE_ENV}`);
-        break;
+      process.env.MONGO_URI = config.MONGO_URI.DEVELOPMENT;
+      console.log(`MONGO_URI set for ${process.env.NODE_ENV}`);
+      break;
 
-      case 'production':
+    case 'production':
 
-        process.env.MONGO_URI = config.MONGO_URI.PRODUCTION;
-        console.log(`MONGO_URI set for ${process.env.NODE_ENV}`);
-        break;
+      process.env.MONGO_URI = config.MONGO_URI.PRODUCTION;
+      console.log(`MONGO_URI set for ${process.env.NODE_ENV}`);
+      break;
 
-      case 'test':
+    case 'test':
 
-        process.env.MONGO_URI = config.MONGO_URI.TEST;
-        console.log(`MONGO_URI set for ${process.env.NODE_ENV}`);
-        break;
+      process.env.MONGO_URI = config.MONGO_URI.TEST;
+      console.log(`MONGO_URI set for ${process.env.NODE_ENV}`);
+      break;
 
-      default:
+    default:
 
-        console.log('Unexpected behavior! process.env.NODE_ENV set to ' +
-          'unexpected value!');
-        break;
+      console.log('Unexpected behavior! process.env.NODE_ENV set to ' +
+        'unexpected value!');
+      break;
     }
   }
 

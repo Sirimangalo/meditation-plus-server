@@ -2,7 +2,6 @@ import Meditation from '../models/meditation.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment';
 import timezone from '../helper/timezone.js';
-let ObjectId = require('mongoose').Types.ObjectId;
 
 export default (app, router, io) => {
 
@@ -144,12 +143,12 @@ export default (app, router, io) => {
 
         // check if date is valid
         if (isNaN(newEnd.getTime()) || newEnd >= moment.utc()) {
-          return res.status(400).json({errMsg: 'The date is invalid.'});;
+          return res.status(400).json({errMsg: 'The date is invalid.'});
         }
 
         // check if date is not older than 30 days
         if (newEnd < moment.utc().subtract(30, 'days')) {
-          return res.status(400).json({errMsg: 'The date is older than 30 days.'});;
+          return res.status(400).json({errMsg: 'The date is older than 30 days.'});
         }
 
         // check if new session time conflicts with existing sessions

@@ -6,7 +6,7 @@ let testimonialSchema = mongoose.Schema({
   reviewed: { type : Boolean, required: true },
   anonymous: { type : Boolean, required: false }
 }, {
-    timestamps: true
+  timestamps: true
 });
 
 export default mongoose.model('Testimonial', testimonialSchema);

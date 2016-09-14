@@ -1,13 +1,5 @@
-// */app/models/message.model.js*
-
-// ## User Model
-
-// Note: MongoDB will autogenerate an _id for each User object created
-
-// Grab the Mongoose module
 import mongoose from 'mongoose';
 
-// Define the schema for the showcase item
 let meditationSchema = mongoose.Schema({
   walking: Number,
   sitting: Number,
@@ -19,7 +11,7 @@ let meditationSchema = mongoose.Schema({
     required: true
   }
 }, {
-    timestamps: true
+  timestamps: true
 });
 
 // Validate presence of either "walking" or "sitting"

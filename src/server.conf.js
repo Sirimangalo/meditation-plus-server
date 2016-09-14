@@ -48,8 +48,6 @@ import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 // PassportJS
 import passport from 'passport';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
 
 // # Configuration
 

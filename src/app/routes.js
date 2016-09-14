@@ -73,7 +73,7 @@ export default (app, router, passport, io) => {
   profileRoutes(app, router);
   appointmentRoutes(app, router, io, admin);
   userRoutes(app, router, io, admin);
-  liveRoutes(app, router, io);
+  liveRoutes(app, router);
 
   // ### Frontend Routes
 

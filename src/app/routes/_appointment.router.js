@@ -89,7 +89,7 @@ export default (app, router, io, admin) => {
    */
   router.post('/api/appointment', admin, async (req, res) => {
     try {
-      let appointment = await Appointment.create({
+      await Appointment.create({
         weekDay: req.body.weekDay,
         hour: req.body.hour
       });

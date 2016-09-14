@@ -149,7 +149,7 @@ export default (app, router) => {
 
           // only one day ago = consecutive day
           if (duration.asDays() ===   1) {
-            doc.meditations.currentConsecutiveDays++
+            doc.meditations.currentConsecutiveDays++;
 
             // save 10-steps as badges
             if (doc.meditations.currentConsecutiveDays % 10 === 0) {

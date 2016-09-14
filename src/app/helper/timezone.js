@@ -18,4 +18,4 @@ export default (user, time) => {
   }
 
   return moment(time).utc().utcOffset(detectedTz.offset);
-}
+};

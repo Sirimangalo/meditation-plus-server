@@ -31,5 +31,4 @@ export default (io) => {
       console.log('a user disconnected');
     });
   });
-
 };
