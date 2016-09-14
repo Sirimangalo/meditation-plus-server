@@ -9,6 +9,7 @@ import testimonialRoutes from './routes/_testimonial.router.js';
 import commitmentRoutes from './routes/_commitment.router.js';
 import meditationRoutes from './routes/_meditation.router.js';
 import profileRoutes from './routes/_profile.router.js';
+import broadcastRoutes from './routes/_broadcast.router.js';
 import appointmentRoutes from './routes/_appointment.router.js';
 import userRoutes from './routes/_user.router.js';
 import liveRoutes from './routes/_livestream.router.js';
@@ -66,6 +67,7 @@ export default (app, router, passport, io) => {
   testimonialRoutes(app, router, io, admin);
   messageRoutes(app, router, io);
   questionRoutes(app, router, io, admin);
+  broadcastRoutes(app, router, admin);
   commitmentRoutes(app, router, admin);
   meditationRoutes(app, router, io);
   profileRoutes(app, router);
@@ -78,6 +80,6 @@ export default (app, router, passport, io) => {
   // Route to handle all Angular requests
   router.get('*', (req, res) => {
     //** Note that the root is set to the parent of this folder, ie the app root **
-   res.sendFile('/client/index.html', { root: __dirname + "/../"});
+    res.sendFile('/client/index.html', { root: __dirname + '/../'});
   });
 };
