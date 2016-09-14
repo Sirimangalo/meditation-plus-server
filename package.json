@@ -9,6 +9,7 @@
     "docs": "./node_modules/apidoc/bin/apidoc -i src/app -o doc/",
     "start": "nodemon src/server.js --exec babel-node",
     "build": "babel src -d dist",
+    "lint": "eslint src",
     "serve": "node src/server.js"
   },
   "dependencies": {
