@@ -204,7 +204,7 @@ export default (app, router, io, admin) => {
 
       res.sendStatus(204);
     } catch (err) {
-      console.error('###ERR', err);
+      console.error(err);
       res.status(500).send(err);
     }
   });
