@@ -1,5 +1,4 @@
 import Question from '../models/question.model.js';
-import meditatedRecently from '../helper/meditatedRecently.js';
 import youtubeHelper from '../helper/youtube.js';
 import moment from 'moment';
 
@@ -53,10 +52,6 @@ export default (app, router, io, admin) => {
         .then();
 
       questions.map(question => {
-        if (question.user) {
-          question.user.meditator = meditatedRecently(question.user);
-        }
-
         for (let like of question.likes) {
           if (like.toString() === req.user._doc._id) {
             question.alreadyLiked = true;
