@@ -6,31 +6,31 @@ export default (mongoose) => {
 
     mongoose.connection.close(() => {
 
-      console.log(`Mongoose connection ` +
-        `has disconnected through app termination`);
+      console.log('Mongoose connection ' +
+        'has disconnected through app termination');
 
       process.exit(0);
     });
   };
 
-  mongoose.connection.on("connected", (ref) => {
+  mongoose.connection.on('connected', () => {
 
     console.log(`Successfully connected to ${process.env.NODE_ENV}` +
-      ` database on startup `);
+      ' database on startup ');
   });
 
   // If the connection throws an error
-  mongoose.connection.on("error", (err) => {
+  mongoose.connection.on('error', (err) => {
 
     console.error(`Failed to connect to ${process.env.NODE_ENV} ` +
-      ` database on startup `, err);
+      ' database on startup ', err);
   });
 
   // When the connection is disconnected
   mongoose.connection.on('disconnected', () => {
 
     console.log(`Mongoose default connection to ${process.env.NODE_ENV}` +
-      ` database disconnected`);
+      ' database disconnected');
   });
 
   // If the Node process ends, close the Mongoose connection

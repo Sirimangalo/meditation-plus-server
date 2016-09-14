@@ -84,7 +84,7 @@ export default (app, router, io, admin) => {
       });
 
       // add user details for response and broadcast
-      let populated = await question.populate(
+      await question.populate(
         'user',
         'name gravatarHash country lastMeditation'
       ).execPopulate();

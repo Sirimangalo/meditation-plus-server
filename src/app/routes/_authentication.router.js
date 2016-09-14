@@ -86,26 +86,27 @@ export default (app, router, passport, admin) => {
   router.post(
     '/auth/refresh',
     expressJwt({ secret: process.env.SESSION_SECRET }),
-    (req, res, next) => {
-    if (!req.user) {
-      return res.sendStatus(401);
+    (req, res) => {
+      if (!req.user) {
+        return res.sendStatus(401);
+      }
+
+      res.status(200);
+
+      delete req.user.exp;
+
+      let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
+        expiresIn: '7d'
+      });
+
+      // Return the new token
+      res.json({
+        token,
+        id: req.user._id,
+        role: req.user.role ? req.user.role : 'ROLE_USER'
+      });
     }
-
-    res.status(200);
-
-    delete req.user.exp;
-
-    let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
-      expiresIn: '7d'
-    });
-
-    // Return the new token
-    res.json({
-      token,
-      id: req.user._id,
-      role: req.user.role ? req.user.role : 'ROLE_USER'
-    });
-  });
+  );
 
   /**
    * @api {post} /auth/signup Register a new account
@@ -175,7 +176,7 @@ export default (app, router, passport, admin) => {
 
       // If there are any errors, return them
       if (err)
-        return next(err);
+        return res.sendStatus(500);
 
       // HTTP Status code `204 No Content`
       res.sendStatus(204);

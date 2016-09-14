@@ -73,7 +73,7 @@ export default (app, router, admin) => {
    */
   router.post('/api/commitment', admin, async (req, res) => {
     try {
-      let commitment = await Commitment.create({
+      await Commitment.create({
         type: req.body.type,
         minutes: req.body.minutes
       });

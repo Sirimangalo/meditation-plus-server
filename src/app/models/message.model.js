@@ -6,7 +6,7 @@ let messageSchema = mongoose.Schema({
   edited: Boolean,
   deleted: Boolean
 }, {
-    timestamps: true
+  timestamps: true
 });
 
 export default mongoose.model('Message', messageSchema);

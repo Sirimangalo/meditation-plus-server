@@ -11,7 +11,7 @@ let commitmentSchema = mongoose.Schema({
     ref: 'User'
   }]
 }, {
-    timestamps: true
+  timestamps: true
 });
 
 export default mongoose.model('Commitment', commitmentSchema);

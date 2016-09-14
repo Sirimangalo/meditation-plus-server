@@ -1,7 +1,5 @@
 import Testimonial from '../models/testimonial.model.js';
 
-import moment from 'moment';
-
 export default (app, router, io, admin) => {
 
   /**
@@ -24,13 +22,13 @@ export default (app, router, io, admin) => {
         .then();
 
       testimonials = testimonials.filter(test => {
-          if (test.user._id == userId) {
-            allowUser = false;
-          }
+        if (test.user._id == userId) {
+          allowUser = false;
+        }
 
-          test.user = test.anonymous ? { name : 'Anonymous' } : test.user;
+        test.user = test.anonymous ? { name : 'Anonymous' } : test.user;
 
-          return test.reviewed;
+        return test.reviewed;
       });
 
       res.json({
@@ -118,7 +116,7 @@ export default (app, router, io, admin) => {
       let testimonial = await Testimonial.findById(req.body.id);
 
       testimonial.reviewed = !testimonial.reviewed;
-      
+
       await testimonial.save();
 
       res.sendStatus(200);

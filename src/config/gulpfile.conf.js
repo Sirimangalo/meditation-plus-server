@@ -3,13 +3,11 @@
 // Import gulp packages
 import gulp from 'gulp';
 import gutil from 'gulp-util';
-import rename from 'gulp-rename';
 import nodemon from 'gulp-nodemon';
 import docco from 'gulp-docco';
 import scsslint from 'gulp-scss-lint';
 import path from 'path';
 import del from 'del';
-import globby from 'globby';
 
 // Define `JavaScript` files to watch/ignore
 let jsGlob = ['**/*.js', '!{node_modules,node_modules/**}', '!{docs,doc/**}',
@@ -51,7 +49,7 @@ gulp.task('build:docs', () => {
 
     if(ext == '') {
 
-      throw new Error('Extension must be passed in for documentation to be generated properly!')
+      throw new Error('Extension must be passed in for documentation to be generated properly!');
     }
     return gulp.src(fileSrc)
       .pipe(docco())
@@ -70,67 +68,34 @@ gulp.task('build:docs', () => {
 // on the fly
 gulp.task('watch:docs', () => {
 
-  // For `gulp-docco` if the need arises
-  //  Default configuration options. All of these may be extended by user-specified options.
-  //
-  //  defaults =
-  //    layout:     'parallel'
-  //    output:     'docs'
-  //    template:   null
-  //    css:        null
-  //    extension:  null
-  //    languages:  {}
-  //    marked:     null
-  //
-  //  Example:
-  //
-  //  let docco = require("gulp-docco");
-  //
-  //  gulp.src("./src/*.js")
-  //    .pipe(docco(options))
-  //    .pipe(gulp.dest('./documentation-output'))
-  //
-  // Reference: https://www.npmjs.com/package/gulp-docco
-  //  Also see: https://jashkenas.github.io/docco/
-  //
-  let options = {
-    layout:     'parallel',
-    output:     'docs',
-    template:    null,
-    css:         null,
-    extension:   null,
-    languages:   {},
-    marked:      null
-  }
-
   // Alert the user whenever changes have been detected and documentation
   // generation is occurring
   function generateUserAlert(ext) {
 
     switch(ext) {
 
-        case '.js':
-          console.log('A JavaScript file has changed; documentation will now be generated...');
+    case '.js':
+      console.log('A JavaScript file has changed; documentation will now be generated...');
 
-          break;
+      break;
 
-        case '.scss':
-          console.log('A Sass file has changed; documentation will now be generated...');
+    case '.scss':
+      console.log('A Sass file has changed; documentation will now be generated...');
 
-          break;
+      break;
 
-        case '.ts':
-          console.log('A TypeScript file has changed; documentation will now be generated...');
+    case '.ts':
+      console.log('A TypeScript file has changed; documentation will now be generated...');
 
-          break;
+      break;
 
-        default:
-          console.log('Generating appropriate folders and styles...');
+    default:
+      console.log('Generating appropriate folders and styles...');
 
-          break;
-      }
+      break;
+    }
 
-      return;
+    return;
   }
 
   // Watch files specified and generate the documentation
@@ -175,7 +140,7 @@ gulp.task('serve:watch', () => {
 // Not currently working due to a globbing issue
 // See: https://github.com/sindresorhus/del/issues/50
 gulp.task('clean:docs', (callback) => {
-  del(['./docs/**/*']).then(function (paths) {
+  del(['./docs/**/*']).then(function () {
     callback(); // ok
   }, function (reason) {
     callback('Failed to delete files: ' + reason); // fail

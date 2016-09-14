@@ -1,8 +1,7 @@
-import moment from 'moment';
 import fetch from 'node-fetch';
 import youtubeHelper from '../helper/youtube.js';
 
-export default (app, router, io) => {
+export default (app, router) => {
 
   /**
    * @api {get} /api/live Get live stream data
