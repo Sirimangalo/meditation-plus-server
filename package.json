@@ -10,6 +10,7 @@
     "start": "nodemon src/server.js --exec babel-node",
     "build": "babel src -d dist",
     "lint": "eslint src",
+    "test": "mocha --compilers js:babel-core/register src/**/*.spec.js",
     "serve": "node src/server.js"
   },
   "pre-commit": [
@@ -25,6 +26,7 @@
     "express-session": "^1.14.0",
     "http": "0.0.0",
     "jsonwebtoken": "^7.1.7",
+    "lodash": "^4.15.0",
     "md5": "^2.1.0",
     "method-override": "^2.3.6",
     "moment": "^2.14.1",
@@ -83,7 +85,7 @@
     "karma-phantomjs-launcher": "^1.0.1",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "1.8.0",
-    "mocha": "^3.0.0",
+    "mocha": "^3.0.2",
     "morgan": "^1.7.0",
     "parse5": "^2.1.5",
     "phantomjs-polyfill": "0.0.2",

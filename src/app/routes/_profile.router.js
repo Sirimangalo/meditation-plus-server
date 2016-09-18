@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-import profileHelper from '../helper/profile.js';
+import { ProfileHelper } from '../helper/profile.js';
 import md5 from 'md5';
 
 let ObjectId = require('mongoose').Types.ObjectId;
@@ -78,7 +78,7 @@ export default (app, router) => {
         return res.json(doc);
       }
 
-      doc.meditations = profileHelper.calculateStats(doc);
+      doc.meditations = await new ProfileHelper().calculateStats(doc);
 
       res.json(doc);
     } catch (err) {
