@@ -19,23 +19,18 @@ export default (app, router, io) => {
       const msgPerPage = 50;
       const page = req.query.page || 0;
 
-      let criteria = {
-        deleted: { $ne: true }
-      };
-
-      if (req.user._doc.role === 'ROLE_ADMIN'){
-        delete criteria['deleted'];
-      }
-
       let messages = await Message
-        .find(criteria)
+        .find(
+          req.user._doc.role === 'ROLE_ADMIN'
+          ? { deleted: { $ne: true } }
+          : {}
+        )
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
         .limit(msgPerPage)
         .populate('user', 'name gravatarHash lastMeditation country')
         .lean()
         .then();
-
 
       messages.reverse();
 
