@@ -20,7 +20,11 @@ export default (app, router, io) => {
       const page = req.query.page || 0;
 
       let messages = await Message
-        .find()
+        .find(
+          req.user._doc.role === 'ROLE_ADMIN'
+          ? { deleted: { $ne: true } }
+          : {}
+        )
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
         .limit(msgPerPage)
@@ -51,13 +55,20 @@ export default (app, router, io) => {
       const timeFrameStart = moment(req.body.timeFrameStart);
       const timeFrameEnd = moment(req.body.timeFrameEnd);
 
+      let criteria = {
+        createdAt: {
+          $gt: timeFrameStart,
+          $lte: timeFrameEnd
+        },
+        deleted: { $ne: true }
+      };
+
+      if (req.user._doc.role === 'ROLE_ADMIN'){
+        delete criteria['deleted'];
+      }
+
       let messages = await Message
-        .find({
-          createdAt: {
-            $gt: timeFrameStart,
-            $lte: timeFrameEnd
-          }
-        })
+        .find(criteria)
         .sort([['createdAt', 'descending']])
         .populate('user', 'name gravatarHash lastMeditation country')
         .lean()
