@@ -24,7 +24,7 @@ export default (app, router, io) => {
       };
 
       if (req.user._doc.role === 'ROLE_ADMIN'){
-        delete criteria['deleted']
+        delete criteria['deleted'];
       }
 
       let messages = await Message
