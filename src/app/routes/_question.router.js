@@ -1,6 +1,7 @@
 import Question from '../models/question.model.js';
 import Broadcast from '../models/broadcast.model.js';
 import moment from 'moment';
+import youtubeHelper from '../helper/youtube.js';
 
 export default (app, router, io, admin) => {
 
@@ -69,6 +70,24 @@ export default (app, router, io, admin) => {
     }
   });
 
+  router.post('/api/question/suggestions', async (req, res) => {
+    try {
+      let suggestions = { youtube: [], questions: [] };
+
+      const youtubeData = await youtubeHelper.findMatchingVideos(req.body.text);
+      suggestions.youtube = youtubeData.items;
+
+      const questions = await Question
+        .find({
+          videoUrl: { $exists: true },
+          text: { $regex: /pattern here/gi }
+        })
+
+      res.json(suggestions);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
   /**
    * @api {post} /api/question Post a new question
    * @apiName AddQuestion
