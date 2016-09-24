@@ -71,19 +71,26 @@ export default (app, router, io, admin) => {
   });
 
   router.post('/api/question/suggestions', async (req, res) => {
+    // requires index: db.getCollection('questions').createIndex( { text: "text" } )
     try {
-      let suggestions = { youtube: [], questions: [] };
-
-      const youtubeData = await youtubeHelper.findMatchingVideos(req.body.text);
-      suggestions.youtube = youtubeData.items;
-
+      const youtubeData = await youtubeHelper.findMatchingVideos(req.body.text.replace(' ', '|'));
       const questions = await Question
         .find({
           videoUrl: { $exists: true },
-          text: { $regex: /pattern here/gi }
+          $text: {
+            $search: req.body.text,
+          }
         })
+        .limit(5)
+        .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('broadcast', 'started videoUrl')
+        .lean()
+        .then();
 
-      res.json(suggestions);
+      res.json({
+        youtube: youtubeData.items,
+        questions: questions
+      });
     } catch (err) {
       res.status(500).send(err);
     }

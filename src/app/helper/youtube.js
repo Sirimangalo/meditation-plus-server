@@ -23,9 +23,7 @@ export default {
       });
     });
   },
-  findMatchingVideos: (question) => {
-    let keywords = question.replace(' ', '|');
-
+  findMatchingVideos: (query) => {
     return new Promise((resolve, reject) => {
       Youtube.authenticate({
         type: 'key',
@@ -36,7 +34,7 @@ export default {
         part: 'snippet',
         channelId: 'UCQJ6ESCWQotBwtJm0Ff_gyQ',
         maxResults: 8,
-        q: keywords
+        q: query
       }, (err, data) => {
         if (err) {
           reject(err);
