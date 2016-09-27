@@ -71,7 +71,7 @@ export default (app, router, io, admin) => {
   });
 
   /**
-   * @api {get} /api/question Get suggestions for question text from other questions and youtube video search
+   * @api {post} /api/question Get suggestions for question text from other questions and youtube video search
    * @apiName SuggestQuestions
    * @apiGroup Question
    *
