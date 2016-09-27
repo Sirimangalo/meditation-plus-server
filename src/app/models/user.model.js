@@ -7,6 +7,7 @@ let userSchema = mongoose.Schema({
     password : String,
     email : { type : String, unique : true }
   },
+  suspendedUntil: Date,
   name: { type: String, maxlength: 30 },
   role : { type : String },
   showEmail: Boolean,
