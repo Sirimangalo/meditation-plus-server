@@ -54,7 +54,7 @@
     "chai": "^3.5.0",
     "cors": "^2.7.1",
     "del": "^2.2.1",
-    "es6-promise": "^3.2.1",
+    "es6-promise": "^4.0.0",
     "es6-promise-loader": "^1.0.1",
     "es6-shim": "^0.35.1",
     "es7-reflect-metadata": "^1.6.0",
