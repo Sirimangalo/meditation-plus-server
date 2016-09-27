@@ -71,7 +71,7 @@ export default (app, router, io, admin) => {
   });
 
   /**
-   * @api {post} /api/question Get suggestions for question text from other questions and youtube video search
+   * @api {post} /api/question/suggestions Get suggestions for question text from other questions and youtube video search
    * @apiName SuggestQuestions
    * @apiGroup Question
    *
@@ -86,9 +86,9 @@ export default (app, router, io, admin) => {
     try {
       const keywords = req.body.text.match(/\w+/g);
       const youtubeData = await youtubeHelper.findMatchingVideos(keywords.join('|'), 8);
-      const questions = await Question
+      const questionsData = await Question
         .find({
-          videoUrl: { $exists: true },
+          answered: true,
           $text: {
             $search: req.body.text,
           }
@@ -100,13 +100,14 @@ export default (app, router, io, admin) => {
         .then();
 
       let youtube = youtubeData.items
-        .filter(data => {
-          return (data.id && data.id.videoId
-             && data.snippet
-             && data.snippet.title
-             && data.snippet.description
-             && data.snippet.thumbnails && data.snippet.thumbnails.default);
-        })
+        .filter(data => data.id
+          && data.id.videoId
+          && data.snippet
+          && data.snippet.title
+          && data.snippet.description
+          && data.snippet.thumbnails
+          && data.snippet.thumbnails.default
+        )
         .map(data => {
           return {
             title: data.snippet.title,
@@ -116,6 +117,9 @@ export default (app, router, io, admin) => {
           };
         });
 
+      let questions = questionsData
+        .filter(data => data.broadcast && data.broadcast.videoUrl);
+
       res.json({
         youtube: youtube,
         questions: questions
@@ -124,6 +128,7 @@ export default (app, router, io, admin) => {
       res.status(500).send(err);
     }
   });
+
   /**
    * @api {post} /api/question Post a new question
    * @apiName AddQuestion
