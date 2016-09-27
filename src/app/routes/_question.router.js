@@ -118,7 +118,6 @@ export default (app, router, io, admin) => {
 
       res.json({
         youtube: youtube,
-        youtubeSearchAll: 'https://www.youtube.com/user/yuttadhammo/search?query=' + keywords.join('+'),
         questions: questions
       });
     } catch (err) {
