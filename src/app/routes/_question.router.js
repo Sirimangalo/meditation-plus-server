@@ -85,7 +85,7 @@ export default (app, router, io, admin) => {
     // requires index: db.getCollection('questions').createIndex( { text: "text" } )
     try {
       const keywords = req.body.text.match(/\w+/g);
-      const youtubeData = await youtubeHelper.findMatchingVideos(keywords.join('|'));
+      const youtubeData = await youtubeHelper.findMatchingVideos(keywords.join('|'), 8);
       const questions = await Question
         .find({
           videoUrl: { $exists: true },

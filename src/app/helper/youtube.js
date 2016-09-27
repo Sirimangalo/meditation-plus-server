@@ -23,18 +23,17 @@ export default {
       });
     });
   },
-  findMatchingVideos: (query) => {
+  findMatchingVideos: (query, limit = 10) => {
     return new Promise((resolve, reject) => {
       Youtube.authenticate({
         type: 'key',
         key: process.env.YOUTUBE_API_KEY
       });
 
-      console.log(query);
       Youtube.search.list({
         part: 'snippet',
         channelId: 'UCQJ6ESCWQotBwtJm0Ff_gyQ',
-        maxResults: 8,
+        maxResults: limit,
         q: query
       }, (err, data) => {
         if (err) {
