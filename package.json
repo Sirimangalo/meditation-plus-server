@@ -39,7 +39,7 @@
     "apidoc": "^0.16.1",
     "babel-cli": "^6.11.4",
     "babel-core": "^6.11.4",
-    "babel-eslint": "^6.1.2",
+    "babel-eslint": "^7.0.0",
     "babel-loader": "^6.2.4",
     "babel-plugin-syntax-async-functions": "^6.8.0",
     "babel-plugin-transform-regenerator": "^6.11.4",
