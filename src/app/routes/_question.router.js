@@ -1,6 +1,7 @@
 import Question from '../models/question.model.js';
 import Broadcast from '../models/broadcast.model.js';
 import moment from 'moment';
+import youtubeHelper from '../helper/youtube.js';
 
 export default (app, router, io, admin) => {
 
@@ -64,6 +65,65 @@ export default (app, router, io, admin) => {
       });
 
       res.json(questions);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /api/question/suggestions Get suggestions for question text from other questions and youtube video search
+   * @apiName SuggestQuestions
+   * @apiGroup Question
+   *
+   * @apiParam {String} text Question body
+   *
+   * @apiSuccess {Object[]} suggestions            List of suggestions
+   * @apiSuccess {Array}    suggestions.questions  List of related questions (already answered, with video link)
+   * @apiSuccess {Array}    suggestions.youtube    List of related Youtube videos
+   */
+  router.post('/api/question/suggestions', async (req, res) => {
+    // requires index: db.getCollection('questions').createIndex( { text: "text" } )
+    try {
+      const keywords = req.body.text.match(/\w+/g);
+      const youtubeData = await youtubeHelper.findMatchingVideos(keywords.join('|'), 8);
+      const questionsData = await Question
+        .find({
+          answered: true,
+          $text: {
+            $search: req.body.text,
+          }
+        })
+        .limit(5)
+        .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('broadcast', 'started videoUrl')
+        .lean()
+        .then();
+
+      let youtube = youtubeData.items
+        .filter(data => data.id
+          && data.id.videoId
+          && data.snippet
+          && data.snippet.title
+          && data.snippet.description
+          && data.snippet.thumbnails
+          && data.snippet.thumbnails.default
+        )
+        .map(data => {
+          return {
+            title: data.snippet.title,
+            description: data.snippet.description,
+            thumbnail: data.snippet.thumbnails.default,
+            videoId: data.id.videoId
+          };
+        });
+
+      let questions = questionsData
+        .filter(data => data.broadcast && data.broadcast.videoUrl);
+
+      res.json({
+        youtube: youtube,
+        questions: questions
+      });
     } catch (err) {
       res.status(500).send(err);
     }
