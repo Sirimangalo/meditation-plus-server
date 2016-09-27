@@ -30,6 +30,7 @@ export default {
         key: process.env.YOUTUBE_API_KEY
       });
 
+      console.log(query);
       Youtube.search.list({
         part: 'snippet',
         channelId: 'UCQJ6ESCWQotBwtJm0Ff_gyQ',

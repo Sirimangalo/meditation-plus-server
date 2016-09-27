@@ -70,10 +70,22 @@ export default (app, router, io, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/question Get suggestions for question text from other questions and youtube video search
+   * @apiName SuggestQuestions
+   * @apiGroup Question
+   *
+   * @apiParam {String} text Question body
+   *
+   * @apiSuccess {Object[]} suggestions            List of suggestions
+   * @apiSuccess {Array}    suggestions.questions  List of related questions (already answered, with video link)
+   * @apiSuccess {Array}    suggestions.youtube    List of related Youtube videos
+   */
   router.post('/api/question/suggestions', async (req, res) => {
     // requires index: db.getCollection('questions').createIndex( { text: "text" } )
     try {
-      const youtubeData = await youtubeHelper.findMatchingVideos(req.body.text.replace(' ', '|'));
+      const keywords = req.body.text.match(/\w+/g);
+      const youtubeData = await youtubeHelper.findMatchingVideos(keywords.join('|'));
       const questions = await Question
         .find({
           videoUrl: { $exists: true },
@@ -87,8 +99,25 @@ export default (app, router, io, admin) => {
         .lean()
         .then();
 
+      let youtube = youtubeData.items
+        .filter(data => {
+          return (data.id && data.id.videoId
+             && data.snippet
+             && data.snippet.title
+             && data.snippet.description
+             && data.snippet.thumbnails && data.snippet.thumbnails.default);
+        })
+        .map(data => {
+          return {
+            title: data.snippet.title,
+            description: data.snippet.description,
+            thumbnail: data.snippet.thumbnails.default,
+            videoId: data.id.videoId
+          };
+        });
+
       res.json({
-        youtube: youtubeData.items,
+        youtube: youtube,
         questions: questions
       });
     } catch (err) {
