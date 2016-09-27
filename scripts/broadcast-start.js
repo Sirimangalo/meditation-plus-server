@@ -6,6 +6,8 @@ import Broadcast from '../src/app/models/broadcast.model.js';
 validateEnvVariables();
 mongooseConf(mongoose);
 
-let test = await Broadcast.create({
+let lastBroadcast = Broadcast.create({
   started: new Date()
 });
+
+mongoose.connection.close()
