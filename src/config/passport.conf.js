@@ -303,6 +303,12 @@ export default (passport) => {
 
           { loginMessage : 'Invalid password entered.' });
       }
+
+      // Check account suspension
+      if (user.suspendedUntil && user.suspendedUntil > new Date()) {
+        return done(null, false, { loginMessage: 'This account is suspended.' });
+      }
+
       // Otherwise all is well; return successful user
 
       // Generate hash for Gravatar if not present

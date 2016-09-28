@@ -193,6 +193,7 @@ export default (app, router) => {
     if (req.body.local.password) delete req.body.local.password;
     if (req.body._id) delete req.body._id;
     if (req.body.role) delete req.body.role;
+    if (req.body.suspendedUntil) delete req.body.suspendedUntil;
 
     try {
       let user = await User.findById(req.user._doc._id);

@@ -24,6 +24,10 @@ export default (app, router, passport, io) => {
     if (req.user) {
       let user = await User.findById(req.user._doc._id);
 
+      if (user.suspendedUntil && user.suspendedUntil > new Date()) {
+        res.sendStatus(401);
+      }
+
       const now = new Date();
 
       if (!user.lastActive ||
