@@ -6,7 +6,9 @@ import Broadcast from '../src/app/models/broadcast.model.js';
 validateEnvVariables();
 mongooseConf(mongoose);
 
-let lastBroadcast = Broadcast.create({
+console.log('Adding new database entry for Broadcast');
+
+await Broadcast.create({
   started: new Date()
 });
 
