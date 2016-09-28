@@ -6,15 +6,18 @@ import Broadcast from '../src/app/models/broadcast.model.js';
 validateEnvVariables();
 mongooseConf(mongoose);
 
-let lastBroadcast = Broadcast
+console.log('Adding end of Broadcast to database entry');
+
+
+Broadcast
   .find()
   .sort({
-    started: 1
+    started: -1
   })
-  .limit(1);
-
-console.log(lastBroadcast);
-lastBroadcast.ended = new Date(),
-
-
-mongoose.connection.close()
+  .limit(1)
+  .update({
+    ended: new Date()
+  })
+  .then(() => {
+    mongoose.connection.close()
+  });

@@ -8,8 +8,11 @@ mongooseConf(mongoose);
 
 console.log('Adding new database entry for Broadcast');
 
-await Broadcast.create({
-  started: new Date()
-});
 
-mongoose.connection.close()
+Broadcast
+  .create({
+    started: new Date()
+  })
+  .then(() => {
+    mongoose.connection.close()
+  });
