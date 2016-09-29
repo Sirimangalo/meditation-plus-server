@@ -10,7 +10,13 @@ console.log('Adding end of Broadcast to database entry');
 
 
 Broadcast
-  .find()
+  .find({
+    $or: [{
+      ended: { $exists: false }
+    }, {
+      ended: null
+    }]
+  })
   .sort({
     started: -1
   })
