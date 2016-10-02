@@ -1,6 +1,31 @@
 import Broadcast from '../models/broadcast.model.js';
+import youtubeHelper from '../helper/youtube.js';
 
 export default (app, router, admin) => {
+
+  /**
+   * Repetetly checks for a broadcast record on youtube being published.
+   * Adds link to broadcast if it finds the processed video.
+   *
+   * @param  {Broadcast} broadcast  Model of broadcast without link
+   */
+  async function checkBroadcastLink(broadcast, currentTry = 0) {
+    // Check every 30 minutes, max. 5 times
+    const interval = 1800000;
+    const maxTries = 5;
+    const findBroadcast = await youtubeHelper.findBroadcastURL(broadcast);
+
+    if (findBroadcast.items && findBroadcast.items.length !== 0) {
+      broadcast.videoUrl = 'https://www.youtube.com/watch?v=' + findBroadcast.items[0].id.videoId;
+      await broadcast.save();
+    }
+
+    if (!broadcast.videoUrl && currentTry < maxTries) {
+      setTimeout(() => {
+        checkBroadcastLink(broadcast, currentTry + 1);
+      }, interval);
+    }
+  }
 
   /**
    * @api {get} /api/broadcast Get broadcast data
@@ -59,10 +84,16 @@ export default (app, router, admin) => {
   router.put('/api/broadcast/:id', admin, async (req, res) => {
     try {
       let broadcast = await Broadcast.findById(req.params.id);
+
       for (const key of Object.keys(req.body)) {
         broadcast[key] = req.body[key];
+
       }
       await broadcast.save();
+
+      if (broadcast.ended && !broadcast.videoUrl) {
+        checkBroadcastLink(broadcast);
+      }
 
       res.sendStatus(200);
     } catch (err) {
