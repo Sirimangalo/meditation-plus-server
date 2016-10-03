@@ -42,8 +42,8 @@ export class ProfileHelper {
     let today = timezone(user, moment());
     let todayWithoutTime = timezone(user, moment()).startOf('day');
     let tenDaysAgo = moment(todayWithoutTime).subtract(9, 'days');
-    let tenWeeksAgo = moment(todayWithoutTime).subtract(9, 'weeks');
-    let tenMonthsAgo = moment(todayWithoutTime).subtract(9, 'months');
+    let tenWeeksAgo = moment(todayWithoutTime).subtract(10, 'weeks').add(1, 'day');
+    let tenMonthsAgo = moment(todayWithoutTime).subtract(10, 'months').add(1, 'day');
 
     return {
       today, todayWithoutTime, tenDaysAgo, tenWeeksAgo, tenMonthsAgo
