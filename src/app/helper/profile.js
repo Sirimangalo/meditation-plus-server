@@ -121,16 +121,18 @@ export class ProfileHelper {
       const duration = this.getStartOfDuration(date, meditations.lastDay);
 
       // only one day ago = consecutive day
-      if (duration.asDays() ===   1) {
-        meditations.currentConsecutiveDays++;
+      if (duration.asDays() === 1) {
+        meditations.currentConsecutiveDays == 0
+            ? 2
+            : meditations.currentConsecutiveDays++;
 
         meditations = this.tenDaysBadge(meditations);
       } else if (duration.asDays() > 1) {
         // more than one day ago = reset consecutive days
-        meditations.currentConsecutiveDays = 1;
+        meditations.currentConsecutiveDays = 0;
       }
     } else {
-      meditations.currentConsecutiveDays = 1;
+      meditations.currentConsecutiveDays = 0;
     }
 
     return meditations;
