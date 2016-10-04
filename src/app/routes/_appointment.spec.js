@@ -77,6 +77,26 @@ describe('Appointment Routes', () => {
           });
       });
     });
+
+    it('should only add hours once', done => {
+      Appointment.create({
+        weekDay: 4,
+        hour: 13
+      }).then((res, err) => {
+        if (err) return done(err);
+
+        user
+          .get('/api/appointment')
+          .expect(200)
+          .end((err, res) => {
+            expect(res.body).to.have.property('hours');
+            expect(res.body).to.have.property('appointments');
+            expect(res.body.hours.length).to.equal(2);
+            expect(res.body.appointments.length).to.equal(3);
+            done(err);
+          });
+      });
+    });
   });
 
   describe('POST /api/appointment/:id/register', () => {

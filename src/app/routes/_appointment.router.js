@@ -29,7 +29,7 @@ export default (app, router, io, admin) => {
         .exec();
 
       result.map(entry => {
-        if (!json.hours.includes(entry.hour)) {
+        if (json.hours.indexOf(entry.hour) < 0) {
           json.hours.push(entry.hour);
         }
         json.appointments.push(entry);
