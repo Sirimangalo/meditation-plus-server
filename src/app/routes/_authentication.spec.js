@@ -6,6 +6,12 @@ import { AuthedSupertest } from '../helper/authed-supertest.js';
 
 const request = supertest(app);
 let authedRequest = new AuthedSupertest();
+let adminUser = new AuthedSupertest(
+  'Admin',
+  'admin@sirimangalo.org',
+  'password',
+  'ROLE_ADMIN'
+);
 
 describe('Authentication Routes', () => {
   describe('GET /auth/login', () => {
@@ -47,7 +53,7 @@ describe('Authentication Routes', () => {
           expect(res.body).to.have.property('role');
           expect(res.body.id).to.equal(user._id.toString());
           expect(res.body.role).to.equal('ROLE_USER');
-          done();
+          done(err);
         });
     });
   });
@@ -60,8 +66,8 @@ describe('Authentication Routes', () => {
         .post('/auth/refresh')
         .send({})
         .expect(401)
-        .end(() => {
-          done();
+        .end(err => {
+          done(err);
         });
     });
 
@@ -76,7 +82,7 @@ describe('Authentication Routes', () => {
           expect(res.body).to.have.property('role');
           expect(res.body.id).to.equal(authedRequest.user._id.toString());
           expect(res.body.role).to.equal('ROLE_USER');
-          done();
+          done(err);
         });
     });
   });
@@ -87,35 +93,15 @@ describe('Authentication Routes', () => {
     it('should respond with 401 when not authenticated', done => {
       request
         .post('/auth/logout')
-        .send({})
         .expect(401)
-        .end(() => {
-          // logged out - check for refresh token
-          authedRequest
-            .post('/auth/refresh')
-            .send({})
-            .expect(200)
-            .end(() => {
-              done();
-            });
-        });
+        .end(err => done(err));
     });
 
     it('should also respond with 401 when authenticated, but also invalidate the token', done => {
       authedRequest
         .post('/auth/logout')
-        .send({})
         .expect(401)
-        .end(() => {
-          // logged out - check for refresh token
-          authedRequest
-            .post('/auth/refresh')
-            .send({})
-            .expect(401)
-            .end(() => {
-              done();
-            });
-        });
+        .end(err =>  done(err));
     });
   });
 
@@ -125,14 +111,11 @@ describe('Authentication Routes', () => {
       return User.remove().exec();
     });
 
-    it('should respond with 401 when receiving empty data', done => {
+    it('should respond with 404 when receiving empty data', done => {
       request
         .post('/auth/signup')
-        .send({})
-        .expect(401)
-        .end(() => {
-          done();
-        });
+        .expect(404)
+        .end(err => done(err));
     });
 
     it('should respond with proper message when receiving invalid email length', done => {
@@ -145,7 +128,7 @@ describe('Authentication Routes', () => {
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equal('Invalid email length.\n');
-          done();
+          done(err);
         });
     });
 
@@ -159,7 +142,7 @@ describe('Authentication Routes', () => {
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equal('Invalid email address.\n');
-          done();
+          done(err);
         });
     });
 
@@ -173,7 +156,7 @@ describe('Authentication Routes', () => {
         .expect(401)
         .end((err, res) => {
           expect(res.text).to.equal('Invalid password length.\n');
-          done();
+          done(err);
         });
     });
 
@@ -185,39 +168,31 @@ describe('Authentication Routes', () => {
           password: 'validpassword'
         })
         .expect(204)
-        .end(() => {
-          done();
+        .end(err => {
+          done(err);
         });
     });
   });
 
   describe('GET /auth/delete/:uid', () => {
-    authedRequest.authorize();
+    adminUser.authorize();
 
     it('should respond with 500 when passing invalid user', done => {
-      request
-        .post('/auth/delete/notexisting')
-        .send({})
+      adminUser
+        .delete('/auth/delete/notexisting')
         .expect(500)
-        .end(() => {
-          done();
+        .end(err => {
+          done(err);
         });
     });
 
     it('should also respond with 204 on success, but also remove the user', done => {
-      authedRequest
-        .post(`/auth/delete/${authedRequest.user._id}`)
+      adminUser
+        .delete(`/auth/delete/${adminUser.user._id}`)
         .send({})
         .expect(204)
-        .end(() => {
-          // removed user - check for refresh token
-          authedRequest
-            .post('/auth/refresh')
-            .send({})
-            .expect(401)
-            .end(() => {
-              done();
-            });
+        .end(err => {
+          done(err);
         });
     });
   });

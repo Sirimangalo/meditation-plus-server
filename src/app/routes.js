@@ -1,8 +1,4 @@
-// Define routes for the Node backend
-
-// Load our API routes for user authentication
 import authRoutes from './routes/_authentication.router.js';
-
 import messageRoutes from './routes/_message.router.js';
 import questionRoutes from './routes/_question.router.js';
 import testimonialRoutes from './routes/_testimonial.router.js';
@@ -18,7 +14,7 @@ import User from './models/user.model.js';
 
 export default (app, router, passport, io) => {
 
-  // ### Express Middlware to use for all requests
+  // Express Middlware to use for all requests
   router.use(async (req, res, next) => {
     // update lastActive for user
     if (req.user) {
@@ -48,26 +44,14 @@ export default (app, router, passport, io) => {
   // Define a middleware function to be used for all secured administration
   // routes
   let admin = (req, res, next) => {
-
-    if (!req.isAuthenticated() || req.user._doc.role !== 'ROLE_ADMIN')
+    if (!req.isAuthenticated() || req.user._doc.role !== 'ROLE_ADMIN') {
       res.sendStatus(401);
-
-    else
+    } else {
       next();
+    }
   };
 
-  // ### Server Routes
-
-  // Handle things like API calls,
-
-  // #### Authentication routes
-
-  // Pass in our Express app and Router.
-  // Also pass in auth & admin middleware and Passport instance
   authRoutes(app, router, passport, admin);
-
-  // #### RESTful API Routes
-
   testimonialRoutes(app, router, io, admin);
   messageRoutes(app, router, io);
   questionRoutes(app, router, io, admin);
@@ -78,8 +62,6 @@ export default (app, router, passport, io) => {
   appointmentRoutes(app, router, io, admin);
   userRoutes(app, router, io, admin);
   liveRoutes(app, router);
-
-  // ### Frontend Routes
 
   // Route to handle all Angular requests
   router.get('*', (req, res) => {

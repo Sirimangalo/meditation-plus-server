@@ -1,41 +1,59 @@
-import { app } from '../../server.conf.js';
 import supertest from 'supertest';
 import User from '../models/user.model.js';
+import { app } from '../../server.conf.js';
 
 export class AuthedSupertest {
   token;
-  agent = supertest.agent(app);
-  user = {
-    name: 'User',
-    local: {
-      email: 'admin@admin.com',
-      password: new User().generateHash('password')
-    },
-    role: 'ROLE_USER'
-  };
+  agent;
+  user;
+  cleartextPassword;
+  email;
+  role;
+  name;
 
-  createUser(done) {
-    User.remove(() => {
-      this.user = new User(this.user);
+  constructor(
+    name = 'User',
+    email = 'user@sirimangalo.org',
+    password = 'password',
+    role = 'ROLE_USER'
+  ) {
+    this.name = name;
+    this.role = role;
+    this.email = email;
+    this.agent = supertest(app);
+    this.cleartextPassword = password;
+  }
 
+  createUser() {
+    this.user = new User({
+      name: this.name,
+      local: {
+        email: this.email,
+        password: new User().generateHash(this.cleartextPassword)
+      },
+      role: this.role
+    });
+
+    return new Promise((resolve, reject) => {
       this.user.save(err => {
-        if (err) return done(err);
-        done();
+        if (err) return reject(err);
+        resolve();
       });
     });
   }
 
   login() {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.agent
         .post('/auth/login')
         .send({
-          email: 'admin@admin.com',
-          password: 'password'
+          email: this.user.local.email,
+          password: this.cleartextPassword
         })
         .expect(200)
         .expect('Content-Type', /json/)
         .end((err, res) => {
+          if (err) return reject(err);
           this.token = res.body.token;
           resolve();
         });
@@ -44,11 +62,14 @@ export class AuthedSupertest {
 
   authorize() {
     before(done => {
-      this.createUser(done);
+      this.createUser()
+        .then(() => this.login())
+        .then(() => done())
+        .catch(err => done(err));
     });
-    before(done => {
-      this.login().then(() => {
-        done();
+    after(done => {
+      this.user.remove(err => {
+        done(err);
       });
     });
   }
