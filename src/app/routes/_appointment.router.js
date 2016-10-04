@@ -1,4 +1,5 @@
 import Appointment from '../models/appointment.model.js';
+import { logger } from '../helper/logger.js';
 
 export default (app, router, io, admin) => {
 
@@ -37,7 +38,7 @@ export default (app, router, io, admin) => {
 
       res.json(json);
     } catch (err) {
-      console.log('Appointment Error', err);
+      logger.error('Appointment Error', err);
       res.status(400).send(err);
     }
   });

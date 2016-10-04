@@ -2,6 +2,7 @@ import Meditation from '../models/meditation.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment';
 import timezone from '../helper/timezone.js';
+import { logger } from '../helper/logger.js';
 
 export default (app, router, io) => {
 
@@ -183,7 +184,7 @@ export default (app, router, io) => {
 
       res.json(created);
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       res
         .status(err.name === 'ValidationError' ? 400 : 500)
         .send(err);

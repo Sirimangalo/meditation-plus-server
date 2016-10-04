@@ -1,4 +1,4 @@
-// *mongoose.conf.js*
+import { logger } from '../app/helper/logger.js';
 
 export default (mongoose) => {
 
@@ -6,7 +6,7 @@ export default (mongoose) => {
 
     mongoose.connection.close(() => {
 
-      console.log('Mongoose connection ' +
+      logger.info('Mongoose connection ' +
         'has disconnected through app termination');
 
       process.exit(0);
@@ -15,21 +15,21 @@ export default (mongoose) => {
 
   mongoose.connection.on('connected', () => {
 
-    console.log(`Successfully connected to ${process.env.NODE_ENV}` +
+    logger.info(`Successfully connected to ${process.env.NODE_ENV}` +
       ' database on startup ');
   });
 
   // If the connection throws an error
   mongoose.connection.on('error', (err) => {
 
-    console.error(`Failed to connect to ${process.env.NODE_ENV} ` +
+    logger.error(`Failed to connect to ${process.env.NODE_ENV} ` +
       ' database on startup ', err);
   });
 
   // When the connection is disconnected
   mongoose.connection.on('disconnected', () => {
 
-    console.log(`Mongoose default connection to ${process.env.NODE_ENV}` +
+    logger.info(`Mongoose default connection to ${process.env.NODE_ENV}` +
       ' database disconnected');
   });
 
