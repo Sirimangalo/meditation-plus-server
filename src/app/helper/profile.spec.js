@@ -54,4 +54,42 @@ describe('ProfileHelper', () => {
     expect(Object.keys(result.lastWeeks).length).to.equal(10, 'expect 10 weeks');
     expect(Object.keys(result.lastDays).length).to.equal(10, 'expect 10 days');
   });
+
+  it('should calculate correct consecutive days', () => {
+    let meditations = {
+      currentConsecutiveDays: 0,
+      lastDay: moment('2016-09-01')
+    };
+
+    profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-02'));
+    expect(meditations.currentConsecutiveDays)
+        .to.equal(2, 'start with 2 consecutive days');
+
+    meditations.lastDay = moment('2016-09-02');
+
+    profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-03'));
+    expect(meditations.currentConsecutiveDays).to.equal(3, 'add another day');
+
+    meditations.lastDay = moment('2016-09-03');
+    profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-05'));
+    expect(meditations.currentConsecutiveDays)
+        .to.equal(0, 'reset to 0 if duration is more than one day');
+  });
+
+  it('should add badge on 10 consecutive days', () => {
+    let meditations = {
+      currentConsecutiveDays: 8,
+      consecutiveDays: [],
+      lastDay: moment('2016-09-01')
+    };
+
+    profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-02'));
+    expect(meditations.currentConsecutiveDays).to.equal(9);
+    expect(meditations.consecutiveDays.length).to.equal(0);
+    meditations.lastDay = moment('2016-09-02');
+
+    profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-03'));
+    expect(meditations.currentConsecutiveDays).to.equal(10);
+    expect(meditations.consecutiveDays.length).to.equal(1);
+  });
 });

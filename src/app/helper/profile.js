@@ -108,7 +108,7 @@ export class ProfileHelper {
 
   tenDaysBadge(meditations) {
     // save 10-steps as badges
-    if (meditations.currentConsecutiveDays % 10 === 0) {
+    if (meditations.currentConsecutiveDays > 0 && meditations.currentConsecutiveDays % 10 === 0) {
       meditations.consecutiveDays.push(meditations.currentConsecutiveDays);
     }
 
@@ -122,9 +122,10 @@ export class ProfileHelper {
 
       // only one day ago = consecutive day
       if (duration.asDays() === 1) {
-        meditations.currentConsecutiveDays == 0
+        meditations.currentConsecutiveDays =
+            meditations.currentConsecutiveDays == 0
             ? 2
-            : meditations.currentConsecutiveDays++;
+            : meditations.currentConsecutiveDays + 1;
 
         meditations = this.tenDaysBadge(meditations);
       } else if (duration.asDays() > 1) {
