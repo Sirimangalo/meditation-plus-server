@@ -11,11 +11,17 @@ let user2 = new AuthedSupertest(
   'user2@sirimangalo.org',
   'password'
 );
+let admin = new AuthedSupertest(
+  'Admin User',
+  'admin@sirimangalo.org',
+  'password',
+  'ROLE_ADMIN'
+);
 
 describe('Appointment Routes', () => {
   let appointment;
 
-  before(done => {
+  beforeEach(done => {
     Appointment.remove(() => {
       appointment = new Appointment({
         weekDay: 1,
@@ -29,7 +35,7 @@ describe('Appointment Routes', () => {
     });
   });
 
-  after(() => {
+  afterEach(() => {
     return Appointment.remove().exec();
   });
 
@@ -80,8 +86,8 @@ describe('Appointment Routes', () => {
 
     it('should only add hours once', done => {
       Appointment.create({
-        weekDay: 4,
-        hour: 13
+        weekDay: 1,
+        hour: 12
       }).then((res, err) => {
         if (err) return done(err);
 
@@ -91,8 +97,8 @@ describe('Appointment Routes', () => {
           .end((err, res) => {
             expect(res.body).to.have.property('hours');
             expect(res.body).to.have.property('appointments');
-            expect(res.body.hours.length).to.equal(2);
-            expect(res.body.appointments.length).to.equal(3);
+            expect(res.body.hours.length).to.equal(1);
+            expect(res.body.appointments.length).to.equal(2);
             done(err);
           });
       });
@@ -136,6 +142,177 @@ describe('Appointment Routes', () => {
             .post(`/api/appointment/${appointment._id}/register`)
             .expect(400)
             .end(err => done(err));
+        });
+    });
+  });
+
+  describe('GET /api/appointment/:id', () => {
+    user.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .get(`/api/appointment/${appointment._id}`)
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 401 when authenticated as user', done => {
+      user
+        .get(`/api/appointment/${appointment._id}`)
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should correctly return when authenticated as admin', done => {
+      admin
+        .get(`/api/appointment/${appointment._id}`)
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body._id).to.equal(appointment._id.toString());
+          done(err);
+        });
+    });
+  });
+
+  describe('PUT /api/appointment/:id', () => {
+    user.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .put(`/api/appointment/${appointment._id}`)
+        .send({
+          weekDay: 0
+        })
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 401 when authenticated as user', done => {
+      user
+        .put(`/api/appointment/${appointment._id}`)
+        .send({
+          weekDay: 0
+        })
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should correctly return when authenticated as admin', done => {
+      admin
+        .put(`/api/appointment/${appointment._id}`)
+        .send({
+          weekDay: 0
+        })
+        .expect(200)
+        .end(err => done(err));
+    });
+  });
+
+  describe('POST /api/appointment', () => {
+    user.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .post('/api/appointment')
+        .send({
+          weekDay: 0
+        })
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 401 when authenticated as user', done => {
+      user
+        .post('/api/appointment')
+        .send({
+          weekDay: 0
+        })
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should correctly return when authenticated as admin', done => {
+      admin
+        .post('/api/appointment')
+        .send({
+          hour: 0,
+          weekDay: 0
+        })
+        .expect(201)
+        .end(err => done(err));
+    });
+  });
+
+  describe('DELETE /api/appointment/:id', () => {
+    user.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .delete(`/api/appointment/${appointment._id}`)
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 401 when authenticated as user', done => {
+      user
+        .delete(`/api/appointment/${appointment._id}`)
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should correctly delete when authenticated as admin', done => {
+      admin
+        .delete(`/api/appointment/${appointment._id}`)
+        .expect(200)
+        .end(err => {
+          if (err) return done(err);
+
+          // check if really deleted
+          admin
+            .get(`/api/appointment/${appointment._id}`)
+            .expect(404)
+            .end(err => done(err));
+        });
+    });
+  });
+
+  describe('DELETE /api/appointment/remove/:id', () => {
+    user.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .delete(`/api/appointment/remove/${appointment._id}`)
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 401 when authenticated as user', done => {
+      user
+        .delete(`/api/appointment/remove/${appointment._id}`)
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should correctly delete when authenticated as admin', done => {
+      admin
+        .delete(`/api/appointment/remove/${appointment._id}`)
+        .expect(200)
+        .end(err => {
+          if (err) return done(err);
+
+          // check if really deleted
+          admin
+            .get(`/api/appointment/${appointment._id}`)
+            .expect(200)
+            .end((err, res) => {
+              expect(res.body.user).to.equal(null);
+              done(err);
+            });
         });
     });
   });
