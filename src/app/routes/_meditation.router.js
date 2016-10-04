@@ -232,6 +232,7 @@ export default (app, router, io) => {
 
       // sending broadcast WebSocket meditation
       io.sockets.emit('meditation', 'no content');
+      res.sendStatus(204);
     } catch (err) {
       res
         .status(500)
