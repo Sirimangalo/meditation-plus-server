@@ -50,8 +50,9 @@ describe('ProfileHelper', () => {
     };
 
     const result = profileHelper.fillTimespan(meditations);
-    expect(Object.keys(result.lastMonths).length).to.equal(10);
-    expect(Object.keys(result.lastWeeks).length).to.equal(10);
-    expect(Object.keys(result.lastDays).length).to.equal(10);
+    console.log(result.lastMonths);
+    expect(Object.keys(result.lastMonths).length).to.equal(10, 'expect 10 months');
+    expect(Object.keys(result.lastWeeks).length).to.equal(10, 'expect 10 weeks');
+    expect(Object.keys(result.lastDays).length).to.equal(10, 'expect 10 days');
   });
 });
