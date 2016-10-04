@@ -1,0 +1,11 @@
+{
+  "ENV" : "development",
+  "PORT" : 3002,
+  "MONGO_URI" : {
+    "DEVELOPMENT" : "mongodb://localhost:27017",
+    "PRODUCTION" : "mongodb://localhost:27017",
+    "TEST" : "mongodb://localhost:27017"
+  },
+  "SESSION_SECRET" : "5EC23D425CF72E433E217DEC18AA8",
+  "YOUTUBE_API_KEY" : ""
+}
