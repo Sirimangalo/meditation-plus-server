@@ -71,8 +71,10 @@ import passportConf from './config/passport.conf.js';
 // Pass Passport configuration our PassportJS instance
 passportConf(passport);
 
-// Log requests to console
-app.use(morgan('combined'));
+if (process.env.NODE_ENV !== 'test') {
+  // Log requests to console
+  app.use(morgan('combined'));
+}
 
 // ## Get all data/stuff of the body (POST) parameters
 

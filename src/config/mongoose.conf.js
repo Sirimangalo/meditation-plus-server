@@ -36,6 +36,10 @@ export default (mongoose) => {
   // If the Node process ends, close the Mongoose connection
   process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
 
+  // replacing mongoose's promise lib:
+  // https://github.com/Automattic/mongoose/issues/4291#issuecomment-230312093
+  mongoose.Promise = global.Promise;
+
   // Connect to our MongoDB database using the MongoDB
   // connection URI from our predefined environment variable
   mongoose.connect(process.env.MONGO_URI, (error) => {
