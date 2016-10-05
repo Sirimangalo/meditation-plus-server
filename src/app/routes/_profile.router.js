@@ -1,8 +1,6 @@
 import User from '../models/user.model.js';
-import Meditation from '../models/meditation.model.js';
-import moment from 'moment';
+import { ProfileHelper } from '../helper/profile.js';
 import md5 from 'md5';
-import timezone from '../helper/timezone.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -80,94 +78,7 @@ export default (app, router) => {
         return res.json(doc);
       }
 
-      // initialize timespans
-      let today = timezone(doc, moment());
-      let todayWithoutTime = timezone(doc, moment()).startOf('day');
-      let tenDaysAgo = moment(todayWithoutTime).subtract(9, 'days');
-      let tenWeeksAgo = moment(todayWithoutTime).subtract(10, 'weeks');
-      let tenMonthsAgo = moment(todayWithoutTime).subtract(10, 'months');
-
-      doc.meditations = {
-        lastMonths: {},
-        lastWeeks: {},
-        lastDays: {},
-        consecutiveDays: [],
-        numberOfSessions: 0,
-        currentConsecutiveDays: 0,
-        totalMeditationTime: 0,
-        averageSessionTime: 0
-      };
-
-      let lastDay = null;
-
-      // iterate days
-      for (let day = moment(tenMonthsAgo); day <= todayWithoutTime; day.add(1, 'day')) {
-        doc.meditations.lastMonths[day.format('MMM')] = 0;
-
-        if (day >= tenWeeksAgo) {
-          doc.meditations.lastWeeks[day.format('w')] = 0;
-        }
-        if (day >= tenDaysAgo) {
-          doc.meditations.lastDays[day.format('Do')] = 0;
-        }
-      }
-      let result = await Meditation
-        .find({
-          end: { $lt: today.format('x') },
-          user: doc._id
-        })
-        .sort([['createdAt', 'ascending']])
-        .lean()
-        .exec();
-
-      // sum meditation time
-      result.map(entry => {
-        const value = entry.sitting + entry.walking;
-
-        doc.meditations.numberOfSessions++;
-        doc.meditations.totalMeditationTime += value;
-        const entryDate = timezone(doc, entry.createdAt);
-
-        // adding times of last 10 months
-        doc.meditations.lastMonths[entryDate.format('MMM')] += value;
-
-        // adding times of last 10 weeks
-        if (entryDate >= tenWeeksAgo) {
-          doc.meditations.lastWeeks[entryDate.format('w')] += value;
-        }
-
-        // adding times of last 10 days
-        if (entryDate >= tenDaysAgo) {
-          doc.meditations.lastDays[entryDate.format('Do')] += value;
-        }
-
-        // calculate consecutive days
-        if (lastDay) {
-          const duration = moment.duration(
-            moment(entryDate).startOf('day').diff(moment(lastDay).startOf('day'))
-          );
-
-          // only one day ago = consecutive day
-          if (duration.asDays() ===   1) {
-            doc.meditations.currentConsecutiveDays++;
-
-            // save 10-steps as badges
-            if (doc.meditations.currentConsecutiveDays % 10 === 0) {
-              doc.meditations.consecutiveDays.push(doc.meditations.currentConsecutiveDays);
-            }
-          } else if (duration.asDays() > 1) {
-            // more than one day ago = reset consecutive days
-            doc.meditations.currentConsecutiveDays = 1;
-          }
-        } else {
-          doc.meditations.currentConsecutiveDays = 1;
-        }
-
-        lastDay = entryDate;
-      });
-
-      doc.meditations.averageSessionTime =
-        Math.round(doc.meditations.totalMeditationTime / doc.meditations.numberOfSessions);
+      doc.meditations = await new ProfileHelper().calculateStats(doc);
 
       res.json(doc);
     } catch (err) {
