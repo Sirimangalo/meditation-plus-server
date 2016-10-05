@@ -20,7 +20,7 @@ const checkBroadcastLink = async (broadcast, currentTry = 1) => {
     return;
   }
   // Check every 30 minutes, max. 5 times
-  const interval = 2000;
+  const interval = 1800000;
   const maxTries = 5;
   const findBroadcast = await youtubeHelper.findBroadcastURL(broadcast);
 
