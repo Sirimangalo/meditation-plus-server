@@ -44,9 +44,6 @@ gulp.task('build:docs', () => {
   // the extension of the files you are trying to generate
   // documentation for
   function generateDocs(fileSrc, ext) {
-
-    console.log(ext);
-
     if(ext == '') {
 
       throw new Error('Extension must be passed in for documentation to be generated properly!');
@@ -67,43 +64,10 @@ gulp.task('build:docs', () => {
 // Create documentation for Javascript, Typescript, and Sass files
 // on the fly
 gulp.task('watch:docs', () => {
-
-  // Alert the user whenever changes have been detected and documentation
-  // generation is occurring
-  function generateUserAlert(ext) {
-
-    switch(ext) {
-
-    case '.js':
-      console.log('A JavaScript file has changed; documentation will now be generated...');
-
-      break;
-
-    case '.scss':
-      console.log('A Sass file has changed; documentation will now be generated...');
-
-      break;
-
-    case '.ts':
-      console.log('A TypeScript file has changed; documentation will now be generated...');
-
-      break;
-
-    default:
-      console.log('Generating appropriate folders and styles...');
-
-      break;
-    }
-
-    return;
-  }
-
   // Watch files specified and generate the documentation
   // whenever changes are detected.
   function generateDocs(fileSrc) {
     gulp.watch(fileSrc, function (event, ext = path.extname(event.path)) {
-
-      generateUserAlert(ext);
 
       // Ignore docs, bower_components and node_modules
       return gulp.src(fileSrc)

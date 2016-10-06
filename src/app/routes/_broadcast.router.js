@@ -1,4 +1,5 @@
 import Broadcast from '../models/broadcast.model.js';
+import { logger } from '../helper/logger.js';
 
 export default (app, router, admin) => {
 
@@ -24,7 +25,7 @@ export default (app, router, admin) => {
 
       res.json(result);
     } catch (err) {
-      console.log('Broadcast Error', err);
+      logger.error('Broadcast Error', err);
       res.status(400).send(err);
     }
   });

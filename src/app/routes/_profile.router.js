@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import { ProfileHelper } from '../helper/profile.js';
 import md5 from 'md5';
+import { logger } from '../helper/logger.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -56,7 +57,6 @@ export default (app, router) => {
    */
   router.get('/api/profile/:id', async (req, res) => {
     try {
-      console.log('find by', req.params);
       let doc = await User
         .findOne({
           '_id': ObjectId(req.params.id)
@@ -82,7 +82,7 @@ export default (app, router) => {
 
       res.json(doc);
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       res.status(400).send(err);
     }
   });
