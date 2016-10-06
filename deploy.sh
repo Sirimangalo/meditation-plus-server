@@ -19,6 +19,7 @@ then
   fi
 
   chmod 600 deploy_key
+  rm -f dist/src/config/config.json
   mv deploy_key ~/.ssh/id_rsa
   cp -R node_modules dist/node_modules
 

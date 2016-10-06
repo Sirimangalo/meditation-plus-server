@@ -29,7 +29,7 @@ export default (app, router, io, admin) => {
         .exec();
 
       result.map(entry => {
-        if (!json.hours.includes(entry.hour)) {
+        if (json.hours.indexOf(entry.hour) < 0) {
           json.hours.push(entry.hour);
         }
         json.appointments.push(entry);
@@ -54,9 +54,9 @@ export default (app, router, io, admin) => {
     try {
       const result = await Appointment
         .findOne({ _id: req.params.id })
-        .lean()
-        .then();
+        .lean();
 
+      if (!result) return res.sendStatus(404);
       res.json(result);
     } catch (err) {
       res.send(err);
@@ -154,24 +154,6 @@ export default (app, router, io, admin) => {
   });
 
   /**
-   * @api {delete} /api/appointment/:id Deletes appointment
-   * @apiName DeleteAppointment
-   * @apiGroup Appointment
-   */
-  router.delete('/api/appointment/:id', admin, async (req, res) => {
-    try {
-      const result = await Appointment
-        .find({ _id: req.params.id })
-        .remove()
-        .exec();
-
-      res.json(result);
-    } catch (err) {
-      res.send(err);
-    }
-  });
-
-  /**
    * @api {delete} /api/appointment/remove/:id Deletes any user from appointment
    * @apiName DeleteRegistration
    * @apiGroup Appointment
@@ -193,6 +175,24 @@ export default (app, router, io, admin) => {
       io.sockets.emit('appointment', appointment);
 
       res.sendStatus(200);
+    } catch (err) {
+      res.send(err);
+    }
+  });
+
+  /**
+   * @api {delete} /api/appointment/:id Deletes appointment
+   * @apiName DeleteAppointment
+   * @apiGroup Appointment
+   */
+  router.delete('/api/appointment/:id', admin, async (req, res) => {
+    try {
+      const result = await Appointment
+        .find({ _id: req.params.id })
+        .remove()
+        .exec();
+
+      res.json(result);
     } catch (err) {
       res.send(err);
     }

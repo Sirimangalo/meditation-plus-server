@@ -7,20 +7,6 @@ let ObjectId = require('mongoose').Types.ObjectId;
 export default (app, router, passport, admin) => {
 
   /**
-   * @api {get} /auth/loggedIn Check if logged in
-   * @apiName LoggedIn
-   * @apiGroup Auth
-   *
-   * @apiSuccess {Mixed} - Logged in: User data; Not logged in: 0
-   */
-  router.get('/auth/loggedIn', (req, res) => {
-
-    // If the user is authenticated, return a user object
-    // else return 0
-    res.send(req.isAuthenticated() ? req.user : '0');
-  });
-
-  /**
    * @api {post} /auth/login Login
    * @apiName Login
    * @apiGroup Auth
@@ -67,6 +53,7 @@ export default (app, router, passport, admin) => {
         let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
           expiresIn: '7d'
         });
+
         // Return the token
         res.json({
           token,
@@ -102,7 +89,7 @@ export default (app, router, passport, admin) => {
       // Return the new token
       res.json({
         token,
-        id: req.user._id,
+        id: req.user._doc._id,
         role: req.user.role ? req.user.role : 'ROLE_USER'
       });
     }
