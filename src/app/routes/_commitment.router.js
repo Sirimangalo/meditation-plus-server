@@ -47,6 +47,32 @@ export default (app, router, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/commitment/:id Get single commitment of current user
+   * @apiName GetCommitment
+   * @apiGroup Commitment
+   *
+   * @apiSuccess {String}   type        "daily", "weekly", ("monthly")
+   * @apiSuccess {Number}   minutes     Minutes of meditation per type
+   */
+  router.get('/api/commitment/user', admin, async (req, res) => {
+    try {
+      const result = await Commitment
+        .findOne({
+          users: req.user._doc._id
+        })
+        .lean()
+        .then();
+
+      console.log('UserID', req.user._doc._id);
+      console.log('Result', result);
+
+      res.json(result);
+    } catch (err) {
+      res.send(err);
+    }
+  });
+
    /**
    * @api {put} /api/commitment/:id Update commitment
    * @apiName UpdateCommitment
