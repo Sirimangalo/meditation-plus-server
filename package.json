@@ -90,7 +90,7 @@
     "phantomjs-prebuilt": "^2.1.9",
     "protractor": "^4.0.2",
     "raw-loader": "^0.5.1",
-    "remap-istanbul": "^0.6.4",
+    "remap-istanbul": "^0.7.0",
     "rimraf": "^2.5.4",
     "should": "^11.1.0",
     "source-map-loader": "^0.1.5",
