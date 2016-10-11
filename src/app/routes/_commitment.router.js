@@ -70,7 +70,6 @@ export default (app, router, admin) => {
     }
   });
 
-
    /**
    * @api {put} /api/commitment/:id Update commitment
    * @apiName UpdateCommitment
