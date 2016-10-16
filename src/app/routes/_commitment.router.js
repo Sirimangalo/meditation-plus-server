@@ -1,4 +1,5 @@
 import Commitment from '../models/commitment.model.js';
+let ObjectId = require('mongoose').Types.ObjectId;
 
 export default (app, router, admin) => {
 
@@ -38,7 +39,7 @@ export default (app, router, admin) => {
     try {
       const result = await Commitment
         .findOne({
-          users: req.user._doc._id
+          users: ObjectId.fromString(req.user._doc._id)
         })
         .lean()
         .then();
