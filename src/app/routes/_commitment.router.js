@@ -39,7 +39,7 @@ export default (app, router, admin) => {
     try {
       const result = await Commitment
         .findOne({
-          users: ObjectId.fromString(req.user._doc._id)
+          users: new ObjectId(req.user._doc._id)
         })
         .lean()
         .then();
