@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import mongooseConf from '../src/config/mongoose.conf.js';
-import {validateEnvVariables} from '../src/config/env.conf.js';
-import Broadcast from '../src/app/models/broadcast.model.js';
-import youtubeHelper from '../src/app/helper/youtube.js';
+import mongooseConf from '../config/mongoose.conf.js';
+import {validateEnvVariables} from '../config/env.conf.js';
+import Broadcast from '../app/models/broadcast.model.js';
+import youtubeHelper from '../app/helper/youtube.js';
 
 validateEnvVariables();
 mongooseConf(mongoose);
@@ -16,7 +16,7 @@ mongooseConf(mongoose);
  */
 const checkBroadcastLink = async (broadcast, currentTry = 1) => {
   if (!broadcast || !broadcast.ended) {
-    mongoose.connection.close()
+    mongoose.connection.close();
     return;
   }
   // Check every 30 minutes, max. 5 times
@@ -37,7 +37,7 @@ const checkBroadcastLink = async (broadcast, currentTry = 1) => {
   } else {
     mongoose.connection.close();
   }
-}
+};
 
 const updateBroadcast = async () => {
   const broadcast = await Broadcast
@@ -58,6 +58,6 @@ const updateBroadcast = async () => {
   }
 
   checkBroadcastLink(broadcast);
-}
+};
 
 updateBroadcast();
