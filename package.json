@@ -20,7 +20,7 @@
     "core-js": "^2.4.1",
     "express": "^4.14.0",
     "express-jwt": "^5.0.0",
-    "express-session": "^1.14.0",
+    "express-session": "^1.14.2",
     "http": "0.0.0",
     "jsonwebtoken": "^7.1.7",
     "lodash": "^4.15.0",
