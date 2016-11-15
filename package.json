@@ -27,7 +27,7 @@
     "md5": "^2.1.0",
     "method-override": "^2.3.6",
     "moment": "^2.14.1",
-    "mongoose": "^4.5.7",
+    "mongoose": "^4.6.8",
     "morgan": "^1.7.0",
     "node-fetch": "^1.6.0",
     "passport": "^0.3.2",
