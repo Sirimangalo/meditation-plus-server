@@ -22,7 +22,7 @@
     "express-jwt": "^5.0.0",
     "express-session": "^1.14.0",
     "http": "0.0.0",
-    "jsonwebtoken": "^7.1.7",
+    "jsonwebtoken": "^7.1.10",
     "lodash": "^4.15.0",
     "md5": "^2.1.0",
     "method-override": "^2.3.6",
