@@ -87,7 +87,7 @@
     "morgan": "^1.7.0",
     "parse5": "^2.1.5",
     "phantomjs-polyfill": "0.0.2",
-    "phantomjs-prebuilt": "^2.1.9",
+    "phantomjs-prebuilt": "^2.1.14",
     "protractor": "^4.0.2",
     "raw-loader": "^0.5.1",
     "remap-istanbul": "^0.6.4",
