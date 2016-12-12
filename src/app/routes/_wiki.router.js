@@ -14,7 +14,6 @@ export default (app, router, io, admin) => {
       videos.map(entry => {
         const c = entry.category;
 
-        console.log(c);
         // initialize new object for each category in the structure object
         if (!structure[c]) {
           structure[c] = {
@@ -38,7 +37,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-  router.post('/api/wiki/query', async (req, res) => {
+  router.post('/api/wiki/videos', async (req, res) => {
     try {
       const category = req.body.category;
 
@@ -57,11 +56,32 @@ export default (app, router, io, admin) => {
     }
   });
 
+  router.post('/api/wiki/search', async (req, res) => {
+    try {
+      const search = req.body.search ? req.body.search : '';
+      let videos = await Wiki
+        .find({
+          $text: {
+            $search: search
+          }
+        });
+
+      res.json(videos);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
   router.post('/api/wiki', async (req, res, next) => {
     try {
-
       const category = req.body.category ? req.body.category.trim() : '';
-      const tags = req.body.tags ? req.body.tags.split(',') : '';
+      const tags = req.body.tags
+          ? req.body.tags
+              .split(',')
+              .filter(i => {
+                return i.trim().length > 0 && i.trim();
+              })
+          : '';
 
       // check category & tags
       if (!category || !tags) {
@@ -75,24 +95,24 @@ export default (app, router, io, admin) => {
       // query youtube video info for videoID
       const videoInfo = await youtubeHelper.getVideoInfo(videoID);
 
+
       // check if youtube query was successful
       if (!videoInfo.items || !videoInfo.items.length) {
         res.status(400);
-        return next('The URL is invalid.');
+        return next('Video URL is invalid.');
       }
 
       // get video title & length
       const videoTitle = videoInfo.items[0].snippet.title;
-      const videoLength = videoInfo.items[0].contentDetails.duration;
-      const videoURL = 'https://youtu.be/' + videoID;
+      const videoDuration = videoInfo.items[0].contentDetails.duration;
 
       // check if the video is already in the database
-      const findVideo = await Wiki
+      const duplicate = await Wiki
         .findOne({
-          url: videoURL
+          videoID: videoID
         });
 
-      if (findVideo) {
+      if (duplicate) {
         // if admin: modify entry
         res.status(400);
         return next('This video is already listed.');
@@ -100,15 +120,16 @@ export default (app, router, io, admin) => {
 
       await Wiki.create({
         title: videoTitle,
-        url: videoURL,
-        length: videoLength,
+        videoID: videoID,
+        duration: videoDuration,
         category: category,
         tags: tags
       });
 
       res.sendStatus(204);
     } catch (err) {
-      res.status(500).send(err);
+      res.status(500);
+      return next('Internal Error');
     }
   });
 
