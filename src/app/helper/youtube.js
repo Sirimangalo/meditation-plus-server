@@ -31,7 +31,7 @@ export default {
       });
 
       Youtube.videos.list({
-        part: 'snippet,contentDetails',
+        part: 'snippet',
         id: videoid
       }, (err, data) => {
         if (err) {
