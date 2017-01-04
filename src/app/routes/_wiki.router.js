@@ -180,10 +180,9 @@ export default (app, router, io, admin) => {
       }
 
       if (duplicate && admin) {
-        const newTags = tags.filter(tag => { return duplicate.tags.indexOf(tag) === -1; });
         await duplicate.update({
           category: category,
-          $push: { 'tags': newTags }
+          tags: tags
         });
         // TODO: Error handling?!
       } else {
