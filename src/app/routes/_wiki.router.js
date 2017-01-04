@@ -42,7 +42,7 @@ export default (app, router, io, admin) => {
           data[category] = {
             tags: [],
             count: 0
-          }
+          };
         }
 
         // increase counter of videos of category
@@ -175,8 +175,8 @@ export default (app, router, io, admin) => {
         });
 
       if (duplicate && !admin) {
-          res.status(400);
-          return next('This video is already listed and you don\'t have permission to modify it.');
+        res.status(400);
+        return next('This video is already listed and you don\'t have permission to modify it.');
       }
 
       if (duplicate && admin) {
