@@ -1,6 +1,5 @@
 import Question from '../models/question.model.js';
 import Broadcast from '../models/broadcast.model.js';
-import moment from 'moment';
 import youtubeHelper from '../helper/youtube.js';
 import { logger } from '../helper/logger.js';
 
