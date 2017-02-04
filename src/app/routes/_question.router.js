@@ -23,27 +23,19 @@ export default (app, router, io, admin) => {
    */
   router.get('/api/question', async (req, res) => {
     try {
+      const perPage = 10;
       const filterAnswered = req.query.filterAnswered === 'true';
       const page = req.query.page || 0;
+      const query = filterAnswered
+        ? Question
+          .find({answered: { $eq: true }})
+          .limit(perPage)
+          .skip(perPage * page)
+        : Question
+          .find({answered: { $ne: true }})
+        ;
 
-      // paginate by two weeks
-      const timespanTo = moment().subtract(2 * page, 'weeks');
-      const timespanFrom = moment(timespanTo).subtract(2, 'weeks');
-
-      let questions = await Question
-        .find(
-          filterAnswered
-          ? {
-            // filter by paginated timespan
-            answeredAt: {
-              $gte: timespanFrom.toDate(),
-              $lte: timespanTo.toDate()
-            }
-          }
-          : {
-            answered: { $ne: true }
-          }
-        )
+      let questions = await query
         .sort(
           filterAnswered
           ? [['answeredAt', 'descending']]
