@@ -94,15 +94,21 @@ export default (app, router, io, admin) => {
     try {
       let user = await User.findById(req.params.id);
 
+      let updatePassword = '';
       // change password if set
       if (req.body.newPassword) {
-        user.local.password = user.generateHash(req.body.newPassword);
+        updatePassword = user.generateHash(req.body.newPassword);
         delete req.body.newPassword;
       }
 
       for (const key of Object.keys(req.body)) {
         user[key] = req.body[key];
       }
+
+      if (updatePassword) {
+        user.local.password = updatePassword;
+      }
+
       await user.save();
 
       res.sendStatus(200);
