@@ -12,9 +12,6 @@ before_install:
     -in deploy_key.enc -out deploy_key -d
 script:
   - cp src/config/config.json.travis src/config/config.json
-  - npm run lint
-  - npm run test
-  - npm run docs
-  - npm run build
+  - yarn lint && yarn test && yarn docs && yarn build
 after_success:
   - sh deploy.sh
