@@ -92,7 +92,7 @@
     "raw-loader": "^0.5.1",
     "remap-istanbul": "^0.6.4",
     "rimraf": "^2.5.4",
-    "should": "^11.1.0",
+    "should": "^11.1.2",
     "source-map-loader": "^0.1.5",
     "supertest": "^2.0.0",
     "url-loader": "^0.5.7"
