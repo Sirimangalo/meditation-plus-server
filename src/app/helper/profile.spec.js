@@ -35,7 +35,7 @@ describe('ProfileHelper', () => {
       lastDays: {}
     };
     check.lastMonths[date.format('MMM')] = 60;
-    check.lastWeeks[date.format('w')] = 60;
+    check.lastWeeks[date.format('YY-w')] = 60;
     check.lastDays[date.format('Do')] = 60;
 
     expect(_.omit(result, 'timespan')).to.deep.equal(check);

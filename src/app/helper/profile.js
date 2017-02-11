@@ -82,8 +82,8 @@ export class ProfileHelper {
 
     // adding times of last 10 weeks
     if (date >= ts.tenWeeksAgo) {
-      meditations.lastWeeks[date.format('w')] =
-        this.setValue(meditations.lastWeeks[date.format('w')], value, add);
+      meditations.lastWeeks[date.format('YY-w')] =
+        this.setValue(meditations.lastWeeks[date.format('YY-w')], value, add);
     }
 
     // adding times of last 10 days
