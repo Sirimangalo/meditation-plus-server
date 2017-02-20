@@ -13,19 +13,19 @@ export default (app, router, admin) => {
    * @apiSuccess {Number}   commitments.minutes     Minutes of meditation per type
    * @apiSuccess {User[]}   commitments.users       Committing users
    */
-  router.get('/api/commitment', async (req, res) => {
-    try {
-      const result = await Commitment
-        .find()
-        .populate('users', 'name gravatarHash')
-        .lean()
-        .then();
+   router.get('/api/commitment', async (req, res) => {
+     try {
+       const result = await Commitment
+       .find()
+       .populate('users', 'name gravatarHash')
+       .lean()
+       .then();
 
-      res.json(result);
-    } catch (err) {
-      res.send(err);
-    }
-  });
+       res.json(result);
+     } catch (err) {
+       res.send(err);
+     }
+   });
 
   /**
    * @api {get} /api/commitment/:id Get single commitment of current user
@@ -58,18 +58,19 @@ export default (app, router, admin) => {
    * @apiSuccess {String}   type        "daily", "weekly", ("monthly")
    * @apiSuccess {Number}   minutes     Minutes of meditation per type
    */
-  router.get('/api/commitment/:id', admin, async (req, res) => {
-    try {
-      const result = await Commitment
-        .findOne({ _id: req.params.id })
-        .lean()
-        .then();
+   router.get('/api/commitment/:id', admin, async (req, res) => {
+     try {
+       const result = await Commitment
+       .findOne({ _id: req.params.id })
+       .lean()
+       .then();
 
-      res.json(result);
-    } catch (err) {
-      res.send(err);
-    }
-  });
+       if (!result) return res.sendStatus(404);
+       res.json(result);
+     } catch (err) {
+       res.send(err);
+     }
+   });
 
    /**
    * @api {put} /api/commitment/:id Update commitment
@@ -163,7 +164,7 @@ export default (app, router, admin) => {
         }
       }
 
-      // use not found
+      // user not found
       res.sendStatus(400);
     } catch (err) {
       res.status(400).send(err);
