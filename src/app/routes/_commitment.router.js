@@ -21,6 +21,7 @@ export default (app, router, admin) => {
         .lean()
         .then();
 
+      
       res.json(result);
     } catch (err) {
       res.send(err);
@@ -64,7 +65,8 @@ export default (app, router, admin) => {
         .findOne({ _id: req.params.id })
         .lean()
         .then();
-
+	
+	    if (!result) return res.sendStatus(404);
       res.json(result);
     } catch (err) {
       res.send(err);
@@ -163,7 +165,7 @@ export default (app, router, admin) => {
         }
       }
 
-      // use not found
+      // user not found
       res.sendStatus(400);
     } catch (err) {
       res.status(400).send(err);
