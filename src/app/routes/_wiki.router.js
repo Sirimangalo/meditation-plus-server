@@ -16,44 +16,18 @@ export default (app, router, io, admin) => {
     return match && match[2].length === 11 ? match[2] : '';
   }
 
-  /**
-   * @api {get} /api/wiki Get the structure (categories, tags & count) of all videos
-   * @apiName ListWikiStructure
-   * @apiGroup Wiki
-   *
-   * @apiSuccess {Object} data Object with all categories (as key) & videos, tags, count (as value)
-   */
-  router.get('/api/wiki', async (req, res) => {
+  router.post('/api/wiki/structure', async (req, res) => {
     try {
-      let data = {};
-
-      // get all entries from database
-      const videos = await Wiki
-        .find()
+      const parent = req.body.parent ? req.body.parent : null;
+      const categories = await WikiStructure
+        .find({
+          parent: parent
+        })
         .sort({
-          category: 1
+          name: 1
         });
 
-      for (let i = 0; i < videos.length; i++) {
-
-        let category = videos[i]['category'];
-
-        if (!(category in data)) {
-          data[category] = {
-            tags: [],
-            count: 0
-          };
-        }
-
-        // increase counter of videos of category
-        data[category]['count']++;
-
-        // concat tags from current video with all tags in data[category]['tags']
-        // & dismiss duplicates
-        data[category]['tags'] = [...new Set(data[category]['tags'].concat(videos[i]['tags']))];
-      }
-
-      res.json(data);
+      res.json(categories);
     } catch (err) {
       res.status(500).send(err);
     }
@@ -139,29 +113,25 @@ export default (app, router, io, admin) => {
    */
   router.post('/api/wiki', async (req, res, next) => {
     try {
-      const admin = req.user._doc.role === 'ROLE_ADMIN';
-      const url = req.body.url ? req.body.url.trim() : null;
-      const category = req.body.category ? req.body.category.trim() : null;
+      const url = req.body.url ? req.body.url : null;
+      const category = req.body.category ? req.body.category: null;
+      const keywords = req.body.keywords ? req.body.keywords: null;
 
-      // parse tags: ',a,,b,c ,' => ['a', 'b', 'c']
-      let tags = req.body.tags
-          ? req.body.tags
-              .split(',')
-              .map(i => i.trim())
-              .filter(i => { return typeof(i) === 'string' && i.length > 0; })
-          : null;
 
-      // check url, category & tags
-      if (!url || !category || !tags) {
+
+      // check url, category
+      if (!url || !category) {
         res.status(400);
         return next('Please fill out all necessary fields and enter at least one tag.');
       }
 
       // remove duplicate tags
-      tags = [...new Set(tags)];
+      if (keywords) {
+        keywords = [...new Set(keywords)];
+      }
 
       // try to extract video id from url
-      const videoID = parseVideoID(req.body.url);
+      const videoID = parseVideoID(url);
 
       if (!videoID) {
         res.status(400);
@@ -232,4 +202,23 @@ export default (app, router, io, admin) => {
     }
   });
 
+  router.post('/api/wiki/newCategory', async (req, res, next) => {
+    try {
+      const name = req.body.parent ? req.body.parent : null
+      const parent = req.body.parent ? req.body.parent : null;
+
+      if (typeof(name) !== 'string') {
+        res.sendStatus(400);
+      }
+
+      await WikiCategory.create({
+        name: name,
+        parent: parent
+      });
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.send(err);
+    }
+  });
 };
