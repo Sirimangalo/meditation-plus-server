@@ -2,37 +2,6 @@ import User from '../models/user.model.js';
 import Analytics from '../models/analytics.model.js';
 
 export default (app, router, admin) => {
-  router.post('/api/analytics', admin, async (req, res) => {
-    try {
-      const admins = await User
-        .find({
-          role: 'ROLE_ADMIN'
-        })
-        .exec();
-
-      const suspendedAccounts = await User
-        .find({
-          suspendedUntil: { $gt: Date.now() }
-        })
-        .exec();
-
-      const inactiveAccounts = await User
-        .find({
-          // older than 3 months (90 days)
-          lastActive: { $lte: Date.now() - 7776E6 }
-        })
-        .exec();
-
-      res.json({
-        admins: admins,
-        inactiveAccounts: inactiveAccounts,
-
-      });
-    } catch (err) {
-      res.status(400).send(err);
-    }
-  });
-
   router.get('/api/analytics-users', admin, async (req, res) => {
     console.log("§");
     try {
@@ -43,13 +12,15 @@ export default (app, router, admin) => {
       const admins = await User
         .find({
           role: 'ROLE_ADMIN'
-        })
+        }, 'name gravatarHash _id country')
+        .lean()
         .exec();
 
       const suspended = await User
         .find({
           suspendedUntil: { $gt: Date.now() }
-        })
+        }, 'name gravatarHash _id country')
+        .lean()
         .exec();
 
       const inactive = await User
