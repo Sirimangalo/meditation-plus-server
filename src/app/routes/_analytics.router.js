@@ -1,5 +1,6 @@
 import User from '../models/user.model.js';
-import Analytics from '../models/analytics.model.js';
+import Meditation from '../models/meditation.model.js';
+import moment from 'moment';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -28,13 +29,6 @@ export default (app, router, admin) => {
           lastActive: { $lte: Date.now() - 7776E6 }
         })
         .count()
-        .exec();
-
-      // Update
-      const newUsers = await User
-        .find({
-          _id: { $gte: data.lastUpdated }
-        })
         .exec();
 
       res.json({
@@ -93,6 +87,8 @@ export default (app, router, admin) => {
       // Default interval: Today - 7 days (= 6048E5 ms)
       const minDate = req.body.minDate ? req.body.minDate : Date.now() - 6048E5;
 
+      const dtFormat = req.body.format ? req.body.format : 'MM/DD/YY';
+
       let data = {
         data: [],
         labels: []
@@ -101,7 +97,6 @@ export default (app, router, admin) => {
       let dtEnd = Date.now();
       let dtStart = dtEnd - interval;
 
-      console.log(minDate, interval, dtEnd, dtStart);
       while (dtStart > minDate) {
 
         const minObjID = ObjectId(Math.floor(dtStart/1000).toString(16) + "0000000000000000");
@@ -114,15 +109,58 @@ export default (app, router, admin) => {
           .count();
 
         data.data.push(userCount);
-        data.labels.push(new Date(dtEnd));
+        data.labels.push(moment(dtEnd).format(dtFormat));
 
         dtStart -= interval;
         dtEnd -= interval;
       }
 
+      data.data.reverse();
+      data.labels.reverse();
+
       res.json(data);
     } catch (err) {
-      console.log(err);
+      res.status(500).send(err);
+    }
+  });
+
+  router.post('/api/analytics-meditations', admin, async (req, res) => {
+    try {
+      // Default interval: 1 day (= 864E5 ms)
+      const interval = req.body.interval ? req.body.interval : 864E5;
+      // Default interval: Today - 7 days (= 6048E5 ms)
+      const minDate = req.body.minDate ? req.body.minDate : Date.now() - 6048E5;
+
+      const dtFormat = req.body.format ? req.body.format : 'MM/DD/YY';
+
+      let data = {
+        data: [],
+        labels: []
+      };
+
+      let dtEnd = Date.now();
+      let dtStart = dtEnd - interval;
+
+      while (dtStart > minDate) {
+
+        const meditationCount = await Meditation
+          .find({
+            end: { $gte: dtStart, $lte: dtEnd }
+          })
+          .count();
+
+        data.data.push(meditationCount);
+        data.labels.push(moment(dtEnd).format(dtFormat));
+
+        dtStart -= interval;
+        dtEnd -= interval;
+      }
+
+      data.data.reverse();
+      data.labels.reverse();
+
+      res.json(data);
+    } catch (err) {
       res.status(500).send(err);
     }
   });
