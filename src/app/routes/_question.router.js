@@ -82,7 +82,7 @@ export default (app, router, io, admin) => {
         .find({
           answered: true,
           $text: {
-            $search: req.body.text,
+            $search: req.body.text
           }
         })
         .limit(5)

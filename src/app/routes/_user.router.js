@@ -44,7 +44,7 @@ export default (app, router, io, admin) => {
   });
 
   /**
-   * @api {post} /api/user/seach Searches users
+   * @api {post} /api/user/search Searches users
    * @apiName SearchUser
    * @apiGroup User
    *
