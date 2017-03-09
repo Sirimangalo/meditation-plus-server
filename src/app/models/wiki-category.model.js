@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 let wikiCategorySchema = mongoose.Schema({
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   parent: { type: mongoose.Schema.Types.ObjectId, default: null },
   videoCount: { type: Number, default: 0 }
 });

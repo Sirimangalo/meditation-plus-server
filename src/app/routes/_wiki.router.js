@@ -1,4 +1,5 @@
-import Wiki from '../models/wiki.model.js';
+import WikiEntry from '../models/wiki-entry.model.js';
+import WikiCategory from '../models/wiki-category.model.js';
 import youtubeHelper from '../helper/youtube.js';
 
 export default (app, router, io, admin) => {
@@ -16,10 +17,11 @@ export default (app, router, io, admin) => {
     return match && match[2].length === 11 ? match[2] : '';
   }
 
-  router.post('/api/wiki/structure', async (req, res) => {
+  router.post('/api/wiki/list', async (req, res) => {
     try {
       const parent = req.body.parent ? req.body.parent : null;
-      const categories = await WikiStructure
+
+      const categories = await WikiCategory
         .find({
           parent: parent
         })
@@ -27,7 +29,18 @@ export default (app, router, io, admin) => {
           name: 1
         });
 
-      res.json(categories);
+      const videos = await WikiEntry
+        .find({
+          category: parent
+        })
+        .sort({
+          title: 1
+        });
+
+      res.json({
+        categories: categories,
+        videos: videos
+      });
     } catch (err) {
       res.status(500).send(err);
     }
@@ -46,7 +59,7 @@ export default (app, router, io, admin) => {
         res.status(400);
       }
 
-      const videos = await Wiki
+      const videos = await WikiEntry
         .find({
           category: req.params.category
         });
@@ -70,7 +83,7 @@ export default (app, router, io, admin) => {
         res.status(400);
       }
 
-      const video = await Wiki
+      const video = await WikiEntry
         .findOne({
           videoID: req.params.videoID
         })
@@ -93,7 +106,7 @@ export default (app, router, io, admin) => {
     // requires index: db.getCollection('questions').createIndex( { text: "text" } )
     try {
       const search = req.body.search ? req.body.search : '';
-      let videos = await Wiki
+      let videos = await WikiEntry
         .find({
           $text: {
             $search: search
@@ -115,7 +128,7 @@ export default (app, router, io, admin) => {
     try {
       const url = req.body.url ? req.body.url : null;
       const category = req.body.category ? req.body.category: null;
-      const keywords = req.body.keywords ? req.body.keywords: null;
+      let keywords = req.body.keywords ? req.body.keywords: null;
 
 
 
@@ -191,7 +204,7 @@ export default (app, router, io, admin) => {
    */
   router.delete('/api/wiki/:videoID', admin, async (req, res) => {
     try {
-      const result = await Wiki
+      const result = await WikiEntry
         .find({ videoID: req.params.videoID })
         .remove()
         .exec();
