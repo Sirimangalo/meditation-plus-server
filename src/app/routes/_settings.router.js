@@ -34,4 +34,4 @@ export default (app, router, admin) => {
       res.status(500).send(err);
     }
   });
-}
+};
