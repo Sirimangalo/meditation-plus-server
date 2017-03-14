@@ -9,10 +9,13 @@ export default {
     let settings = await Settings.findOne();
 
     if (!settings) {
-      settings = await Settings.create();
-    }
+      let data = {};
+      data[property] = value;
 
-    settings[property] = value;
-    await settings.save();
+      settings = await Settings.create(data);
+    } else {
+      settings[property] = value;
+      await settings.save();
+    }
   }
 };
