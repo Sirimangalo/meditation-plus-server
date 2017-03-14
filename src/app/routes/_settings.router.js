@@ -21,8 +21,10 @@ export default (app, router, admin) => {
    * @api {get} /api/settings/appointments Get appointment's increment (of hours) parameter
    * @apiName GetAppointmentIncrement
    * @apiGroup Settings
+   *
+   * @apiSuccess {Number}   increment           value of hours to add
    */
-  router.get('/api/settings/appointments', admin, async (req, res) => {
+  router.get('/api/settings/appointments', async (req, res) => {
     try {
       const increment = await settingsHelper.get('appointmentIncrement');
 
