@@ -112,10 +112,10 @@ export default (app, router, io) => {
   router.post('/api/meditation', async (req, res) => {
     // parse input and normalize
     let walking = req.body.walking ? parseInt(req.body.walking, 10) : 0;
-    if (walking > 120) walking = 120;
+    if (walking > 240) walking = 240;
     if (walking < 0) walking = 0;
     let sitting = req.body.sitting ? parseInt(req.body.sitting, 10) : 0;
-    if (sitting > 120) sitting = 120;
+    if (sitting > 240) sitting = 240;
     if (sitting < 0) sitting = 0;
     let total = sitting + walking;
 
