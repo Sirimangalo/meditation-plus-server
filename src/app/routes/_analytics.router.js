@@ -44,7 +44,8 @@ export default (app, router, admin) => {
 
   router.get('/api/analytics-countries', admin, async (req, res) => {
     try {
-      User.aggregate([
+      User
+        .aggregate([
         {
           $group: {
             _id: '$country', count: { $sum: 1 }
@@ -57,6 +58,7 @@ export default (app, router, admin) => {
         res.json(countries);
       });
     } catch (err) {
+      console.log(err)
       res.status(500).send(err);
     }
   });
