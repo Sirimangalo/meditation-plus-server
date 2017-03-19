@@ -12,6 +12,7 @@ module.exports = {
   "rules": {
     "no-console": "warn",
     "eol-last": "error",
+    "no-tabs": "error",
     "indent": [
       "error",
       2
