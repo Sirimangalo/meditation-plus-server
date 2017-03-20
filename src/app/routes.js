@@ -64,11 +64,8 @@ export default (app, router, passport, io) => {
   appointmentRoutes(app, router, io, admin);
   userRoutes(app, router, io, admin);
   liveRoutes(app, router);
-<<<<<<< b0a5879822b3c3853b17fc2b3a5557f314cf8934
   settingsRoutes(app, router, admin);
-=======
   analyticsRoutes(app, router, admin);
->>>>>>> feat: add routes for users, countries, timezones
 
   // Route to handle all Angular requests
   router.get('*', (req, res) => {
