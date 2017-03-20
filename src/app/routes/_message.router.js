@@ -63,7 +63,7 @@ export default (app, router, io) => {
         deleted: { $ne: true }
       };
 
-      if (req.user._doc.role === 'ROLE_ADMIN'){
+      if (req.user._doc.role === 'ROLE_ADMIN') {
         delete criteria['deleted'];
       }
 

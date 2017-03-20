@@ -93,7 +93,7 @@ export default (app, router, io, admin) => {
     } catch (err) {
       let errStatus = 500;
 
-      if (err.name == 'ValidationError' || err.name == 'MongoError'){
+      if (err.name == 'ValidationError' || err.name == 'MongoError') {
         errStatus = 400;
       }
 
