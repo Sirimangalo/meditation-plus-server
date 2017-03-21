@@ -13,6 +13,7 @@ module.exports = {
     "no-console": "warn",
     "eol-last": "error",
     "no-tabs": "error",
+    "space-before-blocks": "error",
     "indent": [
       "error",
       2

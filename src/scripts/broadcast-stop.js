@@ -30,7 +30,7 @@ const checkBroadcastLink = async (broadcast, currentTry = 1) => {
     broadcast.videoUrl = 'https://youtu.be/' + findBroadcast.items[0].id.videoId;
     await broadcast.save();
     mongoose.connection.close();
-  } else if (currentTry < maxTries){
+  } else if (currentTry < maxTries) {
     setTimeout(() => {
       checkBroadcastLink(broadcast, currentTry + 1);
     }, interval);
