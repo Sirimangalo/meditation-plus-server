@@ -5,6 +5,18 @@ import moment from 'moment';
 let ObjectId = require('mongoose').Types.ObjectId;
 
 export default (app, router, admin) => {
+
+  /**
+   * @api {get} /api/analytics-users Get statistics of all user accounts
+   * @apiName GetGeneralStats
+   * @apiGroup analytics
+   *
+   * @apiSuccess {Object}   userdata             Object containing all data
+   * @apiSuccess {Number}   userdata.count       Count of all users
+   * @apiSuccess {Object[]} userdata.admins      List of all admin accounts
+   * @apiSuccess {Object[]} userdata.suspended   List of all suspended accounts
+   * @apiSuccess {Number}   userdata.inactive    Count of inactive users
+   */
   router.get('/api/analytics-users', admin, async (req, res) => {
     try {
       const count = await User.count();
@@ -42,6 +54,13 @@ export default (app, router, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/analytics-countries Get statistics of the countries of all accounts
+   * @apiName GetCountryStats
+   * @apiGroup analytics
+   *
+   * @apiSuccess {Object[]} countries  List of all countries and their count of users
+   */
   router.get('/api/analytics-countries', admin, async (req, res) => {
     try {
       User
@@ -63,6 +82,13 @@ export default (app, router, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/analytics-timezones Get statistics of the timezone of all accounts
+   * @apiName GetTimezoneStats
+   * @apiGroup analytics
+   *
+   * @apiSuccess {Object[]} timezones  List of all timezones and their count of users
+   */
   router.get('/api/analytics-timezones', admin, async (req, res) => {
     try {
       User.aggregate([
@@ -82,13 +108,20 @@ export default (app, router, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/analytics-signups Get statistics about new accounts
+   * @apiName GetSignupStats
+   * @apiGroup analytics
+   *
+   * @apiSuccess {Object} signupChartData  Data for linechart
+   */
   router.post('/api/analytics-signups', admin, async (req, res) => {
     try {
       // Default interval: 1 day (= 864E5 ms)
       const interval = req.body.interval ? req.body.interval : 864E5;
+
       // Default interval: Today - 7 days (= 6048E5 ms)
       const minDate = req.body.minDate ? req.body.minDate : Date.now() - 6048E5;
-
       const dtFormat = req.body.format ? req.body.format : 'MM/DD/YY';
 
       let data = {
@@ -100,9 +133,9 @@ export default (app, router, admin) => {
       let dtStart = dtEnd - interval;
 
       while (dtStart > minDate) {
-
-        const minObjID = ObjectId(Math.floor(dtStart/1000).toString(16) + "0000000000000000");
-        const maxObjID = ObjectId(Math.floor(dtEnd/1000).toString(16) + "0000000000000000");
+        // Use MongoDB's id to find new users within the current timespan
+        const minObjID = ObjectId(Math.floor(dtStart / 1000).toString(16) + "0000000000000000");
+        const maxObjID = ObjectId(Math.floor(dtEnd / 1000).toString(16) + "0000000000000000");
 
         const userCount = await User
           .find({
@@ -126,13 +159,20 @@ export default (app, router, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/analytics-signups Get statistics about number of meditation sessions
+   * @apiName GetMeditationStats
+   * @apiGroup analytics
+   *
+   * @apiSuccess {Object} meditationChartData  Data for linechart
+   */
   router.post('/api/analytics-meditations', admin, async (req, res) => {
     try {
       // Default interval: 1 day (= 864E5 ms)
       const interval = req.body.interval ? req.body.interval : 864E5;
+
       // Default interval: Today - 7 days (= 6048E5 ms)
       const minDate = req.body.minDate ? req.body.minDate : Date.now() - 6048E5;
-
       const dtFormat = req.body.format ? req.body.format : 'MM/DD/YY';
 
       let data = {
@@ -144,7 +184,6 @@ export default (app, router, admin) => {
       let dtStart = dtEnd - interval;
 
       while (dtStart > minDate) {
-
         const meditationCount = await Meditation
           .find({
             end: { $gte: dtStart, $lte: dtEnd }
