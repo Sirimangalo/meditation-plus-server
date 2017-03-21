@@ -190,11 +190,11 @@ describe('Meditation Routes', () => {
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
-          try{
+          try {
             expect(res.body.length).to.equal(1);
             expect(res.body[0].numOfLikes).to.equal(1);
             done();
-          }catch(e){
+          } catch(e) {
             //console.log('exception', e);
             done(e);
           }
