@@ -177,7 +177,7 @@ describe('Meditation Routes', () => {
         .expect(401)
         .end(err => done(err));
     });
-    
+
     it('should like meditations when authenticated', done => {
       user
       .post('/api/meditation/like')
@@ -195,7 +195,7 @@ describe('Meditation Routes', () => {
             expect(res.body[0].numOfLikes).to.equal(1);
             done();
           }catch(e){
-            console.log('exception', e);
+            //console.log('exception', e);
             done(e);
           }
         });
