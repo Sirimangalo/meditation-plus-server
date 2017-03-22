@@ -5,11 +5,6 @@ import { AuthedSupertest } from '../helper/authed-supertest.js';
 
 const request = supertest(app);
 let user = new AuthedSupertest();
-let user2 = new AuthedSupertest(
-  'Second User',
-  'user2@sirimangalo.org',
-  'password'
-);
 let admin = new AuthedSupertest(
   'Admin User',
   'admin@sirimangalo.org',

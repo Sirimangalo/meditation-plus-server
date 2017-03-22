@@ -65,18 +65,20 @@ export default (app, router, admin) => {
     try {
       User
         .aggregate([
-        {
-          $group: {
-            _id: '$country', count: { $sum: 1 }
+          {
+            $group: {
+              _id: '$country', count: { $sum: 1 }
+            }
+          },
+          { $sort : { count : -1} }
+        ], (err, countries) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.json(countries);
           }
-        },
-        { $sort : { count : -1} }
-      ], (err, countries) => {
-        if (err) return handleError(err);
-        res.json(countries);
-      });
+        });
     } catch (err) {
-      console.log(err)
       res.status(500).send(err);
     }
   });
@@ -90,18 +92,22 @@ export default (app, router, admin) => {
    */
   router.get('/api/analytics-timezones', admin, async (req, res) => {
     try {
-      User.aggregate([
-        {
-          $group: {
-            _id: '$timezone', count: { $sum: 1 }
+      User
+        .aggregate([
+          {
+            $group: {
+              _id: '$timezone', count: { $sum: 1 }
+            }
+          },
+          { $sort : { count : -1} },
+          { $limit : 10 }
+        ], (err, timezones) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.json(timezones);
           }
-        },
-        { $sort : { count : -1} },
-        { $limit : 10 }
-      ], (err, timezones) => {
-        if (err) return handleError(err);
-        res.json(timezones);
-      });
+        });
     } catch (err) {
       res.status(500).send(err);
     }
@@ -209,6 +215,6 @@ export default (app, router, admin) => {
       res.status(500).send(err);
     }
   });
-}
+};
 
 
