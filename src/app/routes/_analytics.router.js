@@ -70,8 +70,7 @@ export default (app, router, admin) => {
             _id: '$country', count: { $sum: 1 }
           }
         },
-        { $sort : { count : -1} },
-        { $limit : 10 }
+        { $sort : { count : -1} }
       ], (err, countries) => {
         if (err) return handleError(err);
         res.json(countries);
@@ -83,11 +82,11 @@ export default (app, router, admin) => {
   });
 
   /**
-   * @api {get} /api/analytics-timezones Get statistics of the timezone of all accounts
+   * @api {get} /api/analytics-timezones Get statistics of the top 10 timezones of all accounts
    * @apiName GetTimezoneStats
    * @apiGroup analytics
    *
-   * @apiSuccess {Object[]} timezones  List of all timezones and their count of users
+   * @apiSuccess {Object[]} timezones  List of top 10 timezones and their count of users
    */
   router.get('/api/analytics-timezones', admin, async (req, res) => {
     try {
@@ -121,8 +120,13 @@ export default (app, router, admin) => {
       const interval = req.body.interval ? req.body.interval : 864E5;
 
       // Default interval: Today - 7 days (= 6048E5 ms)
-      const minDate = req.body.minDate ? req.body.minDate : Date.now() - 6048E5;
-      const dtFormat = req.body.format ? req.body.format : 'MM/DD/YY';
+      const minDate = req.body.minDate && req.body.minDate < Date.now()
+        ? req.body.minDate
+        : Date.now() - 6048E5;
+
+      const dtFormat = req.body.format && typeof(req.body.format) === 'string'
+        ? req.body.format
+        : 'MM/DD/YY';
 
       let data = {
         data: [],
@@ -132,10 +136,10 @@ export default (app, router, admin) => {
       let dtEnd = Date.now();
       let dtStart = dtEnd - interval;
 
-      while (dtStart > minDate) {
+      while (dtStart >= minDate) {
         // Use MongoDB's id to find new users within the current timespan
-        const minObjID = ObjectId(Math.floor(dtStart / 1000).toString(16) + "0000000000000000");
-        const maxObjID = ObjectId(Math.floor(dtEnd / 1000).toString(16) + "0000000000000000");
+        const minObjID = ObjectId(Math.floor(dtStart / 1000).toString(16) + '0000000000000000');
+        const maxObjID = ObjectId(Math.floor(dtEnd / 1000).toString(16) + '0000000000000000');
 
         const userCount = await User
           .find({
@@ -183,7 +187,7 @@ export default (app, router, admin) => {
       let dtEnd = Date.now();
       let dtStart = dtEnd - interval;
 
-      while (dtStart > minDate) {
+      while (dtStart >= minDate) {
         const meditationCount = await Meditation
           .find({
             end: { $gte: dtStart, $lte: dtEnd }
