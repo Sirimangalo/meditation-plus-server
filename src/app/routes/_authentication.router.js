@@ -27,25 +27,27 @@ export default (app, router, passport, admin) => {
     // set within the Local Passport strategy.
     passport.authenticate('local-login', (err, user, info) => {
 
-      if (err)
+      if (err) {
         return next(err);
+      }
 
       // If no user is returned...
       if (!user) {
 
         // Set HTTP status code `401 Unauthorized`
         res.status(401);
+        res.send(info.loginMessage)
 
-        // Return the info message
-        return next(info.loginMessage);
+        return next();
       }
 
       // Use login function exposed by Passport to establish a login
       // session
       req.login(user, (err) => {
 
-        if (err)
+        if (err) {
           return next(err);
+        }
 
         // Set HTTP status code `200 OK`
         res.status(200);
@@ -122,9 +124,10 @@ export default (app, router, passport, admin) => {
 
         // Set HTTP status code `401 Unauthorized`
         res.status(401);
+        res.send(info.signupMessage)
 
         // Return the info message
-        return next(info.signupMessage);
+        return next();
       }
 
       // Set HTTP status code `204 No Content`

@@ -111,10 +111,10 @@ describe('Authentication Routes', () => {
       return User.remove().exec();
     });
 
-    it('should respond with 404 when receiving empty data', done => {
+    it('should respond with 401 when receiving empty data', done => {
       request
         .post('/auth/signup')
-        .expect(404)
+        .expect(401)
         .end(err => done(err));
     });
 
@@ -127,7 +127,7 @@ describe('Authentication Routes', () => {
         })
         .expect(401)
         .end((err, res) => {
-          expect(res.text).to.equal('Invalid email length.\n');
+          expect(res.text).to.equal('Invalid email length.');
           done(err);
         });
     });
@@ -141,7 +141,7 @@ describe('Authentication Routes', () => {
         })
         .expect(401)
         .end((err, res) => {
-          expect(res.text).to.equal('Invalid email address.\n');
+          expect(res.text).to.equal('Invalid email address.');
           done(err);
         });
     });
@@ -155,7 +155,7 @@ describe('Authentication Routes', () => {
         })
         .expect(401)
         .end((err, res) => {
-          expect(res.text).to.equal('Invalid password length.\n');
+          expect(res.text).to.equal('Invalid password length.');
           done(err);
         });
     });
