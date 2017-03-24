@@ -36,7 +36,7 @@ export default (app, router, passport, admin) => {
 
         // Set HTTP status code `401 Unauthorized`
         res.status(401);
-        res.send(info.loginMessage)
+        res.send(info.loginMessage);
 
         return next();
       }
@@ -124,7 +124,7 @@ export default (app, router, passport, admin) => {
 
         // Set HTTP status code `401 Unauthorized`
         res.status(401);
-        res.send(info.signupMessage)
+        res.send(info.signupMessage);
 
         // Return the info message
         return next();
