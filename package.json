@@ -35,6 +35,7 @@
     "socket.io": "^1.7.3",
     "socketio-jwt": "^4.5.0",
     "timezones.json": "^1.2.0",
+    "tough-cookie": "^2.3.2",
     "winston": "^2.3.1",
     "youtube-api": "^2.0.8"
   },
