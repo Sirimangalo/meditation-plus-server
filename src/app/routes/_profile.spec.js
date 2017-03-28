@@ -216,7 +216,7 @@ describe('Profile Routes', () => {
         .send(tmpCustomUserInfo)
         .expect(400)
         .end(err => done(err));
-    }).timeout(5000);
+    });
 
     it('should respond 400 when duplicate email', done => {
       let tmpCustomUserInfo = { local: {} };
