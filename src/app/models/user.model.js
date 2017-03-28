@@ -21,7 +21,9 @@ let userSchema = mongoose.Schema({
   sound: { type: String, default: '/assets/audio/bell1.mp3' },
   stableBell: { type: Boolean, default: false },
   gravatarHash: String,
-  timezone: String
+  timezone: String,
+  verified: { type: Boolean, default: false, maxlength: 32 },
+  verifyToken: String
 });
 
 // ## Methods

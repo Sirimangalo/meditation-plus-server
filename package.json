@@ -33,6 +33,7 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "socket.io": "^1.7.3",
+    "randomstring": "^1.1.5",
     "socketio-jwt": "^4.5.0",
     "timezones.json": "^1.2.0",
     "winston": "^2.3.1",

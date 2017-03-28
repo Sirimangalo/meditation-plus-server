@@ -172,4 +172,30 @@ export default (app, router, passport, admin) => {
       res.sendStatus(204);
     });
   });
+
+  router.get('/auth/verify/', (req, res) => {
+    try {
+      const token = req.params.token ? req.params.token : null;
+
+      if (!token) {
+        return res.sendStatus(400);
+      }
+
+      const user = await User.findOne({
+        verifyToken: token,
+        verified: false
+      });
+
+      if (user) {
+        user.verified = true;
+        await user.save();
+
+        res.sendStatus(200);
+      } else {
+        res.sendStatus(400);
+      }
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
 };
