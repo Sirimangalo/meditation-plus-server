@@ -104,7 +104,7 @@ describe('Profile Routes', () => {
     });
 
     it('should respond with 404 when profile does not exist (wrong id)', done => {
-      let wrongId = profile._id.toString().replace(/[1-9]/gi, '2');
+      let wrongId = '000f0f00bcf00cd000000000';
       randomUser
       .get(`/api/profile/${wrongId}`)
       .expect(404)
