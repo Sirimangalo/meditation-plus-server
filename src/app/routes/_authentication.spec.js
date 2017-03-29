@@ -127,7 +127,7 @@ describe('Authentication Routes', () => {
         })
         .expect(401)
         .end((err, res) => {
-          expect(res.text).to.equal('Invalid email length.\n');
+          expect(res.text).to.contain('Invalid email length.');
           done(err);
         });
     });
@@ -141,7 +141,7 @@ describe('Authentication Routes', () => {
         })
         .expect(401)
         .end((err, res) => {
-          expect(res.text).to.equal('Invalid email address.\n');
+          expect(res.text).to.contain('Invalid email address.');
           done(err);
         });
     });
@@ -155,7 +155,7 @@ describe('Authentication Routes', () => {
         })
         .expect(401)
         .end((err, res) => {
-          expect(res.text).to.equal('Invalid password length.\n');
+          expect(res.text).to.contain('Invalid password length.');
           done(err);
         });
     });
