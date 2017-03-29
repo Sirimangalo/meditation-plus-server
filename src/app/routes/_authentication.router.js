@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import expressJwt from 'express-jwt';
+import mail from '../helper/mail.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -129,6 +130,9 @@ export default (app, router, passport, admin) => {
         // Return the info message
         return next();
       }
+
+      // Send verification email
+      mail.sendVerificationEmail(user.email, user.verifyToken);
 
       // Set HTTP status code `204 No Content`
       res.sendStatus(204);
