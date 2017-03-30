@@ -11,14 +11,25 @@ export default (app, router) => {
         res.status(400).send();
       }
 
-      await PushSubscriptions.create({
-        user: req.user._doc._id,
-        endpoint: endpoint,
-        p256dh: p256dh,
-        auth: auth
+      // Check for already existing subscription
+      const subscription = await PushSubscriptions.findOne({
+        endpoint: endpoint
       });
 
-      console.log('PUSH', req.body);
+      if (subscription) {
+        subscription.update({
+          user: req.user._doc._id,
+          p256dh: p256dh,
+          auth: auth
+        });
+      } else {
+        await PushSubscriptions.create({
+          user: req.user._doc._id,
+          endpoint: endpoint,
+          p256dh: p256dh,
+          auth: auth
+        });
+      }
 
       res.status(200);
     } catch (err) {
