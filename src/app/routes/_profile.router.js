@@ -2,6 +2,8 @@ import User from '../models/user.model.js';
 import { ProfileHelper } from '../helper/profile.js';
 import md5 from 'md5';
 import { logger } from '../helper/logger.js';
+import timezone from '../helper/timezone.js';
+import moment from 'moment';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -56,6 +58,7 @@ export default (app, router) => {
    * @apiSuccess {String}     gravatarHash      Hash for Gravatar
    */
   router.get('/api/profile/:id', async (req, res) => {
+
     try {
       let doc = await User
         .findOne({
@@ -100,13 +103,15 @@ export default (app, router) => {
    * @apiParam {String}     gravatarHash    Hash for Gravatar
    */
   router.put('/api/profile', async (req, res) => {
-    // remove readonly data
-    if (req.body.local.password) delete req.body.local.password;
-    if (req.body._id) delete req.body._id;
-    if (req.body.role) delete req.body.role;
-    if (req.body.suspendedUntil) delete req.body.suspendedUntil;
 
+    // watch out for undefined local field ?!
     try {
+      // remove readonly data
+      if (req.body.local.password) delete req.body.local.password;
+      if (req.body._id) delete req.body._id;
+      if (req.body.role) delete req.body.role;
+      if (req.body.suspendedUntil) delete req.body.suspendedUntil;
+
       let user = await User.findById(req.user._doc._id);
 
       // change password if set
@@ -123,7 +128,15 @@ export default (app, router) => {
         user[key] = req.body[key];
       }
 
-      user.gravatarHash = md5(user.local.email);
+      //test timezone string validity to avoid exceptions at retrieve on calculateStats
+      if(user.timezone) {
+        timezone(user, moment());
+      }
+
+
+      if(user.local) {
+        user.gravatarHash = md5(user.local.email);
+      }
       await user.save();
 
       res.sendStatus(200);
