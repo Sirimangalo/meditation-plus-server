@@ -13,8 +13,11 @@ import base from './sockets/base';
 import mongooseConf from './config/mongoose.conf.js';
 import passportConf from './config/passport.conf.js';
 import routes from './app/routes';
+import webpush from 'web-push';
 
 validateEnvVariables();
+
+webpush.setGCMAPIKey(process.env.GOOGLE_API_KEY);
 
 let app = express();
 let server = http.createServer(app);
