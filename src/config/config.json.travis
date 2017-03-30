@@ -7,5 +7,5 @@
     "TEST" : "mongodb://localhost:27017"
   },
   "SESSION_SECRET" : "5EC23D425CF72E433E217DEC18AA8",
-  "GOOGLE_API_KEY" : "AIzaSyDKklHo7AXwWt2ZxzC78CeYrPKKgmyrbbk"
+  "GOOGLE_API_KEY" : ""
 }
