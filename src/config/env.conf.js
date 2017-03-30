@@ -23,8 +23,8 @@ export function validateEnvVariables() {
   if (!process.env.PORT)
     process.env.PORT = config.PORT;
 
-  if (!process.env.YOUTUBE_API_KEY)
-    process.env.YOUTUBE_API_KEY = config.YOUTUBE_API_KEY;
+  if (!process.env.GOOGLE_API_KEY)
+    process.env.GOOGLE_API_KEY = config.GOOGLE_API_KEY;
 
   // Set the appropriate MongoDB URI
   validateMongoUri();

@@ -132,11 +132,6 @@ export default (app, router, io) => {
         current: populated
       });
 
-      push.send(req.user._doc, {
-        title: 'Message',
-        message: req.body.text
-      });
-
       res.json(populated);
     } catch (err) {
       res

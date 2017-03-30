@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-let pushSchema = mongoose.Schema({
+let pushSubscriptionsSchema = mongoose.Schema({
   user : { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   endpoint: { type: String, unique: true },
   p256dh: String,
@@ -9,4 +9,4 @@ let pushSchema = mongoose.Schema({
   timestamps: true
 });
 
-export default mongoose.model('Push', pushSchema);
+export default mongoose.model('PushSubscriptions', pushSubscriptionsSchema);

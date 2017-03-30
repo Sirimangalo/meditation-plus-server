@@ -2,6 +2,7 @@ import PushSubscriptions from '../models/push.model.js';
 import webpush from 'web-push';
 import config from '../../config/config.json';
 
+
 export default {
   list: async () => {
     return await PushSubscriptions.find();
@@ -12,13 +13,13 @@ export default {
         user: userId
       });
 
-      console.log(config['GCM_API_KEY']);
-
       if (!subscription) {
         return;
       }
 
-      webpush.setGCMAPIKey(config['GCM_API_KEY']);
+      console.log(process.env.GOOGLE_API_KEY);
+
+      webpush.setGCMAPIKey(process.env.GOOGLE_API_KEY);
 
       const vapidKeys = webpush.generateVAPIDKeys();
       webpush.setVapidDetails(
