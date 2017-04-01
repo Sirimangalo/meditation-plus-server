@@ -26,6 +26,9 @@ export function validateEnvVariables() {
   if (!process.env.YOUTUBE_API_KEY)
     process.env.YOUTUBE_API_KEY = config.YOUTUBE_API_KEY;
 
+  if (!process.env.MAIL_NOREPLY)
+    process.env.MAIL_NOREPLY = config.MAIL_NOREPLY;
+
   // Set the appropriate MongoDB URI
   validateMongoUri();
 

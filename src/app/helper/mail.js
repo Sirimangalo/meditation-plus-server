@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import config from '../config/config.json';
 
-let transporter = nodemailer.createTransport(config['SMTP_NOREPLY']);
+let transporter = nodemailer.createTransport(process.env.MAIL_NOREPLY);
 
 export default {
   /**

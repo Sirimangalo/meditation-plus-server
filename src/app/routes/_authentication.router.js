@@ -177,7 +177,7 @@ export default (app, router, passport, admin) => {
     });
   });
 
-  router.get('/auth/verify/', (req, res) => {
+  router.get('/auth/verify/', async (req, res) => {
     try {
       const token = req.params.token ? req.params.token : null;
 
