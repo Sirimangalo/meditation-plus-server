@@ -135,7 +135,7 @@ export default (passport) => {
 
       // If the user's email address is not verified yet
       if (!user.verified) {
-        return done(null, false, { loginMessage: 'Please confirm your email address. <a href="/verify">Send again</a>'})
+        return done(null, false, { loginMessage: 'Please confirm your email address.'})
       }
 
       // If the user is found but the password is incorrect

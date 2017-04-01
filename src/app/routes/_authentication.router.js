@@ -131,13 +131,51 @@ export default (app, router, passport, admin) => {
         return next();
       }
 
-      // Send verification email
-      mail.sendVerificationEmail(user.email, user.verifyToken);
-
-      // Set HTTP status code `204 No Content`
-      res.sendStatus(204);
+      // Send activation email
+      mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
+        if (err) {
+          // Mail delivery failed
+          res.status(500).send('Fatal Error: Could not send verifcation email. Please contact support.');
+        } else {
+          // Set HTTP status code `204 No Content`
+          res.sendStatus(204);
+        }
+      });
 
     }) (req, res, next);
+  });
+
+  /**
+   * @api {post} /auth/verify Verify the account of a new user by checking the secret email token
+   * @apiName Verify
+   * @apiGroup Auth
+   *
+   * @apiParam {String} token Verification token the user got via email
+   */
+  router.post('/auth/verify', async (req, res) => {
+    try {
+      const token = req.body.token ? req.body.token : null;
+
+      if (!token) {
+        return res.sendStatus(400);
+      }
+
+      const user = await User.findOne({
+        verifyToken: token
+      });
+
+      if (!user) {
+        res.sendStatus(400);
+      }
+
+      user.verified = true;
+
+      await user.save();
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(500).send(err);
+    }
   });
 
   /**
@@ -175,31 +213,5 @@ export default (app, router, passport, admin) => {
       // HTTP Status code `204 No Content`
       res.sendStatus(204);
     });
-  });
-
-  router.get('/auth/verify/', async (req, res) => {
-    try {
-      const token = req.params.token ? req.params.token : null;
-
-      if (!token) {
-        return res.sendStatus(400);
-      }
-
-      const user = await User.findOne({
-        verifyToken: token,
-        verified: false
-      });
-
-      if (user) {
-        user.verified = true;
-        await user.save();
-
-        res.sendStatus(200);
-      } else {
-        res.sendStatus(400);
-      }
-    } catch (err) {
-      res.status(500).send(err);
-    }
   });
 };

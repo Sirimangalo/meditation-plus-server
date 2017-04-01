@@ -1,1 +1,0 @@
-Welcome %{{newUser}}%,\nplease enter the link below into your browser\n%{{activationLink}}%\nif you have trouble logging into your account please contact it@sirimangalo.org
