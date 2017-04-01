@@ -26,7 +26,7 @@ const createMessage = (template: string, replacements: Object) => {
     plain: plain,
     html: html
   };
-}
+};
 
 export default {
   /**

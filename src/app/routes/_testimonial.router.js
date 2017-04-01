@@ -1,5 +1,4 @@
 import Testimonial from '../models/testimonial.model.js';
-import mail from '../helper/mail.js';
 
 export default (app, router, io, admin) => {
 
