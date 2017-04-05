@@ -6,7 +6,7 @@ import config from '../../config/config.json';
 let apnProvider = new apnProvider(config.APPLE_APN);
 
 export default {
-  send: async (userId, title, message) => {
+  send: async (userId, data) => {
     try {
       const subscription = await PushSubscriptions.find({
         user: userId
