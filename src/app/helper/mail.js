@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import config from '../../config/config.json';
 
-let transporter = nodemailer.createTransport(config.MAIL_NOREPLY);
+let transporter = config.MAIL_NOREPLY ? nodemailer.createTransport(config.MAIL_NOREPLY) : null;
 
 /**
  * Creates a message from a template. For each template there must exist
@@ -37,6 +37,10 @@ export default {
    * @param  {string} token       User's activation token
    */
   sendActivationEmail: (userName: string, userEmail: string, token: string, callback = null) => {
+    if (!transporter) {
+      return;
+    }
+
     const activationLink = 'https://meditation.sirimangalo.org/login;verify=' + token;
     const message = createMessage('activate_account', {
       userName: userName,
