@@ -22,7 +22,7 @@ let userSchema = mongoose.Schema({
   stableBell: { type: Boolean, default: false },
   gravatarHash: String,
   timezone: String,
-  verified: { type: Boolean, default: false, maxlength: 32 },
+  verified: { type: Boolean, default: false },
   verifyToken: String
 });
 

@@ -135,7 +135,7 @@ export default (app, router, passport, admin) => {
       mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
         if (err) {
           // Mail delivery failed
-          res.status(500).send('Fatal Error: Could not send verifcation email. Please contact support.');
+          res.status(204).send('Error: Could not send verification email. Please try again or contact support.');
         } else {
           // Set HTTP status code `204 No Content`
           res.sendStatus(204);
@@ -173,6 +173,44 @@ export default (app, router, passport, admin) => {
       await user.save();
 
       res.sendStatus(200);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /auth/resend Resend verification email
+   * @apiName Resend
+   * @apiGroup Auth
+   *
+   * @apiParam {String} email email address
+   */
+  router.post('/auth/resend', async (req, res) => {
+    try {
+      const email = req.body.email ? req.body.email : null;
+
+      if (!email) {
+        return res.sendStatus(400);
+      }
+
+      const user = await User.findOne({
+        'local.email': email
+      });
+
+      if (!user || user.verified || !user.verifyToken) {
+        res.sendStatus(400);
+      }
+
+      // Send activation email
+      mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
+        if (err) {
+          // Mail delivery failed
+          res.status(500).send('Error: Could not send verification email. Please try again or contact support.');
+        } else {
+          // Set HTTP status code `204 No Content`
+          res.sendStatus(204);
+        }
+      });
     } catch (err) {
       res.status(500).send(err);
     }
