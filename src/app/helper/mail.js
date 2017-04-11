@@ -1,8 +1,12 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
-import config from '../../config/config.json';
 
-let transporter = config.MAIL_NOREPLY ? nodemailer.createTransport(config.MAIL_NOREPLY) : null;
+let transporter = nodemailer.createTransport({
+    sendmail: true,
+    newline: 'unix',
+    path: '/usr/sbin/sendmail'
+});
+
 
 /**
  * Creates a message from a template. For each template there must exist
