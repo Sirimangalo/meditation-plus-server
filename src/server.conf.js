@@ -17,7 +17,9 @@ import webpush from 'web-push';
 
 validateEnvVariables();
 
-webpush.setGCMAPIKey(process.env.GOOGLE_API_KEY);
+if (process.env.GOOGLE_API_KEY) {
+  webpush.setGCMAPIKey(process.env.GOOGLE_API_KEY);
+}
 
 let app = express();
 let server = http.createServer(app);
