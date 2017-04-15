@@ -1,0 +1,7 @@
+Welcome {{userName}},
+
+please activate your account by opening the following link in your browser:
+
+{{activationLink}}
+
+If you have problems logging in or other technical issues, please send an email to it@sirimangalo.org.
