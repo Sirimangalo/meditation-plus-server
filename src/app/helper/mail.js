@@ -2,9 +2,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 
 let transporter = nodemailer.createTransport({
-  sendmail: true,
-  newline: 'unix',
-  path: '/usr/sbin/sendmail'
+  name: 'localhost'
 });
 
 
