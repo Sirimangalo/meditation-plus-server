@@ -205,7 +205,7 @@ export default (app, router, passport, admin) => {
       mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
         if (err) {
           // Mail delivery failed
-          res.status(500).send('Error: Could not send verification email. Please try again or contact support.');
+          res.status(500).send(err);
         } else {
           // Set HTTP status code `204 No Content`
           res.sendStatus(204);
