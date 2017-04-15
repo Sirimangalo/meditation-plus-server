@@ -134,7 +134,7 @@ export default (passport) => {
       }
 
       // If the user's email address is not verified yet
-      if (!user.verified) {
+      if (!user.verified && (!user.role || user.role !== 'ROLE_ADMIN')) {
         return done(null, false, { loginMessage: 'Please confirm your email address.'});
       }
 

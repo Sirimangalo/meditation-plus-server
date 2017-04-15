@@ -2,7 +2,8 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 
 let transporter = nodemailer.createTransport({
-  name: 'localhost'
+  host: 'localhost',
+  port: 25
 });
 
 
