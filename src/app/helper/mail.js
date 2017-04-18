@@ -65,7 +65,7 @@ export default {
     }
 
     const recoveryLink =
-      'https://meditation.sirimangalo.org/recover;user=' +  user._id + ';auth=' + user.verifyToken;
+      'https://meditation.sirimangalo.org/recover;user=' +  user._id + ';token=' + user.verifyToken;
 
     const message = createMessage('recover_password', {
       userName: user.name,
