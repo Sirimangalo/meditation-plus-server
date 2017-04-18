@@ -31,7 +31,8 @@ export class AuthedSupertest {
         email: this.email,
         password: new User().generateHash(this.cleartextPassword)
       },
-      role: this.role
+      role: this.role,
+      verified: true
     });
 
     return new Promise((resolve, reject) => {

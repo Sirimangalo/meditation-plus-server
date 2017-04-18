@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import expressJwt from 'express-jwt';
+import mail from '../helper/mail.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -130,10 +131,89 @@ export default (app, router, passport, admin) => {
         return next();
       }
 
-      // Set HTTP status code `204 No Content`
-      res.sendStatus(204);
+      // Send activation email
+      mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
+        if (err) {
+          // Mail delivery failed
+          res.status(204).send('Error: Could not send verification email. Please try again or contact support.');
+        } else {
+          // Set HTTP status code `204 No Content`
+          res.sendStatus(204);
+        }
+      });
 
     }) (req, res, next);
+  });
+
+  /**
+   * @api {post} /auth/verify Verify the account of a new user by checking the secret email token
+   * @apiName Verify
+   * @apiGroup Auth
+   *
+   * @apiParam {String} token Verification token the user got via email
+   */
+  router.post('/auth/verify', async (req, res) => {
+    try {
+      const token = req.body.token ? req.body.token : null;
+
+      if (!token) {
+        return res.sendStatus(400);
+      }
+
+      const user = await User.findOne({
+        verifyToken: token
+      });
+
+      if (!user) {
+        res.sendStatus(400);
+      }
+
+      user.verified = true;
+
+      await user.save();
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /auth/resend Resend verification email
+   * @apiName Resend
+   * @apiGroup Auth
+   *
+   * @apiParam {String} email email address
+   */
+  router.post('/auth/resend', async (req, res) => {
+    try {
+      const email = req.body.email ? req.body.email : null;
+
+      if (!email) {
+        return res.sendStatus(400);
+      }
+
+      const user = await User.findOne({
+        'local.email': email
+      });
+
+      if (!user || user.verified || !user.verifyToken) {
+        res.sendStatus(400);
+      }
+
+      // Send activation email
+      mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
+        if (err) {
+          // Mail delivery failed
+          res.status(500).send(err);
+        } else {
+          // Set HTTP status code `204 No Content`
+          res.sendStatus(204);
+        }
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
   });
 
   /**

@@ -23,7 +23,8 @@ describe('Authentication Routes', () => {
           local: {
             email: 'test@test.com',
             password: new User().generateHash('password')
-          }
+          },
+          verified: true
         });
 
         user.save(err => {

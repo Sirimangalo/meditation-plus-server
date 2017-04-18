@@ -6,6 +6,7 @@
 import LocalStrategy from 'passport-local';
 import User from '../app/models/user.model.js';
 import md5 from 'md5';
+import randomstring from 'randomstring';
 
 export default (passport) => {
   // Define length boundaries for expected parameters
@@ -89,6 +90,7 @@ export default (passport) => {
           newUser.name = req.body.name;
           newUser.local.password = newUser.generateHash(password);
           newUser.gravatarHash = md5(newUser.local.email);
+          newUser.verifyToken = randomstring.generate();
 
           // Save the new user
           newUser.save(err => {
@@ -131,9 +133,14 @@ export default (passport) => {
         );
       }
 
+      // If the user's email address is not verified yet
+      if (!user.verified && (!user.role || user.role !== 'ROLE_ADMIN')) {
+        return done(null, false, { loginMessage: 'Please confirm your email address.'});
+      }
+
       // If the user is found but the password is incorrect
       if (!user.validPassword(password)) {
-        return done(null, false, { loginMessage : 'Invalid password entered.' });
+        return done(null, false, { loginMessage: 'Invalid password entered.' });
       }
 
       // Check account suspension

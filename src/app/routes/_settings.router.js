@@ -30,7 +30,6 @@ export default (app, router, admin) => {
 
       res.json(increment ? increment : 0);
     } catch (err) {
-      console.log(err);
       res.status(500).send(err);
     }
   });
