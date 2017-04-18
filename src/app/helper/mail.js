@@ -72,8 +72,6 @@ export default {
       recoveryLink: recoveryLink
     });
 
-    console.log(message);
-
     transporter.sendMail({
       from: 'noreply@sirimangalo.org',
       to: user.local.email,

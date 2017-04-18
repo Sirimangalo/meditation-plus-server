@@ -272,15 +272,10 @@ export default (app, router, passport, admin) => {
    */
   router.post('/auth/reset', async (req, res) => {
     try {
-      console.log(req.body);
-
       const userId = req.body.userId ? req.body.userId : null;
       const token = req.body.token ? req.body.token : null;
 
-      console.log(userId, token);
-
       if (!userId || !token) {
-        console.log(userId, token);
         return res.status(400).send('Invalid email or token.');
       }
 
