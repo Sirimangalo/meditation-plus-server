@@ -1,0 +1,7 @@
+Hi {{userName}},
+
+you can reset your password by navigating your browser to the following URL:
+
+{{recoveryLink}}
+
+If you have problems logging in or other technical issues, please send an email to it@sirimangalo.org.
