@@ -65,12 +65,14 @@ export default {
     }
 
     const recoveryLink =
-      'https://meditation.sirimangalo.org/recover;user=' +  user._id + ';token=' + user.verifyToken;
+      'https://meditation.sirimangalo.org/reset-password;user=' +  user._id + ';token=' + user.verifyToken;
 
     const message = createMessage('recover_password', {
       userName: user.name,
       recoveryLink: recoveryLink
     });
+
+    console.log(message);
 
     transporter.sendMail({
       from: 'noreply@sirimangalo.org',
