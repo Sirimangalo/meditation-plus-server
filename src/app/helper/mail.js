@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import config from '../../config/config.json';
 
 let transporter = nodemailer.createTransport({
   host: 'localhost',
@@ -45,7 +46,7 @@ export default {
       return;
     }
 
-    const activationLink = 'https://meditation.sirimangalo.org/login;verify=' + user.verifyToken;
+    const activationLink = config.HOST + '/login;verify=' + user.verifyToken;
     const message = createMessage('activate_account', {
       userName: user.name,
       activationLink: activationLink
@@ -65,7 +66,7 @@ export default {
     }
 
     const recoveryLink =
-      'https://meditation.sirimangalo.org/reset-password;user=' +  user._id + ';token=' + user.verifyToken;
+      config.HOST + '/reset-password;user=' +  user._id + ';token=' + user.verifyToken;
 
     const message = createMessage('recover_password', {
       userName: user.name,
