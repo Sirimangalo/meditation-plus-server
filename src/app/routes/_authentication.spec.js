@@ -463,7 +463,7 @@ describe('Authentication Routes', () => {
             token: '1111'
           })
           .expect(401)
-          .end((err, res) => {
+          .end(err => {
             done(err);
           });
       });
