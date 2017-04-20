@@ -170,7 +170,6 @@ export default (app, router, passport, admin) => {
       }
 
       user.verified = true;
-
       await user.save();
 
       res.sendStatus(200);
@@ -206,7 +205,7 @@ export default (app, router, passport, admin) => {
       mail.sendActivationEmail(user, (err) => {
         if (err) {
           // Mail delivery failed
-          res.status(500).send(err);
+          res.status(501).send(err);
         } else {
           // Set HTTP status code `204 No Content`
           res.sendStatus(204);
@@ -250,7 +249,7 @@ export default (app, router, passport, admin) => {
       mail.sendRecoveryEmail(user, (err) => {
         if (err) {
           // Mail delivery failed
-          res.status(500).send(err);
+          res.status(501).send(err);
         } else {
           // Set HTTP status code `204 No Content`
           res.sendStatus(204);

@@ -1,4 +1,5 @@
 {
+  "HOST" : "http://localhost:4200",
   "ENV" : "development",
   "PORT" : 3002,
   "MONGO_URI" : {
