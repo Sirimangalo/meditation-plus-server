@@ -5,7 +5,7 @@ export default {
     return new Promise((resolve, reject) => {
       Youtube.authenticate({
         type: 'key',
-        key: process.env.YOUTUBE_API_KEY
+        key: process.env.GOOGLE_API_KEY
       });
 
       Youtube.search.list({
@@ -27,7 +27,7 @@ export default {
     return new Promise((resolve, reject) => {
       Youtube.authenticate({
         type: 'key',
-        key: process.env.YOUTUBE_API_KEY
+        key: process.env.GOOGLE_API_KEY
       });
 
       Youtube.search.list({
@@ -49,7 +49,7 @@ export default {
     return new Promise((resolve, reject) => {
       Youtube.authenticate({
         type: 'key',
-        key: process.env.YOUTUBE_API_KEY
+        key: process.env.GOOGLE_API_KEY
       });
 
       Youtube.search.list({
