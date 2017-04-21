@@ -133,11 +133,6 @@ export default (passport) => {
         );
       }
 
-      // If the user's email address is not verified yet
-      if (!user.verified && (!user.role || user.role !== 'ROLE_ADMIN')) {
-        return done(null, false, { loginMessage: 'Please confirm your email address.'});
-      }
-
       // If the user is found but the password is incorrect
       if (!user.validPassword(password)) {
         return done(null, false, { loginMessage: 'Invalid password entered.' });
@@ -146,6 +141,11 @@ export default (passport) => {
       // Check account suspension
       if (user.suspendedUntil && user.suspendedUntil > new Date()) {
         return done(null, false, { loginMessage: 'This account is suspended.' });
+      }
+
+      // If the user's email address is not verified yet
+      if (!user.verified && (!user.role || user.role !== 'ROLE_ADMIN')) {
+        return done(null, false, { loginMessage: 'Please confirm your email address.'});
       }
 
       // Otherwise all is well; return successful user

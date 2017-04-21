@@ -115,7 +115,8 @@ export default (app, router) => {
       let user = await User.findById(req.user._doc._id);
 
       // change password if set
-      if (req.body.newPassword) {
+      if (req.body.newPassword && req.body.newPassword.length >= 8
+        && req.body.newPassword.length <= 128) {
         user.local.password = user.generateHash(req.body.newPassword);
         delete req.body.newPassword;
       }

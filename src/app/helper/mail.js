@@ -1,10 +1,10 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import config from '../../config/config.json';
 
 let transporter = nodemailer.createTransport({
   host: 'localhost',
   port: 25,
-  debug: true,
   ignoreTLS: true
 });
 
@@ -41,21 +41,42 @@ export default {
    * @param  {string} mailAddress User's mail address
    * @param  {string} token       User's activation token
    */
-  sendActivationEmail: (userName: string, userEmail: string, token: string, callback = null) => {
+  sendActivationEmail: (user, callback = null) => {
     if (!transporter) {
       return;
     }
 
-    const activationLink = 'https://meditation.sirimangalo.org/login;verify=' + token;
+    const activationLink = config.HOST + '/login;verify=' + user.verifyToken;
     const message = createMessage('activate_account', {
-      userName: userName,
+      userName: user.name,
       activationLink: activationLink
     });
 
     transporter.sendMail({
       from: 'noreply@sirimangalo.org',
-      to: userEmail,
+      to: user.local.email,
       subject: 'Meditation+ Account Activation',
+      text: message.plain,
+      html: message.html
+    }, callback);
+  },
+  sendRecoveryEmail: (user, callback = null) => {
+    if (!transporter) {
+      return;
+    }
+
+    const recoveryLink =
+      config.HOST + '/reset-password;user=' +  user._id + ';token=' + user.verifyToken;
+
+    const message = createMessage('recover_password', {
+      userName: user.name,
+      recoveryLink: recoveryLink
+    });
+
+    transporter.sendMail({
+      from: 'noreply@sirimangalo.org',
+      to: user.local.email,
+      subject: 'Meditation+ Password Recovery',
       text: message.plain,
       html: message.html
     }, callback);

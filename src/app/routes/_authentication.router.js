@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import expressJwt from 'express-jwt';
 import mail from '../helper/mail.js';
+import randomstring from 'randomstring';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
@@ -132,7 +133,7 @@ export default (app, router, passport, admin) => {
       }
 
       // Send activation email
-      mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
+      mail.sendActivationEmail(user, (err) => {
         if (err) {
           // Mail delivery failed
           res.status(204).send('Error: Could not send verification email. Please try again or contact support.');
@@ -169,7 +170,6 @@ export default (app, router, passport, admin) => {
       }
 
       user.verified = true;
-
       await user.save();
 
       res.sendStatus(200);
@@ -198,19 +198,116 @@ export default (app, router, passport, admin) => {
       });
 
       if (!user || user.verified || !user.verifyToken) {
-        res.sendStatus(400);
+        return res.sendStatus(400);
       }
 
       // Send activation email
-      mail.sendActivationEmail(user.name, user.local.email, user.verifyToken, (err) => {
+      mail.sendActivationEmail(user, (err) => {
         if (err) {
           // Mail delivery failed
-          res.status(500).send(err);
+          res.status(501).send(err);
         } else {
           // Set HTTP status code `204 No Content`
           res.sendStatus(204);
         }
       });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /auth/reset-init Send the user a mail for password recovery
+   * @apiName Recover
+   * @apiGroup Auth
+   *
+   * @apiParam {String} email email address
+   */
+  router.post('/auth/reset-init', async (req, res) => {
+    try {
+      const email = req.body.email ? req.body.email : null;
+
+      if (!email) {
+        return res.status(400).send('Invalid email.');
+      }
+
+      let user = await User.findOne({
+        'local.email': email
+      });
+
+      if (!user || !user.verified) {
+        return res.status(400).send('There is no user with this email.');
+      }
+
+      // Regenerate user's token & activate password reset for 48 hours
+      user.verifyToken = randomstring.generate();
+      user.recoverUntil = Date.now() + 1728E5;
+
+      await user.save();
+
+      // Send recovery email
+      mail.sendRecoveryEmail(user, (err) => {
+        if (err) {
+          // Mail delivery failed
+          res.status(501).send(err);
+        } else {
+          // Set HTTP status code `204 No Content`
+          res.sendStatus(204);
+        }
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /auth/reset Reset the password using the 'verifyToken'
+   * @apiName Reset
+   * @apiGroup Auth
+   *
+   * @apiParam {String} email         email address
+   * @apiParam {String} token         user's token
+   * @apiParam {String} newPassword   new password
+   */
+  router.post('/auth/reset', async (req, res) => {
+    try {
+      const userId = req.body.userId ? req.body.userId : null;
+      const token = req.body.token ? req.body.token : null;
+
+      if (!userId || !token) {
+        return res.status(400).send('Invalid email or token.');
+      }
+
+      let user = await User.findOne({
+        _id: userId
+      });
+
+      if (!user || !user.verified) {
+        return res.status(400).send('Invalid user.');
+      }
+
+      if (token !== user.verifyToken) {
+        return res.status(401).send('Invalid token.');
+      }
+
+      if (!user.recoverUntil || Date.now() > user.recoverUntil) {
+        return res.status(401).send('Token has expired.');
+      }
+
+      if (req.body.newPassword && req.body.newPassword.length >= 8
+        && req.body.newPassword.length <= 128) {
+        // Change password
+        user.local.password = user.generateHash(req.body.newPassword);
+        delete req.body.newPassword;
+
+        // Deauthorize user's token for password reset
+        user.recoverUntil = 0;
+        await user.save();
+
+        res.sendStatus(200);
+      } else {
+        return res.status(400).send('Invalid password.');
+      }
     } catch (err) {
       res.status(500).send(err);
     }

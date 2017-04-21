@@ -23,7 +23,8 @@ let userSchema = mongoose.Schema({
   gravatarHash: String,
   timezone: String,
   verified: { type: Boolean, default: false },
-  verifyToken: String
+  verifyToken: String,
+  recoverUntil: Date
 });
 
 // ## Methods

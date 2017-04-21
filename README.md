@@ -24,6 +24,7 @@ The `server.conf.js` file is expecting certain `environment` `variables` to be s
 
 ```
 {
+  "HOST" : "https://medidation.sirimangalo.org",
   "ENV" : "development",
   "PORT" : 3000,
   "MONGO_URI" : {
