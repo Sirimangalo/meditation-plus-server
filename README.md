@@ -37,6 +37,6 @@ The `server.conf.js` file is expecting certain `environment` `variables` to be s
   # Note that you don't need to use specifically
   # this, but it will certainly suffice
   "SESSION_SECRET" : "the session secrect",
-  "YOUTUBE_API_KEY" : "the youtube api key"
+  "GOOGLE_API_KEY" : "the google api key"
 }
 ```
