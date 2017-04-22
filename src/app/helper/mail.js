@@ -20,17 +20,21 @@ let transporter = nodemailer.createTransport({
  * @return {Object}               Object containing message as plain text and HTML file
  */
 const createMessage = (template: string, replacements: Object) => {
+  // read html skeleton used for every email
+  let mockupHTML = fs.readFileSync(__dirname + '/mail-templates/mockup.html', 'utf8');
+
+  // read customized content for email
   let plain = fs.readFileSync(__dirname + '/mail-templates/' + template + '/mail.txt', 'utf8');
   let html = fs.readFileSync(__dirname + '/mail-templates/' + template + '/mail.html', 'utf8');
 
   for (let key in replacements) {
     plain = plain.replace('{{' + key + '}}', replacements[key]);
-    html = html .replace('{{' + key + '}}', replacements[key]);
+    html = html.replace('{{' + key + '}}', replacements[key]);
   }
 
   return {
     plain: plain,
-    html: html
+    html: mockupHTML.replace('{{content}}', html)
   };
 };
 
