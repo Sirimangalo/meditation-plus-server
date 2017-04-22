@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import config from '../../config/config.json';
+import User from '../models/user.model.js';
 
 let transporter = nodemailer.createTransport({
   host: 'localhost',
@@ -19,17 +20,21 @@ let transporter = nodemailer.createTransport({
  * @return {Object}               Object containing message as plain text and HTML file
  */
 const createMessage = (template: string, replacements: Object) => {
+  // read html skeleton used for every email
+  let mockupHTML = fs.readFileSync(__dirname + '/mail-templates/mockup.html', 'utf8');
+
+  // read customized content for email
   let plain = fs.readFileSync(__dirname + '/mail-templates/' + template + '/mail.txt', 'utf8');
   let html = fs.readFileSync(__dirname + '/mail-templates/' + template + '/mail.html', 'utf8');
 
   for (let key in replacements) {
     plain = plain.replace('{{' + key + '}}', replacements[key]);
-    html = html .replace('{{' + key + '}}', replacements[key]);
+    html = html.replace('{{' + key + '}}', replacements[key]);
   }
 
   return {
     plain: plain,
-    html: html
+    html: mockupHTML.replace('{{content}}', html)
   };
 };
 
@@ -80,5 +85,32 @@ export default {
       text: message.plain,
       html: message.html
     }, callback);
+  },
+  sendTestimonialNotification: (testimonial, callback = null) => {
+    if (!transporter) {
+      return;
+    }
+
+    User
+      .find({
+        role: 'ROLE_ADMIN',
+        subscribeTestimonials: true
+      })
+      .then(res => {
+        res.map(user => {
+          let message = createMessage('testimonial_notification', {
+            testimonialText: testimonial.text,
+            reviewLink: config.HOST + '/admin/testimonials'
+          });
+
+          transporter.sendMail({
+            from: 'noreply@sirimangalo.org',
+            to: user.local.email,
+            subject: 'Meditation+ New Testimonial',
+            text: message.plain,
+            html: message.html
+          }, callback);
+        });
+      });
   }
 };

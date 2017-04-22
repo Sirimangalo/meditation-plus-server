@@ -24,7 +24,8 @@ let userSchema = mongoose.Schema({
   timezone: String,
   verified: { type: Boolean, default: false },
   verifyToken: String,
-  recoverUntil: Date
+  recoverUntil: Date,
+  subscribeTestimonials: Boolean // relevant for admins only
 });
 
 // ## Methods
