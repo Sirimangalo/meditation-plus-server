@@ -133,7 +133,7 @@ export default (app, router, passport, admin) => {
       }
 
       // Send activation email
-      mail.sendActivationEmail(user, (err) => {
+      mail.sendActivationEmail(user, err => {
         if (err) {
           // Mail delivery failed
           res.status(204).send('Error: Could not send verification email. Please try again or contact support.');
@@ -202,7 +202,7 @@ export default (app, router, passport, admin) => {
       }
 
       // Send activation email
-      mail.sendActivationEmail(user, (err) => {
+      mail.sendActivationEmail(user, err => {
         if (err) {
           // Mail delivery failed
           res.status(501).send(err);

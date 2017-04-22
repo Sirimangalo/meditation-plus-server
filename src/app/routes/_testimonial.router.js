@@ -1,4 +1,5 @@
 import Testimonial from '../models/testimonial.model.js';
+import mail from '../helper/mail.js';
 
 export default (app, router, io, admin) => {
 
@@ -88,6 +89,9 @@ export default (app, router, io, admin) => {
 
       // sending broadcast WebSocket testimonial
       io.sockets.emit('testimonial', leanObject);
+
+      // notify admin users that have subscribed
+      mail.sendTestimonialNotification(testimonial);
 
       res.json(leanObject);
     } catch (err) {

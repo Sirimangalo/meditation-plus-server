@@ -1,0 +1,5 @@
+A new testimonial has been submitted:
+
+{{testimonialText}}
+
+You can review it in the Admin Section at {{reviewLink}} .

@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import config from '../../config/config.json';
+import User from '../models/user.model.js';
 
 let transporter = nodemailer.createTransport({
   host: 'localhost',
@@ -80,5 +81,32 @@ export default {
       text: message.plain,
       html: message.html
     }, callback);
+  },
+  sendTestimonialNotification: (testimonial, callback = null) => {
+    if (!transporter) {
+      return;
+    }
+
+    User
+      .find({
+        role: 'ROLE_ADMIN',
+        subscribeTestimonials: true
+      })
+      .then(res => {
+        res.map(user => {
+          let message = createMessage('testimonial_notification', {
+            testimonialText: testimonial.text,
+            reviewLink: config.HOST + '/admin/testimonials'
+          });
+
+          transporter.sendMail({
+            from: 'noreply@sirimangalo.org',
+            to: user.local.email,
+            subject: 'Meditation+ New Testimonial',
+            text: message.plain,
+            html: message.html
+          }, callback);
+        });
+      });
   }
 };
