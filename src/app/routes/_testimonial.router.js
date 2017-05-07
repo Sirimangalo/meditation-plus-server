@@ -18,7 +18,7 @@ export default (app, router, io, admin) => {
       let testimonials = await Testimonial
         .find()
         .sort([['createdAt', 'descending']])
-        .populate('user', 'name gravatarHash')
+        .populate('user', 'name gravatarHash username')
         .lean()
         .then();
 
@@ -53,7 +53,7 @@ export default (app, router, io, admin) => {
       let testimonials = await Testimonial
         .find()
         .sort([['createdAt', 'descending']])
-        .populate('user', 'name gravatarHash')
+        .populate('user', 'name gravatarHash username')
         .lean()
         .then();
 

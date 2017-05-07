@@ -25,7 +25,7 @@ export default (app, router, io, admin) => {
           weekDay: 'asc',
           hour: 'asc'
         })
-        .populate('user', 'name gravatarHash')
+        .populate('user', 'name gravatarHash username')
         .lean()
         .exec();
 

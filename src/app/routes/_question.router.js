@@ -40,7 +40,7 @@ export default (app, router, io, admin) => {
           ? [['answeredAt', 'descending']]
           : [['numOfLikes', 'descending'], ['createdAt', 'ascending']]
         )
-        .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('user', 'name gravatarHash lastMeditation country username')
         .populate('broadcast', 'started videoUrl')
         .lean()
         .then();
@@ -86,7 +86,7 @@ export default (app, router, io, admin) => {
           }
         })
         .limit(5)
-        .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('user', 'name gravatarHash lastMeditation country username')
         .populate('broadcast', 'started videoUrl')
         .lean()
         .then();

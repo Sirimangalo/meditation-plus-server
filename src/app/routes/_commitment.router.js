@@ -17,7 +17,7 @@ export default (app, router, admin) => {
     try {
       const result = await Commitment
       .find()
-      .populate('users', 'name gravatarHash')
+      .populate('users', 'name gravatarHash username')
       .lean()
       .then();
 

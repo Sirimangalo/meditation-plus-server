@@ -28,6 +28,7 @@ let admin = new AuthedSupertest(
 
 let yesterday = moment.utc().add(-1, 'days');
 let userCustomInfos = {
+  username: 'mytestusername',
   name: userBasicInfos.name,
   local:{
     password: userBasicInfos.password,
@@ -89,8 +90,6 @@ describe('Profile Routes', () => {
     });
   });
 
-
-
   describe('GET /api/profile/:id', () => {
     randomUser.authorize();
     user2.authorize();
@@ -123,10 +122,38 @@ describe('Profile Routes', () => {
       });
     });
 
+    describe('GET /api/profile/username/:username', () => {
+    randomUser.authorize();
+    user2.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+      .get(`/api/profile/username/${profile.username}`)
+      .expect(401)
+      .end(err => done(err));
+    });
+
+    it('should respond with 404 when profile does not exist (wrong username)', done => {
+      randomUser
+      .get(`/api/profile/username/reallydoesnotexist`)
+      .expect(404)
+      .end(err => done(err));
+    });
+
+    it('should respond with the profile', done => {
+      randomUser
+      .get(`/api/profile/username/${profile.username}`)
+      .expect(200)
+      .end((err, res) => {
+        expect(res.body.name).to.equal(userBasicInfos.name);
+        expect(res.body.local.email).to.equal(userBasicInfos.email);
+        expect(res.body.local.password).to.be.undefined;
+        done(err);
+      });
+    });
 
     describe('Testing email and stats availability', () => {
-
-
       beforeEach(done => {
         profile.showEmail = false;
         profile.hideStats = true;
@@ -167,7 +194,6 @@ describe('Profile Routes', () => {
             done(err);
           });
       });
-
     });
   });
 

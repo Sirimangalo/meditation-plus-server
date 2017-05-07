@@ -27,6 +27,13 @@ export default (app, router, passport, io) => {
         res.sendStatus(401);
       }
 
+      if (!user.username) {
+        req.logOut();
+        res
+          .status(401)
+          .json({ message: 'missing username' });
+      }
+
       const now = new Date();
 
       if (!user.lastActive ||
