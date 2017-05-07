@@ -8,6 +8,8 @@ import User from '../app/models/user.model.js';
 import md5 from 'md5';
 import randomstring from 'randomstring';
 
+const reservedUsernames = ['yuttadhammo', 'doug', 'martin', 'robin', 'sebastian', 'it'];
+
 export default (passport) => {
   // Define length boundaries for expected parameters
   let bounds = {
@@ -81,7 +83,7 @@ export default (passport) => {
       }, (err, user) => {
         if (err) return done(err);
 
-        if (user) {
+        if (user || reservedUsernames.contains(req.body.username) ) {
           // Email or username already taken.
           // Invoke `done` with `false` to indicate authentication failure
           return done(null, false, { signupMessage : 'That email or username is already taken.' });
@@ -154,7 +156,7 @@ export default (passport) => {
 
         // Check if a username is set and if not request one
         if (!user.username) {
-          if (!req.body.username) {
+          if (!req.body.username || reservedUsernames.contains(req.body.username)) {
             return done(
               null,
               false,
