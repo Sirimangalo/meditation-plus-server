@@ -9,11 +9,13 @@ const request = supertest(app);
 let user = new AuthedSupertest();
 let user2 = new AuthedSupertest(
   'Second User',
+  'user2',
   'user2@sirimangalo.org',
   'password'
 );
 let admin = new AuthedSupertest(
   'Admin User',
+  'admin',
   'admin@sirimangalo.org',
   'password',
   'ROLE_ADMIN'

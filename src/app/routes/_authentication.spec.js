@@ -8,6 +8,7 @@ const request = supertest(app);
 let authedRequest = new AuthedSupertest();
 let adminUser = new AuthedSupertest(
   'Admin',
+  'admin',
   'admin@sirimangalo.org',
   'password',
   'ROLE_ADMIN'
@@ -24,6 +25,7 @@ describe('Authentication Routes', () => {
             email: 'test@test.com',
             password: new User().generateHash('password')
           },
+          username: 'myusername',
           verified: true
         });
 
@@ -123,6 +125,7 @@ describe('Authentication Routes', () => {
       request
         .post('/auth/signup')
         .send({
+          username: 'myusername',
           email: 'inv',
           password: 'invalid'
         })
@@ -137,6 +140,7 @@ describe('Authentication Routes', () => {
       request
         .post('/auth/signup')
         .send({
+          username: 'myusername',
           email: 'invalidinvalidinvalid',
           password: 'invalidinvalidinvalid'
         })
@@ -151,6 +155,7 @@ describe('Authentication Routes', () => {
       request
         .post('/auth/signup')
         .send({
+          username: 'myusername',
           email: 'valid@valid.com',
           password: 'invalid'
         })
@@ -165,6 +170,7 @@ describe('Authentication Routes', () => {
       request
         .post('/auth/signup')
         .send({
+          username: 'myusername',
           email: 'valid@valid.com',
           password: 'validpassword'
         })
@@ -182,6 +188,7 @@ describe('Authentication Routes', () => {
       User.remove(() => {
         user = new User({
           local: {
+            username: 'myusername',
             email: 'test@test.com',
             password: new User().generateHash('password')
           },
@@ -248,6 +255,7 @@ describe('Authentication Routes', () => {
       User.remove(() => {
         user = new User({
           local: {
+            username: 'myusername',
             email: 'test@iamasurelynonexistentdomain.com',
             password: new User().generateHash('password')
           },
@@ -337,6 +345,7 @@ describe('Authentication Routes', () => {
       User.remove(() => {
         user = new User({
           local: {
+            username: 'myusername',
             email: 'test@iamasurelynonexistentdomain.com',
             password: new User().generateHash('password')
           },
@@ -397,6 +406,7 @@ describe('Authentication Routes', () => {
       User.remove(() => {
         user = new User({
           local: {
+            username: 'myusername',
             email: 'test@test.com',
             password: password
           },

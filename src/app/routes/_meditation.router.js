@@ -90,7 +90,7 @@ export default (app, router, io) => {
           end: { $gt: Date.now() - 1.08E7 }
         })
         .sort([['createdAt', 'descending']])
-        .populate('user', 'name gravatarHash country')
+        .populate('user', 'name gravatarHash country username')
         .lean()
         .exec();
 

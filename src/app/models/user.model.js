@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
 let userSchema = mongoose.Schema({
-
+  username: { type: String, unique: true, validate: /^[a-zA-Z][a-zA-Z0-9-_\.]{3,20}$/},
   local : {
     password : String,
     email : { type : String, unique : true }
@@ -28,19 +28,12 @@ let userSchema = mongoose.Schema({
   subscribeTestimonials: Boolean // relevant for admins only
 });
 
-// ## Methods
-
-// ### Generate a hash
 userSchema.methods.generateHash = function(password) {
-
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
 
-// ### Check if password is valid
 userSchema.methods.validPassword = function(password) {
-
   return bcrypt.compareSync(password, this.local.password);
 };
 
-// Create the model for users and expose it to the app
 export default mongoose.model('User', userSchema);

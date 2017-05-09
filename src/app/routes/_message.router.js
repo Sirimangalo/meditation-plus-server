@@ -28,7 +28,7 @@ export default (app, router, io) => {
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
         .limit(msgPerPage)
-        .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('user', 'name gravatarHash lastMeditation country username')
         .lean()
         .then();
 
@@ -70,7 +70,7 @@ export default (app, router, io) => {
       let messages = await Message
         .find(criteria)
         .sort([['createdAt', 'descending']])
-        .populate('user', 'name gravatarHash lastMeditation country')
+        .populate('user', 'name gravatarHash lastMeditation country username')
         .lean()
         .then();
 
@@ -106,7 +106,7 @@ export default (app, router, io) => {
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
-        'name gravatarHash country lastMeditation'
+        'name gravatarHash country lastMeditation username'
       ).execPopulate();
 
       // sending broadcast WebSocket message
@@ -163,7 +163,7 @@ export default (app, router, io) => {
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
-        'name gravatarHash country lastMeditation'
+        'name gravatarHash country lastMeditation username'
       ).execPopulate();
 
       // sending broadcast WebSocket message
@@ -205,7 +205,7 @@ export default (app, router, io) => {
       // add user details for response and broadcast
       let populated = await message.populate(
         'user',
-        'name gravatarHash country lastMeditation'
+        'name gravatarHash country lastMeditation username'
       ).execPopulate();
 
       // sending broadcast WebSocket message

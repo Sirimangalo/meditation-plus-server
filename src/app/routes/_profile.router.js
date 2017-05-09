@@ -7,6 +7,36 @@ import moment from 'moment';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
+const getUser = async (query, req, res) =>  {
+  try {
+    let doc = await User
+      .findOne(query)
+      .lean()
+      .exec();
+
+    if (!doc) return res.sendStatus(404);
+
+    // remove sensitive data
+    delete doc.local['password'];
+    delete doc['__v'];
+    if (!doc.showEmail) {
+      delete doc.local['email'];
+    }
+
+    // skip stats for public if hideStats is true
+    if (doc.hideStats && doc._id.toString() !== req.user._doc._id) {
+      return res.json(doc);
+    }
+
+    doc.meditations = await new ProfileHelper().calculateStats(doc);
+
+    return res.json(doc);
+  } catch (err) {
+    logger.error(err);
+    return res.status(400).send(err);
+  }
+};
+
 export default (app, router) => {
 
   /**
@@ -58,36 +88,26 @@ export default (app, router) => {
    * @apiSuccess {String}     gravatarHash      Hash for Gravatar
    */
   router.get('/api/profile/:id', async (req, res) => {
+    return getUser({ '_id': ObjectId(req.params.id) }, req, res);
+  });
 
-    try {
-      let doc = await User
-        .findOne({
-          '_id': ObjectId(req.params.id)
-        })
-        .lean()
-        .exec();
-
-      if (!doc) return res.sendStatus(404);
-
-      // remove sensitive data
-      delete doc.local['password'];
-      delete doc['__v'];
-      if (!doc.showEmail) {
-        delete doc.local['email'];
-      }
-
-      // skip stats for public if hideStats is true
-      if (doc.hideStats && doc._id.toString() !== req.user._doc._id) {
-        return res.json(doc);
-      }
-
-      doc.meditations = await new ProfileHelper().calculateStats(doc);
-
-      res.json(doc);
-    } catch (err) {
-      logger.error(err);
-      res.status(400).send(err);
-    }
+  /**
+   * @api {get} /api/profile/username/:username Get profile details of a user by username
+   * @apiName ShowProfileByUsername
+   * @apiGroup Profile
+   * @apiDescription Get the profile data of a user.
+   *
+   * @apiSuccess {Object}     local             Details for local authentication
+   * @apiSuccess {String}     local.email       Email address (if public)
+   * @apiSuccess {String}     name              Name
+   * @apiSuccess {String}     description       Profile description
+   * @apiSuccess {String}     website           Website
+   * @apiSuccess {String}     country           Country
+   * @apiSuccess {Object}     meditations       Last week meditation times
+   * @apiSuccess {String}     gravatarHash      Hash for Gravatar
+   */
+  router.get('/api/profile/username/:username', async (req, res) => {
+    return getUser({ 'username': req.params.username }, req, res);
   });
 
   /**

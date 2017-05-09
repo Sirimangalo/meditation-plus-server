@@ -33,7 +33,7 @@ export default (app, router, io, admin) => {
       const result = await User
         .find({
           lastActive: { $gt: Date.now() - 120000 }
-        }, 'name gravatarHash _id lastMeditation country')
+        }, 'name gravatarHash _id lastMeditation country username')
         .lean()
         .exec();
 
@@ -56,6 +56,7 @@ export default (app, router, io, admin) => {
       const result = await User
         .find({
           $or: [
+            {'username': regex},
             {'name': regex},
             {'local.email': regex}
           ]
@@ -77,6 +78,23 @@ export default (app, router, io, admin) => {
     try {
       const result = await User
         .findOne({ _id: req.params.id })
+        .then();
+
+      res.json(result);
+    } catch (err) {
+      res.send(err);
+    }
+  });
+
+   /**
+   * @api {get} /api/user/usernam/:username Get single user by username
+   * @apiName GetUserByUsername
+   * @apiGroup User
+   */
+  router.get('/api/user/username/:username', admin, async (req, res) => {
+    try {
+      const result = await User
+        .findOne({ username: req.params.username })
         .then();
 
       res.json(result);
