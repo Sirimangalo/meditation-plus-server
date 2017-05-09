@@ -136,7 +136,7 @@ describe('Profile Routes', () => {
 
       it('should respond with 404 when profile does not exist (wrong username)', done => {
         randomUser
-        .get(`/api/profile/username/reallydoesnotexist`)
+        .get('/api/profile/username/reallydoesnotexist')
         .expect(404)
         .end(err => done(err));
       });
