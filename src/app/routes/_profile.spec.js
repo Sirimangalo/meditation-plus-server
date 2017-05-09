@@ -160,6 +160,9 @@ describe('Profile Routes', () => {
   });
 
   describe('Testing email and stats availability', () => {
+    randomUser.authorize();
+    user2.authorize();
+
     beforeEach(done => {
       profile.showEmail = false;
       profile.hideStats = true;
