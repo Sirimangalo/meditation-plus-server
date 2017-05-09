@@ -10,9 +10,11 @@ export class AuthedSupertest {
   email;
   role;
   name;
+  username;
 
   constructor(
     name = 'User',
+    username = 'user',
     email = 'user@sirimangalo.org',
     password = 'password',
     role = 'ROLE_USER'
@@ -20,6 +22,7 @@ export class AuthedSupertest {
     this.name = name;
     this.role = role;
     this.email = email;
+    this.username = username;
     this.agent = supertest(app);
     this.cleartextPassword = password;
   }
@@ -27,6 +30,7 @@ export class AuthedSupertest {
   createUser() {
     this.user = new User({
       name: this.name,
+      username: this.username,
       local: {
         email: this.email,
         password: new User().generateHash(this.cleartextPassword)

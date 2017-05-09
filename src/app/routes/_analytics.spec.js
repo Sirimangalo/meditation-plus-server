@@ -7,6 +7,7 @@ const request = supertest(app);
 let user = new AuthedSupertest();
 let admin = new AuthedSupertest(
   'Admin User',
+  'admin',
   'admin@sirimangalo.org',
   'password',
   'ROLE_ADMIN'
