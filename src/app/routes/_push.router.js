@@ -1,55 +1,40 @@
+import User from '../models/user.model.js';
 import PushSubscriptions from '../models/push.model.js';
 
 export default (app, router) => {
   /**
-   * @api {post} /api/push/register Save the browser's (service worker) push subscription in Database
+   * @api {post} /api/push/register Register a new push subscription for an unique endpoint
    * @apiName PushRegister
    * @apiGroup Push
    *
-   * @apiParam {endpoint} string Endpoint URL of subscription
-   * @apiParam {keys} Object Encryption keys for sending messages
+   * @apiParam {Object} Connection data
    */
   router.post('/api/push/register', async (req, res) => {
     try {
-      // Cleanup old (7 days) subscription first of all
-      PushSubscriptions
-        .find({
-          updatedAt: { $lt: Date.now() - 6048e5}
-        })
-        .remove()
-        .exec();
-
       const endpoint = req.body.endpoint ? req.body.endpoint : null;
-      const p256dh = req.body.keys && req.body.keys['p256dh'] ? req.body.keys['p256dh'] : '';
-      const auth = req.body.keys && req.body.keys['auth'] ? req.body.keys['auth'] : '';
+      if (!endpoint) return res.sendStatus(400);
 
-      if (!endpoint) {
-        res.status(400).send();
-      }
+      const user = await User.findOne({ _id : req.user._doc._id });
+      if (!user) return res.sendStatus(403);
 
-      // Check for already existing subscription
-      const subscription = await PushSubscriptions.findOne({
-        endpoint: endpoint
-      });
+      const subscription = JSON.stringify(req.body);
+      const dup = await PushSubscriptions.findOne({ endpoint: endpoint });
 
-      if (subscription) {
-        subscription.update({
-          user: req.user._doc._id,
-          p256dh: p256dh,
-          auth: auth
+      if (dup) {
+        await dup.update({
+          username: user.username,
+          subscription: subscription
         });
       } else {
         await PushSubscriptions.create({
-          user: req.user._doc._id,
+          username: user.username,
           endpoint: endpoint,
-          p256dh: p256dh,
-          auth: auth
+          subscription: subscription
         });
       }
 
-      res.status(200).send();
+      res.sendStatus(204);
     } catch (err) {
-      console.log(err);
       res.status(500).send(err);
     }
   });
