@@ -69,7 +69,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {get} /api/user/:id Get single user
    * @apiName GetUser
    * @apiGroup User
@@ -86,8 +86,8 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
-   * @api {get} /api/user/usernam/:username Get single user by username
+  /**
+   * @api {get} /api/user/username/:username Get single user by username
    * @apiName GetUserByUsername
    * @apiGroup User
    */
@@ -98,6 +98,24 @@ export default (app, router, io, admin) => {
         .then();
 
       res.json(result);
+    } catch (err) {
+      res.send(err);
+    }
+  });
+
+  /**
+   * @api {get} /api/user/mention/:search Get single username by search string
+   * @apiName GetUsernameForMention
+   * @apiGroup User
+   */
+  router.get('/api/user/mention/:search', async (req, res) => {
+    try {
+      const search = req.params.search ? req.params.search : '';
+      const result = await User
+        .findOne({ username: new RegExp('^' + search, 'i') })
+        .then();
+
+      res.json(result ? result.username : '');
     } catch (err) {
       res.send(err);
     }
