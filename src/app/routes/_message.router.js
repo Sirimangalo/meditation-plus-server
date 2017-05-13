@@ -1,6 +1,7 @@
 import Message from '../models/message.model.js';
 let ObjectId = require('mongoose').Types.ObjectId;
 import moment from 'moment';
+import push from '../helper/push.js';
 
 export default (app, router, io) => {
 
@@ -91,8 +92,10 @@ export default (app, router, io) => {
    */
   router.post('/api/message', async (req, res) => {
     try {
+      const messageText = req.body.text ? req.body.text : '';
+
       let message = await Message.create({
-        text: req.body.text,
+        text: messageText,
         user: req.user._doc
       });
 
@@ -114,6 +117,19 @@ export default (app, router, io) => {
         previous: previousMessage,
         current: populated
       });
+
+      // notify possible mentions
+      const mentions = messageText.match(/@\w+/g);
+
+      if (mentions) {
+        mentions.map(mention => push.send(mention.substring(1), {
+          title: 'Message',
+          body: messageText,
+          data: {
+            url: '/home;tab=chat'
+          }
+        }));
+      }
 
       res.json(populated);
     } catch (err) {
