@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
 
 let pushSubscriptionsSchema = mongoose.Schema({
-  user : { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  username : { type: String, required: true },
   endpoint: { type: String, unique: true },
-  p256dh: String,
-  auth: String
+  subscription: { type: String, required: true, unique: true }
 }, {
   timestamps: true
 });
