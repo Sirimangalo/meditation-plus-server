@@ -317,4 +317,25 @@ export default (app, router, io, admin) => {
       res.status(500).send(err);
     }
   });
+
+  /**
+   * @api {get} /api/question/count Get count of unanswered questions
+   * @apiName CountQuestion
+   * @apiGroup Question
+   *
+   * @apiParam {Number} count Number of unanswered questions
+   */
+  router.get('api/question/count', async (req, res) => {
+    try {
+      const count = await Question
+        .find({
+          answered: false
+        })
+        .count();
+
+      res.json(count);
+    } catch (err) {
+      res.sendStatus(500);
+    }
+  });
 };
