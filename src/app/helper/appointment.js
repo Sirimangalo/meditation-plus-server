@@ -1,4 +1,5 @@
 import Appointment from '../models/appointment.model.js';
+import Settings from '../models/settings.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 
@@ -68,6 +69,13 @@ const appointmentHelper = {
           }, {
             $addToSet: { log: now.startOf('day').format() }
           });
+      }
+
+      const settings = await Settings.findOne();
+
+      // apply universal increment to appointment
+      if (settings && settings.appointmentIncrement) {
+        doc.hour += settings.appointmentIncrement;
       }
 
       return doc;
