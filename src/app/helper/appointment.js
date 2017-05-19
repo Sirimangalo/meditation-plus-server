@@ -65,9 +65,9 @@ const appointmentHelper = {
         // afterwards.
         await User
           .findOneAndUpdate({
-            _id: doc.user._id
+            _id: user._id
           }, {
-            $addToSet: { log: now.startOf('day').format() }
+            $addToSet: { appointments: moment.utc().startOf('day').toDate() }
           });
       }
 
@@ -84,7 +84,7 @@ const appointmentHelper = {
     return null;
   },
 
-  anwerer: ['yuttadhammo', 'a1123']
+  answerer: ['yuttadhammo']
 };
 
 export default appointmentHelper;
