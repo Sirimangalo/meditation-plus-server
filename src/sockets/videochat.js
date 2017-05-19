@@ -1,31 +1,5 @@
 import appointHelper from '../app/helper/appointment.js';
 
-/**
- * Modified from http://stackoverflow.com/a/41519537
- * @param  {[type]} room [description]
- * @return {[type]}      [description]
- */
-function getClientsInRoom(room) {
-  // get array of socket ids in this room
-  var socketIds = io.sockets.adapter.rooms[room];
-  var clients = [];
-
-  if (socketIds && socketIds.length > 0) {
-    //socketsCount = socketIds.lenght;
-
-    // push every client to the result array
-    for (var i = 0, len = socketIds.length; i < len; i++) {
-      // check if the socket is not the requesting
-      // socket
-      if (socketIds.sockets[i] != socketId) {
-          clients.push(chatClients[Object.keys(socketIds.sockets)[i]]);
-      }
-    }
-  }
-
-  return clients;
-}
-
 export default (socket, io) => {
 
   const user = () => socket.decoded_token._doc;
@@ -51,9 +25,9 @@ export default (socket, io) => {
     socket.emit('appointment', appointment);
 
     if (join === true && appointment) {
-      socket.join('Videochat');
+      const initiator = (count === 1) && !inRoom();
 
-      const initiator = (count === 1);
+      socket.join('Videochat');
 
       socket.emit('videochat:status', {
         rtcInitiator: initiator
@@ -70,7 +44,7 @@ export default (socket, io) => {
 
       io.to('Videochat').emit('videochat:message', {
         isMeta: true,
-        text: user().name + ' joined the appointment.'
+        text: user().name + ' (@' + user().username + ') joined the appointment.'
       });
     }
   });
@@ -86,16 +60,12 @@ export default (socket, io) => {
       return;
     }
 
-    let status = { connected: false };
+    io.to('Videochat').emit('videochat:status', {
+      connected: false,
+      message: 'Trying to reconnect... Please hold on.',
+      reconnect: true
+    });
 
-    if (members() === 2) {
-      status.message = 'Reconnecting... Please hold on.';
-      status.doConnect = true;
-    } else {
-      status.message = 'Connection interrupted. Waiting for opponent to rejoin.';
-    }
-
-    io.to('Videochat').emit('videochat:status', status);
     io.to('Videochat').emit('videochat:message', {
       isMeta: true,
       text: 'Connection was interrupted.'
