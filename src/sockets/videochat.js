@@ -51,9 +51,7 @@ export default (socket, io) => {
 
   /**
    * The ':reconnect' event is being used when a user disconnects
-   * without reason. It sets the connection status back to
-   *   - 1 if the disconnected user also left the socket room 'Videochat'
-   *   - 2 if the user is still in the socket room 'Videochat'
+   * without reason.
    */
   socket.on('videochat:reconnect', () => {
     if (!inRoom()) {
