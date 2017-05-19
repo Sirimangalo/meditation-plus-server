@@ -25,7 +25,8 @@ let userSchema = mongoose.Schema({
   verified: { type: Boolean, default: false },
   verifyToken: String,
   recoverUntil: Date,
-  subscribeTestimonials: Boolean // relevant for admins only
+  subscribeTestimonials: Boolean, // relevant for admins only
+  appointments: [{ type: Date }]
 });
 
 userSchema.methods.generateHash = function(password) {
