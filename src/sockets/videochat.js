@@ -29,17 +29,16 @@ function getClientsInRoom(room) {
 export default (socket, io) => {
 
   const user = () => socket.decoded_token._doc;
-  const members = () => io.sockets.adapter.rooms['AppointmentCall']
-    ? io.sockets.adapter.rooms['AppointmentCall'].length
+  const members = () => io.sockets.adapter.rooms['Videochat']
+    ? io.sockets.adapter.rooms['Videochat'].length
     : 0;
-  const inRoom = () => io.sockets.adapter.sids[socket.id]['AppointmentCall'] ? true : false;
+  const inRoom = () => io.sockets.adapter.sids[socket.id]['Videochat'] ? true : false;
 
   /**
-   * The ':join' event is being used for
-   *   - authorizing an user to join the appointment
-   *   - actually joining the appointment
+   * Find an appointment the user is allowed to join right now.
+   * Join the appointment if parameter is true.
    */
-  socket.on('videochat:join', async appointmentOnly => {
+  socket.on('appointment', async join => {
     const count = members();
 
     // only allow max. 2 participants
@@ -49,11 +48,10 @@ export default (socket, io) => {
 
     // try to find an appointment that is due right now that the user can join
     const appointment = await appointHelper.getNow(user(), count === 1);
-
     socket.emit('appointment', appointment);
 
-    if (appointment && appointmentOnly !== true) {
-      socket.join('AppointmentCall');
+    if (join === true && appointment) {
+      socket.join('Videochat');
 
       const initiator = (count === 1);
 
@@ -61,18 +59,16 @@ export default (socket, io) => {
         rtcInitiator: initiator
       });
 
-      socket.broadcast.to('AppointmentCall').emit('videochat:status', {
+      socket.broadcast.to('Videochat').emit('videochat:status', {
         rtcInitiator: !initiator
       });
 
-      io.to('AppointmentCall').emit('videochat:status', {
+      io.to('Videochat').emit('videochat:status', {
         doConnect: initiator,
         message: initiator ? 'Connecting.' : 'Waiting for opponent.'
       });
-      if (count === 1) {
-      }
 
-      io.to('AppointmentCall').emit('videochat:message', {
+      io.to('Videochat').emit('videochat:message', {
         isMeta: true,
         text: user().name + ' joined the appointment.'
       });
@@ -82,15 +78,14 @@ export default (socket, io) => {
   /**
    * The ':reconnect' event is being used when a user disconnects
    * without reason. It sets the connection status back to
-   *   - 1 if the disconnected user also left the socket room 'AppointmentCall'
-   *   - 2 if the user is still in the socket room 'AppointmentCall'
+   *   - 1 if the disconnected user also left the socket room 'Videochat'
+   *   - 2 if the user is still in the socket room 'Videochat'
    */
   socket.on('videochat:reconnect', () => {
     if (!inRoom()) {
       return;
     }
 
-    console.log('reconnect');
     let status = { connected: false };
 
     if (members() === 2) {
@@ -100,8 +95,8 @@ export default (socket, io) => {
       status.message = 'Connection interrupted. Waiting for opponent to rejoin.';
     }
 
-    io.to('AppointmentCall').emit('videochat:status', status);
-    io.to('AppointmentCall').emit('videochat:message', {
+    io.to('Videochat').emit('videochat:status', status);
+    io.to('Videochat').emit('videochat:message', {
       isMeta: true,
       text: 'Connection was interrupted.'
     });
@@ -118,7 +113,7 @@ export default (socket, io) => {
 
     const userNow = user();
 
-    io.to('AppointmentCall').emit('videochat:message', {
+    io.to('Videochat').emit('videochat:message', {
       isMeta: isMeta,
       user: {
         _id: userNow._id,
@@ -137,7 +132,7 @@ export default (socket, io) => {
       return;
     }
 
-    socket.broadcast.to('AppointmentCall').emit('videochat:signal', data);
+    socket.broadcast.to('Videochat').emit('videochat:signal', data);
   });
 
   /**
@@ -148,8 +143,8 @@ export default (socket, io) => {
       return;
     }
 
-    socket.leave('AppointmentCall');
-    io.to('AppointmentCall').emit('videochat:status', {
+    socket.leave('Videochat');
+    io.to('Videochat').emit('videochat:status', {
       doEnd: true
     });
   });
