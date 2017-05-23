@@ -190,6 +190,7 @@ export default (app, router, io) => {
             title: 'Walking done'
           }), walking * 60000);
         }
+
         if (sitting) {
           setTimeout(() => push.send(user.username, {
             title: 'Sitting done'

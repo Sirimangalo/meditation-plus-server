@@ -130,7 +130,7 @@ export default (app, router, io) => {
             ? { $exists: true, $ne: user.username }
             : { $in: mentions.map(s => s.substring(1))}
         }, {
-          title: 'Message',
+          title: 'New Message',
           body: messageText,
           data: {
             url: '/home;tab=chat'
