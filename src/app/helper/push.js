@@ -1,7 +1,6 @@
 import PushSubscriptions from '../models/push.model.js';
 import User from '../models/user.model.js';
 import webpush from 'web-push';
-import { logger } from './logger.js';
 
 const push = {
 
