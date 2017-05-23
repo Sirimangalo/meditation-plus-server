@@ -140,7 +140,6 @@ export default (app, router, io) => {
 
       res.json(populated);
     } catch (err) {
-      console.log(err);
       res
         .status(err.name === 'ValidationError' ? 400 : 500)
         .send(err);
