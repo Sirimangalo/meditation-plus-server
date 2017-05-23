@@ -141,8 +141,8 @@ export default (app, router, io, admin) => {
         'name gravatarHash country lastMeditation'
       ).execPopulate();
 
-      // sending broadcast WebSocket question
-      io.sockets.emit('question', 'no content');
+      // sending broadcast WebSocket question & send update for question counter
+      io.sockets.emit('question', 1);
 
       res.sendStatus(204);
     } catch (err) {
@@ -183,7 +183,7 @@ export default (app, router, io, admin) => {
       await entry.save();
 
       // sending broadcast WebSocket question
-      io.sockets.emit('question', 'no content');
+      io.sockets.emit('question', 0);
 
       res.sendStatus(204);
     } catch (err) {
@@ -215,8 +215,8 @@ export default (app, router, io, admin) => {
       entry.answeredAt = new Date();
       await entry.save();
 
-      // sending broadcast WebSocket question
-      io.sockets.emit('question', 'no content');
+      // sending broadcast WebSocket question & send update for question counter
+      io.sockets.emit('question', -1);
 
       res.sendStatus(204);
     } catch (err) {
@@ -252,7 +252,7 @@ export default (app, router, io, admin) => {
       await entry.save();
 
       // sending broadcast WebSocket question
-      io.sockets.emit('question', 'no content');
+      io.sockets.emit('question', 0);
 
       res.sendStatus(204);
     } catch (err) {
@@ -281,7 +281,7 @@ export default (app, router, io, admin) => {
       await entry.save();
 
       // sending broadcast WebSocket question
-      io.sockets.emit('question', 'no content');
+      io.sockets.emit('question', 0);
 
       res.sendStatus(204);
     } catch (err) {
@@ -309,8 +309,8 @@ export default (app, router, io, admin) => {
 
       await Question.remove({ _id: req.params.id }).exec();
 
-      // sending broadcast WebSocket question
-      io.sockets.emit('question', 'no content');
+      // sending broadcast WebSocket question & send update for question counter
+      io.sockets.emit('question', -1);
 
       res.sendStatus(204);
     } catch (err) {
@@ -325,7 +325,7 @@ export default (app, router, io, admin) => {
    *
    * @apiParam {Number} count Number of unanswered questions
    */
-  router.get('api/question/count', async (req, res) => {
+  router.get('/api/question/count', async (req, res) => {
     try {
       const count = await Question
         .find({
