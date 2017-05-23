@@ -122,24 +122,25 @@ export default (app, router, io) => {
       const mentions = [...new Set(messageText.match(/@\w+/g))];
 
       if (mentions) {
-        const payload = {
+        const user = req.user._doc;
+
+        push.send({
+          'notifications.message': true,
+          username: mentions.indexOf('@all') > -1 && user && user.role && user.role === 'ROLE_ADMIN'
+            ? { $exists: true, $ne: user.username }
+            : { $in: mentions.map(s => s.substring(1))}
+        }, {
           title: 'Message',
           body: messageText,
           data: {
             url: '/home;tab=chat'
           }
-        };
-
-        push.send({
-          notifications: { message: true },
-          username: mentions.indexOf('@all') > -1 && req.body._doc.role === 'ROLE_ADMIN'
-            ? { $exists: true, $ne: req.body._doc.username }
-            : { $in: mentions.map(s => s.substring(1))}
-        }, data);
+        });
       }
 
       res.json(populated);
     } catch (err) {
+      console.log(err);
       res
         .status(err.name === 'ValidationError' ? 400 : 500)
         .send(err);

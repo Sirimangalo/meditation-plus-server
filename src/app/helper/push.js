@@ -1,22 +1,36 @@
 import PushSubscriptions from '../models/push.model.js';
 import User from '../models/user.model.js';
 import webpush from 'web-push';
+import { logger } from './logger.js';
 
 const push = {
+
+  /**
+   * Send a Push message out to a user.
+   *
+   * @param  username   either username or query to find user(s)
+   * @param  data       payload for notification
+   */
   send: (username, data) => {
+    if (!data) {
+      return;
+    }
+
     if (typeof username === 'string') {
+      // find all subscribed devices of the user
+      // and send notification.
       PushSubscriptions
         .find({
           username: username
         })
-        .then(subs => subs.map(sub => {
-          webpush.sendNotification(JSON.parse(sub.subscription), JSON.stringify(data));
-        }));
+        .then(subs => subs.map(sub =>
+          webpush.sendNotification(JSON.parse(sub.subscription), JSON.stringify(data))
+        ));
     } else if (typeof username === 'object') {
-      // interpret as query, run recursively
+      // interpret as query and run push.send() recursively
       User
         .find(username)
-        .map(user => push.send(user, data));
+        .then(users => users.map(user => push.send(user.username, data)));
     }
   }
 };
