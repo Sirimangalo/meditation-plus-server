@@ -133,7 +133,7 @@ export default (app, router, io) => {
         push.send({
           notifications: { message: true },
           username: mentions.indexOf('@all') > -1 && req.body._doc.role === 'ROLE_ADMIN'
-            ? { $exists: true, $ne: null }
+            ? { $exists: true, $ne: req.body._doc.username }
             : { $in: mentions.map(s => s.substring(1))}
         }, data);
       }
