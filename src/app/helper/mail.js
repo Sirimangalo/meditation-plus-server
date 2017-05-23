@@ -94,7 +94,9 @@ export default {
     User
       .find({
         role: 'ROLE_ADMIN',
-        subscribeTestimonials: true
+        notifications: {
+          testimonial: true
+        }
       })
       .then(res => {
         res.map(user => {
