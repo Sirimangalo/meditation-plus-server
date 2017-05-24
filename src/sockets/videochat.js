@@ -24,8 +24,8 @@ export default (socket, io) => {
     const appointment = await appointHelper.getNow(user(), count === 1);
     socket.emit('appointment', appointment);
 
-    if (join === true && appointment) {
-      const initiator = (count === 1) && !inRoom();
+    if (join === true && appointment && !inRoom()) {
+      const initiator = (count === 1);
 
       socket.join('Videochat');
 
