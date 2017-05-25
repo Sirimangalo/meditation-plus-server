@@ -77,7 +77,7 @@ export default (app, router, io) => {
 
       messages.reverse();
 
-      res.json(messages);
+      res.json(req.body.countOnly && req.body.countOnly === true ? messages.length : messages);
     } catch (err) {
       res.status(500).send(err);
     }
