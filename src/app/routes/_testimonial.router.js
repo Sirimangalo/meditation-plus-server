@@ -23,7 +23,10 @@ export default (app, router, io, admin) => {
         .then();
 
       testimonials = testimonials.filter(test => {
-        if (test.user._id == userId) {
+        if (!test.user) {
+          test.user = { name : 'Deleted User' };
+        }
+        if (test.user && test.user._id == userId) {
           allowUser = false;
         }
 
