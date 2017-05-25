@@ -4,7 +4,7 @@ let questionSchema = mongoose.Schema({
   text : { type: String, required: true, maxlength: 1000 },
   user : { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   broadcast : { type: mongoose.Schema.Types.ObjectId, ref: 'Broadcast' },
-  answered: Boolean,
+  answered: { type: Boolean, default: false, required: true },
   answeringAt: Date,
   answeredAt: Date,
   videoUrl: String,
