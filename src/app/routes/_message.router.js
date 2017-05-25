@@ -119,16 +119,23 @@ export default (app, router, io) => {
       });
 
       // notify possible mentions
-      const mentions = messageText.match(/@\w+/g);
+      const mentions = [...new Set(messageText.match(/@\w+/g))];
 
       if (mentions) {
-        mentions.map(mention => push.send(mention.substring(1), {
-          title: 'Message',
+        const user = req.user._doc;
+
+        push.send({
+          'notifications.message': true,
+          username: mentions.indexOf('@all') > -1 && user && user.role && user.role === 'ROLE_ADMIN'
+            ? { $exists: true, $ne: user.username }
+            : { $in: mentions.map(s => s.substring(1))}
+        }, {
+          title: 'New Message',
           body: messageText,
           data: {
             url: '/home;tab=chat'
           }
-        }));
+        });
       }
 
       res.json(populated);

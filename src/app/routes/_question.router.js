@@ -2,6 +2,7 @@ import Question from '../models/question.model.js';
 import Broadcast from '../models/broadcast.model.js';
 import youtubeHelper from '../helper/youtube.js';
 import { logger } from '../helper/logger.js';
+import push from '../helper/push.js';
 
 export default (app, router, io, admin) => {
 
@@ -217,6 +218,17 @@ export default (app, router, io, admin) => {
 
       // sending broadcast WebSocket question & send update for question counter
       io.sockets.emit('question', -1);
+
+      // send push message to author of the question
+      push.send({
+        _id: entry.user
+      }, {
+        title: 'Question Answered',
+        body: 'A question you have asked was answered just now.',
+        data: {
+          url: '/home;tab=ask'
+        }
+      });
 
       res.sendStatus(204);
     } catch (err) {
