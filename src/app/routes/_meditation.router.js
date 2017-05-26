@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import moment from 'moment';
 import timezone from '../helper/timezone.js';
 import { logger } from '../helper/logger.js';
+import push from '../helper/push.js';
 
 export default (app, router, io) => {
 
@@ -181,6 +182,21 @@ export default (app, router, io) => {
 
       // sending broadcast WebSocket meditation
       io.sockets.emit('meditation', 'no content');
+
+      // setup PUSH notification if allowed
+      if (user.notifications.meditation) {
+        if (walking) {
+          setTimeout(() => push.send(user.username, {
+            title: 'Walking done'
+          }), walking * 60000);
+        }
+
+        if (sitting) {
+          setTimeout(() => push.send(user.username, {
+            title: 'Sitting done'
+          }), (walking + sitting) * 60000);
+        }
+      }
 
       res.json(created);
     } catch (err) {
