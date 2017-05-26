@@ -3,6 +3,7 @@ import mongooseConf from '../config/mongoose.conf.js';
 import {validateEnvVariables} from '../config/env.conf.js';
 import Broadcast from '../app/models/broadcast.model.js';
 import youtubeHelper from '../app/helper/youtube.js';
+import {logger} from '../app/helper/logger.js';
 
 validateEnvVariables();
 mongooseConf(mongoose);
@@ -24,7 +25,7 @@ const checkBroadcastLink = async (broadcast, currentTry = 1) => {
   const maxTries = 5;
   const findBroadcast = await youtubeHelper.findBroadcastURL(broadcast);
 
-  console.log('Trying to catch video URL (' + currentTry + '/' + maxTries + ')');
+  logger.info('Trying to catch video URL (' + currentTry + '/' + maxTries + ')');
 
   if (findBroadcast.items && findBroadcast.items.length !== 0) {
     broadcast.videoUrl = 'https://youtu.be/' + findBroadcast.items[0].id.videoId;
@@ -52,7 +53,7 @@ const updateBroadcast = async () => {
     });
 
   if (broadcast) {
-    console.log('Updating broadcast end date/time');
+    logger.info('Updating broadcast end date/time');
     broadcast.ended = new Date();
     await broadcast.save();
   }

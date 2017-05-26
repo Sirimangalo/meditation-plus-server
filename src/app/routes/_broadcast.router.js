@@ -80,6 +80,16 @@ export default (app, router, admin) => {
     try {
       await Broadcast.create(req.body);
 
+      // Notify users
+      push.send({
+        'notifications.livestream': true
+      }, {
+        title: 'Livestream starting now',
+        data: {
+          url: '/live'
+        }
+      });
+
       res.sendStatus(201);
     } catch (err) {
       res
