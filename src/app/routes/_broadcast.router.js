@@ -1,5 +1,6 @@
 import Broadcast from '../models/broadcast.model.js';
 import { logger } from '../helper/logger.js';
+import push from '../helper/push.js';
 
 export default (app, router, admin) => {
 
@@ -79,6 +80,16 @@ export default (app, router, admin) => {
   router.post('/api/broadcast', admin, async (req, res) => {
     try {
       await Broadcast.create(req.body);
+
+      // Notify users
+      push.send({
+        'notifications.livestream': true
+      }, {
+        title: 'Livestream starting now',
+        data: {
+          url: '/live'
+        }
+      });
 
       res.sendStatus(201);
     } catch (err) {
