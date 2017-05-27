@@ -231,7 +231,7 @@ export default (app, router, passport, admin) => {
         return res.status(400).send('Invalid email or username.');
       }
 
-      let user = await User.findOne(
+      let user = await User.findOne({
         $or: [
           {'local.email': email},
           {'username': email}
