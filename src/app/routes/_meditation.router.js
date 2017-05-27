@@ -187,13 +187,17 @@ export default (app, router, io) => {
       if (user.notifications.meditation) {
         if (walking) {
           setTimeout(() => push.send(user.username, {
-            title: 'Walking done'
+            title: 'Walking done',
+            meditationAlarm: true,
+            vibrate: [100, 100]
           }), walking * 60000);
         }
 
         if (sitting) {
           setTimeout(() => push.send(user.username, {
-            title: 'Sitting done'
+            title: 'Sitting done',
+            meditationAlarm: true,
+            vibrate: [100, 100]
           }), (walking + sitting) * 60000);
         }
       }
