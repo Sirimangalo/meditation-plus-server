@@ -33,7 +33,7 @@ const push = {
         .find(username)
         .then(users => users.map(user => {
           // make notification silent if user is in meditation session
-          data.silent = data.meditationAlarm === true || now <= user.lastMeditation;
+          data.silent = !(data.meditationAlarm === true || now > user.lastMeditation);
 
           push.send(user.username, data);
         }));
