@@ -26,10 +26,17 @@ const push = {
           webpush.sendNotification(JSON.parse(sub.subscription), JSON.stringify(data))
         ));
     } else if (typeof username === 'object') {
+      const now = Date.now();
+
       // interpret as query and run push.send() recursively
       User
         .find(username)
-        .then(users => users.map(user => push.send(user.username, data)));
+        .then(users => users.map(user => {
+          // make notification silent if user is in meditation session
+          data.silent = !(data.meditationAlarm === true || now > user.lastMeditation);
+
+          push.send(user.username, data);
+        }));
     }
   }
 };
