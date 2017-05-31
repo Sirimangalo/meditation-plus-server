@@ -26,6 +26,8 @@ export default (io) => {
       .sort('-createdAt')
       .then();
 
+    socket.on('message', () => io.emit('message'));
+
     socket.emit('connection', { latestMessage });
 
     socket.on('disconnect', () => {
