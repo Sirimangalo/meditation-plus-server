@@ -228,15 +228,18 @@ export default (app, router, passport, admin) => {
       const email = req.body.email ? req.body.email : null;
 
       if (!email) {
-        return res.status(400).send('Invalid email.');
+        return res.status(400).send('Invalid email or username.');
       }
 
       let user = await User.findOne({
-        'local.email': email
+        $or: [
+          {'local.email': email},
+          {'username': email}
+        ]
       });
 
       if (!user || !user.verified) {
-        return res.status(400).send('There is no user with this email.');
+        return res.status(400).send('There is no user with this username or email.');
       }
 
       // Regenerate user's token & activate password reset for 48 hours
