@@ -26,7 +26,7 @@ const push = {
           webpush.sendNotification(JSON.parse(sub.subscription), JSON.stringify(data))
         ));
     } else if (typeof username === 'object') {
-      const now = Date.now();
+      const now = new Date();
       // prevent wrong date comparison below if milliseconds matter
       now.setSeconds(now.getSeconds() - 3);
 
@@ -36,8 +36,8 @@ const push = {
         .then(users => users.map(user => {
           // if the user is in a meditation session, only let the alarm through.
           // But if he's not, then don't let the alarm through (caught a stopped session).
-          if (data.meditationAlarm === true && now <= user.lastMeditation
-            || data.meditationAlarm !== true && now >= user.lastMeditation) {
+          // The logical condition is like !(A xor B)
+          if ((data.meditationAlarm === true) === (now <= user.lastMeditation)) {
             push.send(user.username, data);
           }
         }));

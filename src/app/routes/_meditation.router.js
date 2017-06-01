@@ -186,7 +186,9 @@ export default (app, router, io) => {
       // setup PUSH notification if allowed
       if (user.notifications.meditation) {
         if (walking) {
-          setTimeout(() => push.send(user.username, {
+          setTimeout(() => push.send({
+            _id: user._id
+          }, {
             title: 'Walking done',
             meditationAlarm: true,
             vibrate: [100, 100]
@@ -194,7 +196,9 @@ export default (app, router, io) => {
         }
 
         if (sitting) {
-          setTimeout(() => push.send(user.username, {
+          setTimeout(() => push.send({
+            _id: user._id
+          }, {
             title: 'Sitting done',
             meditationAlarm: true,
             vibrate: [100, 100]
@@ -250,6 +254,13 @@ export default (app, router, io) => {
         meditation.end = Date.now();
         await meditation.save();
       }
+
+      // update user's last meditation end to now
+      User.findOneAndUpdate({
+        _id: req.user._doc._id
+      }, {
+        lastMeditation: Date.now()
+      }).exec();
 
       // sending broadcast WebSocket meditation
       io.sockets.emit('meditation', 'no content');
