@@ -27,7 +27,8 @@ const push = {
         ));
     } else if (typeof username === 'object') {
       const now = new Date();
-      // prevent wrong date comparison below if milliseconds matter
+      // prevent incorrect date comparison (for performance related differences in milliseconds)
+      // to cause the meditation alarm to not pass.
       now.setSeconds(now.getSeconds() - 3);
 
       // interpret as query and run push.send() recursively
@@ -37,7 +38,9 @@ const push = {
           // if the user is in a meditation session, only let the alarm through.
           // But if he's not, then don't let the alarm through (caught a stopped session).
           // The logical condition is like !(A xor B)
+          console.log('MAYBE PUSH');
           if ((data.meditationAlarm === true) === (now <= user.lastMeditation)) {
+            console.log('PUSH');
             push.send(user.username, data);
           }
         }));
