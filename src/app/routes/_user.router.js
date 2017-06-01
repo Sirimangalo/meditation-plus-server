@@ -30,9 +30,15 @@ export default (app, router, io, admin) => {
    */
   router.get('/api/user/online', async (req, res) => {
     try {
+      const userIds = Object.keys(io.sockets.sockets)
+        .map(s => io.sockets.sockets[s].decoded_token ?
+          io.sockets.sockets[s].decoded_token._doc._id
+          : null
+        );
+
       const result = await User
         .find({
-          lastActive: { $gt: Date.now() - 120000 }
+          _id: { $in: userIds }
         }, 'name gravatarHash _id lastMeditation country username')
         .lean()
         .exec();
