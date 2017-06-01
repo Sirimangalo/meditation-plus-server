@@ -27,12 +27,17 @@ const push = {
         ));
     } else if (typeof username === 'object') {
       const now = Date.now();
+      // prevent wrong date comparison below if milliseconds matter
+      now.setSeconds(now.getSeconds() - 3);
 
       // interpret as query and run push.send() recursively
       User
         .find(username)
         .then(users => users.map(user => {
-          if (data.meditationAlarm === true || now > user.lastMeditation) {
+          // if the user is in a meditation session, only let the alarm through.
+          // But if he's not, then don't let the alarm through (caught a stopped session).
+          if (data.meditationAlarm === true && now <= user.lastMeditation
+            || data.meditationAlarm !== true && now >= user.lastMeditation) {
             push.send(user.username, data);
           }
         }));
