@@ -31,7 +31,7 @@ let userSchema = mongoose.Schema({
     question: { type: Boolean, default: true },
     testimonial: Boolean, // relevant for admins only
     livestream: Boolean
-  }
+  },
   appointments: [{ type: Date }]
 });
 
