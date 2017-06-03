@@ -10,15 +10,9 @@ import moment from 'moment-timezone';
  * @return {Number}        Time as Number
  */
 function timeToNumber(time): Number {
-  let res = 0;
-
-  if (time instanceof Date) {
-    res = time.getHours() * 100 + time.getMinutes();
-  } else if (time instanceof moment) {
-    res = time.hours() * 100 + time.minutes();
-  }
-
-  return res;
+  return time instanceof Date
+    ? time.getHours() * 100 + time.getMinutes()
+    : (time instanceof moment ? time.hours() * 100 + time.minutes() : 0);
 }
 
 const appointmentHelper = {
@@ -28,18 +22,23 @@ const appointmentHelper = {
    * join right now. For regular users this means at
    * the time of their booked appointment (with a 5 minute
    * tolerance). For admins marked as teacher, it means
-   * 5 minutes before the appointment starts or 25 minutes
-   * after the appointment was scheduled.
+   * within the timespan of 5 minutes before any appointment
+   * starts and 25 minutes after it was scheduled.
    *
    * @param  {Object}  user      User that needs authorization
-   * @param  {Boolean} reconnect If set to true it doesn't check
-   *                             the time for regular users
-   * @return                     the appointment object or false
+   * @param  {Boolean} reconnect If set to true, the time tolarance
+   *                             for regular users is the same as for
+   *                             admins.
+   *
+   * @return                     the appointment object
    */
   getNow: async (user, reconnect = false) => {
     if (!user) return null;
 
+    // appointments are formatted in this timezone
     const now = moment.tz('America/Toronto');
+
+    // find any appointment for right now
     const doc = await Appointment
         .findOne({
           weekDay: now.weekday(),
@@ -52,13 +51,13 @@ const appointmentHelper = {
         .populate('user', 'name gravatarHash')
         .exec();
 
+    // check if user is admin and marked as teacher
+    const isTeacher = user.role === 'ROLE_ADMIN' && user.username === 'yuttadhammo' ;
 
-    const isAnswerer = user.role === 'ROLE_ADMIN' && appointmentHelper.answerer.indexOf(user.username) > -1;
-
-    if (doc && (isAnswerer || doc.user._id.toString() === user._id &&
+    if (doc && (isTeacher || doc.user._id.toString() === user._id &&
       (reconnect || doc.hour >= timeToNumber(now.clone().subtract(5, 'minutes'))))) {
 
-      if (!isAnswerer && !reconnect) {
+      if (!isTeacher && !reconnect) {
         // register the user's request to initiate an appointment.
         // Use 'await' in order to not confuse the count of
         // the appointments before this update with the count
@@ -82,9 +81,7 @@ const appointmentHelper = {
     }
 
     return null;
-  },
-
-  answerer: ['yuttadhammo']
+  }
 };
 
 export default appointmentHelper;
