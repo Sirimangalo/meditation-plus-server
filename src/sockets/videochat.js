@@ -22,35 +22,37 @@ export default (socket, io) => {
   socket.on('appointment', async join => {
     // try to find an appointment that is due right now that the user can join
     const roomLen = roomLength();
-    const appointment = await appointHelper.getNow(user(), roomLen === 1);
+    const userNow = user();
+
+    // if an authorized user is already in the room 'Videochat', then this means that a
+    // reconnect is given (-> second parameter).
+    const appointment = await appointHelper.getNow(userNow, roomLen === 1 && !inRoom());
     socket.emit('appointment', appointment);
 
+    // join appointment if requested and possible
     if (join === true && appointment && roomLen < 2 && !inRoom()) {
-      const isInitiator = (roomLen === 1);
-
       // let socket join the room 'Videochat' where the exchanging of data and messages happens
       socket.join('Videochat');
 
-      // let client know whether he has the initiator role (technical info for WebRTC)
-      socket.emit('videochat:status', {
-        rtcInitiator: isInitiator
-      });
+      // use an abitrary condition for determining the roles for WebRTC
+      const isInitiator = (roomLen > 0);
 
-      // let other party in room know the opposite role. Only has an effect if roomLen > 1
-      socket.broadcast.to('Videochat').emit('videochat:status', {
-        rtcInitiator: !isInitiator
-      });
+      // let client know whether he has the initiator role (technical info for WebRTC)
+      socket.emit('videochat:status', { rtcInitiator: isInitiator });
+
+      // let other party in room know the opposite role.
+      socket.broadcast.to('Videochat').emit('videochat:status', { rtcInitiator: !isInitiator });
 
       // send status message and signal clients to connect now if everybody is there
       io.to('Videochat').emit('videochat:status', {
         doConnect: isInitiator,
-        message: isInitiator ? 'Connecting.' : 'Waiting for opponent.'
+        message: isInitiator ? 'Connecting' : 'Waiting for opponent'
       });
 
-      // send info message about joining user in chat
+      // send info message about joined user in chat
       io.to('Videochat').emit('videochat:message', {
         isMeta: true,
-        text: user().name + ' (@' + user().username + ') joined the appointment.'
+        text: userNow.name + ' (@' + userNow.username + ') joined the appointment.'
       });
     }
   });
@@ -78,13 +80,13 @@ export default (socket, io) => {
 
   /**
    * The ':message' event is being used for sending and receiving
-   * text messages between the two roomLength of the live appointment call.
+   * text messages between the two participants of the live appointment call.
    *
    * @param  {String} message       Message to deliver
    * @param  {String} isMeta        Whether the message is a status text not from the user
    */
   socket.on('videochat:message', (message, isMeta) => {
-    if (!inRoom() || message.length > 500) {
+    if (!inRoom() || !message || message.length > 500) {
       return;
     }
 
