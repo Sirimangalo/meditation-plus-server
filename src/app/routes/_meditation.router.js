@@ -190,9 +190,8 @@ export default (app, router, io) => {
             _id: user._id
           }, {
             title: 'Walking done',
-            meditationAlarm: true,
             vibrate: [100, 100]
-          }), walking * 60000);
+          }, true), walking * 60000);
         }
 
         if (sitting) {
@@ -200,9 +199,8 @@ export default (app, router, io) => {
             _id: user._id
           }, {
             title: 'Sitting done',
-            meditationAlarm: true,
             vibrate: [100, 100]
-          }), (walking + sitting) * 60000);
+          }, true), (walking + sitting) * 60000);
         }
       }
 
