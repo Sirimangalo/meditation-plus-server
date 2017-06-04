@@ -38,24 +38,44 @@ const appointmentHelper = {
     // appointments are formatted in this timezone
     const now = moment.tz('America/Toronto');
 
+    // load global increment for appointments
+    const settings = await Settings.findOne();
+    const increment = settings && settings.appointmentIncrement
+      ? settings.appointmentIncrement
+      : 0;
+
     // find any appointment for right now
     const doc = await Appointment
         .findOne({
           weekDay: now.weekday(),
           hour: {
-            $lte: timeToNumber(now.clone().add(5, 'minutes')),
-            $gte: timeToNumber(now.clone().subtract(25, 'minutes'))
+            $lte: timeToNumber(
+              // 5 minutes before appointment
+              now.clone().add(5 + 60 * increment , 'minutes')
+            ),
+            $gte: timeToNumber(
+              // 25 minutes after appointment
+              now.clone().subtract(25 + 60 * increment, 'minutes')
+            )
           },
           user: { $exists: true, $ne: null }
         })
         .populate('user', 'name gravatarHash')
         .exec();
 
-    // check if user is admin and marked as teacher
-    const isTeacher = user.role === 'ROLE_ADMIN' && user.username === 'yuttadhammo' ;
+    if (!doc) {
+      return null;
+    }
 
-    if (doc && (isTeacher || doc.user._id.toString() === user._id &&
-      (reconnect || doc.hour >= timeToNumber(now.clone().subtract(5, 'minutes'))))) {
+    // check if user is admin and marked as teacher
+    const isTeacher = user.role === 'ROLE_ADMIN' && user.username === 'yuttadhammo';
+    // check if appointment is the one of requested user
+    const isOwnAppointment = doc.user._id.toString() === user._id.toString()
+    // check whether the time now is before 10 minutes after the appointment starts
+    const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10 + 60 * increment, 'minutes'));
+
+
+    if (doc && (isTeacher || isOwnAppointment && (reconnect || isAppOnTime))) {
 
       if (!isTeacher && !reconnect) {
         // register the user's request to initiate an appointment.
@@ -68,13 +88,6 @@ const appointmentHelper = {
           }, {
             $addToSet: { appointments: moment.utc().startOf('day').toDate() }
           });
-      }
-
-      const settings = await Settings.findOne();
-
-      // apply universal increment to appointment
-      if (settings && settings.appointmentIncrement) {
-        doc.hour += settings.appointmentIncrement;
       }
 
       return doc;

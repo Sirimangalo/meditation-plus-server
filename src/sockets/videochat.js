@@ -1,4 +1,5 @@
 import appointHelper from '../app/helper/appointment.js';
+import push from '../app/helper/push.js';
 
 export default (socket, io) => {
 
@@ -29,10 +30,23 @@ export default (socket, io) => {
     const appointment = await appointHelper.getNow(userNow, roomLen === 1 && !inRoom());
     socket.emit('appointment', appointment);
 
+
     // join appointment if requested and possible
     if (join === true && appointment && roomLen < 2 && !inRoom()) {
       // let socket join the room 'Videochat' where the exchanging of data and messages happens
       socket.join('Videochat');
+
+      if (roomLen === 0) {
+        // notify other participant
+        push.send({
+          'notifications.appointment': true,
+          _id: userNow.username === 'yuttadhammo' ? appointment.user : { $exists: true },
+          username: userNow._id.toString() === appointment.user.toString() ? 'yuttadhammo' : { $exists: true }
+        }, {
+          title: 'Appointment Call Incoming',
+          body: 'Please click on this notification or go to the schedule page'
+        });
+      }
 
       // use an abitrary condition for determining the roles for WebRTC
       const isInitiator = (roomLen > 0);
@@ -85,7 +99,7 @@ export default (socket, io) => {
    * @param  {String} message       Message to deliver
    * @param  {String} isMeta        Whether the message is a status text not from the user
    */
-  socket.on('videochat:message', (message, isMeta) => {
+  socket.on('videochat:message', message => {
     if (!inRoom() || !message || message.length > 500) {
       return;
     }
@@ -93,13 +107,20 @@ export default (socket, io) => {
     const userNow = user();
 
     io.to('Videochat').emit('videochat:message', {
-      isMeta: isMeta,
       user: {
         _id: userNow._id,
         name: userNow.name
       },
-      text: (isMeta ? userNow.name + ' ' : '') + message
+      text: message
     });
+  });
+
+  socket.on('videochat:toggledMedia', (audio, video) => {
+    if (!inRoom()) {
+      return;
+    }
+
+    socket.broadcast.to('Videochat').emit('videochat:toggledMedia', { audio, video });
   });
 
   /**
