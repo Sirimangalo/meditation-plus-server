@@ -44,7 +44,10 @@ export default (socket, io) => {
           username: userNow._id.toString() === appointment.user.toString() ? 'yuttadhammo' : { $exists: true }
         }, {
           title: 'Appointment Call Incoming',
-          body: 'Please click on this notification or go to the schedule page'
+          body: 'Please click on this notification or go to the schedule page',
+          data: {
+            url: '/schedule/call'
+          }
         });
       }
 
@@ -109,7 +112,9 @@ export default (socket, io) => {
     io.to('Videochat').emit('videochat:message', {
       user: {
         _id: userNow._id,
-        name: userNow.name
+        name: userNow.name,
+        username: userNow.username,
+        gravatarHash: userNow.gravatarHash
       },
       text: message
     });
