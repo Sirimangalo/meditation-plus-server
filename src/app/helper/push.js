@@ -16,7 +16,6 @@ const push = {
     }
 
     if (typeof username === 'string') {
-      console.log(username, data);
       // find all subscribed devices of the user
       // and send notification.
       PushSubscriptions
