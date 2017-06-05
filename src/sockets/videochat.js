@@ -38,10 +38,11 @@ export default (socket, io) => {
 
       if (roomLen === 0) {
         // notify other participant
+        const isAppHolder = userNow._id.toString() === appointment.user._id.toString();
         push.send({
           'notifications.appointment': true,
-          _id: userNow.username === 'yuttadhammo' ? appointment.user : { $exists: true },
-          username: userNow._id.toString() === appointment.user.toString() ? 'yuttadhammo' : { $exists: true }
+          _id: isAppHolder ? { $ne: null } : appointment.user,
+          username:  isAppHolder ? 'yuttadhammo' : { $ne: null }
         }, {
           title: 'Appointment Call Incoming',
           body: 'Please click on this notification or go to the schedule page',
