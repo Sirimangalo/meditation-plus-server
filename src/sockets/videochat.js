@@ -69,8 +69,14 @@ export default (socket, io) => {
 
       // send info message about joined user in chat
       io.to('Videochat').emit('videochat:message', {
-        isMeta: true,
-        text: userNow.name + ' (@' + userNow.username + ') joined the appointment.'
+        user: {
+          _id: userNow._id,
+          name: userNow.name,
+          username: userNow.username,
+          gravatarHash: userNow.gravatarHash,
+          country: userNow.country
+        },
+        text: '...joined the appointment.'
       });
     }
   });
@@ -89,11 +95,6 @@ export default (socket, io) => {
       message: 'Trying to reconnect... Please hold on.',
       doConnect: true
     });
-
-    io.to('Videochat').emit('videochat:message', {
-      isMeta: true,
-      text: 'Connection was interrupted.'
-    });
   });
 
   /**
@@ -101,7 +102,6 @@ export default (socket, io) => {
    * text messages between the two participants of the live appointment call.
    *
    * @param  {String} message       Message to deliver
-   * @param  {String} isMeta        Whether the message is a status text not from the user
    */
   socket.on('videochat:message', message => {
     if (!inRoom() || !message || message.length > 500) {
@@ -115,7 +115,8 @@ export default (socket, io) => {
         _id: userNow._id,
         name: userNow.name,
         username: userNow.username,
-        gravatarHash: userNow.gravatarHash
+        gravatarHash: userNow.gravatarHash,
+        country: userNow.country
       },
       text: message
     });
