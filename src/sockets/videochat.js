@@ -122,6 +122,10 @@ export default (socket, io) => {
     });
   });
 
+  /**
+   * The ':toggledMedia' event is being used when a user
+   * disables his microphone/camera
+   */
   socket.on('videochat:toggledMedia', (audio, video) => {
     if (!inRoom()) {
       return;
