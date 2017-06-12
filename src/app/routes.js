@@ -76,6 +76,11 @@ export default (app, router, passport, io) => {
   analyticsRoutes(app, router, admin);
   pushRoutes(app, router);
 
+  // Provide a simple status page
+  router.get('/status', (req, res) => {
+    return res.sendStatus(204);
+  });
+
   // Route to handle all Angular requests
   router.get('*', (req, res) => {
     //** Note that the root is set to the parent of this folder, ie the app root **
