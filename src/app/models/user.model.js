@@ -16,7 +16,7 @@ let userSchema = mongoose.Schema({
   website: { type: String, maxlength: 100 },
   country: String,
   lastActive: Date,
-  lastMeditation: Date,
+  lastMeditation: { type: Date, required: true, default: new Date(0) },
   lastLike: Date,
   sound: { type: String, default: '/assets/audio/bell1.mp3' },
   stableBell: { type: Boolean, default: false },
