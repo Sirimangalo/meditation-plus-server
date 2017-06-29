@@ -4,7 +4,7 @@ let wikiEntrySchema = mongoose.Schema({
   url: { type: String, required: true },
   startAt: { type: Number, default: 0 },
   description: String,
-  tags: [{ ref: 'WikiTag' }]
+  tags: [{ type: String, ref: 'WikiTag' }]
 }, {
   timestamps: true
 });
