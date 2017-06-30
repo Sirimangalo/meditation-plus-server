@@ -23,6 +23,26 @@ export default {
       });
     });
   },
+  getVideoInfo: (videoid) => {
+    return new Promise((resolve, reject) => {
+      Youtube.authenticate({
+        type: 'key',
+        key: process.env.GOOGLE_API_KEY
+      });
+
+      Youtube.videos.list({
+        part: 'snippet',
+        id: videoid
+      }, (err, data) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(data);
+      });
+    });
+  },
   findMatchingVideos: (query, limit = 10) => {
     return new Promise((resolve, reject) => {
       Youtube.authenticate({
