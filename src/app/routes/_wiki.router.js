@@ -71,8 +71,13 @@ export default (app, router, admin) => {
 
       const apiResults = apiCall.items[0];
 
-      // check if found video is not from strange channel
-      const allowedChannels = ['UCQJ6ESCWQotBwtJm0Ff_gyQ'];
+      // check if found video is not from strange channel.
+      // Keeping the list of allowed channels hardcoded
+      // since they are supposed to change very rarely.
+      const allowedChannels = [
+        // https://www.youtube.com/user/yuttadhammo
+        'UCQJ6ESCWQotBwtJm0Ff_gyQ'
+      ];
 
       if (allowedChannels.indexOf(apiResults.snippet.channelId) === -1) {
         return res.status(403).send('That video is from a channel that is not allowed.');
@@ -84,7 +89,6 @@ export default (app, router, admin) => {
 
       // update (verified) url to a normalized form
       url = 'https://youtu.be/' + apiResults.id;
-
 
       // Check for duplicate entries
       // ===========================
@@ -100,7 +104,7 @@ export default (app, router, admin) => {
         .then();
 
       if (duplicate) {
-        return res.status(403).send('There already exists a duplicate entry for this video.');
+        return res.status(400).send('There already exists a duplicate entry for this video.');
       }
 
       // Check tags
@@ -114,14 +118,14 @@ export default (app, router, admin) => {
 
       // try to find at least one tag within the provided ones that already exists
       // on another entry
-      const existingTags = await WikiTag
-        .find({
+      const existingTag = await WikiTag
+        .findOne({
           _id: { $in: tags }
         })
         .then();
 
-      if (!tags || !existingTags) {
-        return res.status(400).send('Please provide at least one existing tag.')
+      if (!tags || !existingTag) {
+        return res.status(403).send('Please provide at least one existing tag.')
       }
 
       // All checks done!
