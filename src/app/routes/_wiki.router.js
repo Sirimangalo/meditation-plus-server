@@ -80,7 +80,7 @@ export default (app, router, admin) => {
       ];
 
       if (allowedChannels.indexOf(apiResults.snippet.channelId) === -1) {
-        return res.status(403).send('That video is from a channel that is not allowed.');
+        return res.status(403).send('That video is from an unallowed channel.');
       }
 
       // extract possibly custom starting position
@@ -171,6 +171,49 @@ export default (app, router, admin) => {
       res.sendStatus(200);
     } catch (err) {
       console.log(err);
+      res.status(500).send(err);
+    }
+  });
+
+  router.get('/api/wiki/tags', async (req, res) => {
+    try {
+      // limit & pagination
+      const maxPerPage = req.query.maxResults ? req.query.maxResults : 50;
+      const page = req.query.page ? req.query.page : 1;
+
+      // build search query
+      const query = {}, sorting = {};
+
+      if (req.query.search) {
+        query._id = { $regex: new RegExp('^' + req.query.search, 'i') };
+      }
+
+      if (req.query.relatedTo) {
+        query.relatedTo = { $elemMatch: req.query.relatedTo };
+      }
+
+      // set sort of query
+      const sortBy = req.query.sortBy ? req.query.sortBy : '_id';
+      sorting[sortBy] = req.query.sortOrder ? req.query.sortOrder : 1;
+
+      // find matching tags
+      const result = await WikiTag
+        .find(query)
+        .limit(maxPerPage)
+        .skip((page - 1) * maxPerPage)
+        .sort(sorting)
+        .then();
+
+      res.json(result);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  router.post('/api/wiki/entries', async (req, res) => {
+    try {
+      // 1. Check if at least 1 tag with more than 1 entries related stays after modification
+    } catch (err) {
       res.status(500).send(err);
     }
   });
