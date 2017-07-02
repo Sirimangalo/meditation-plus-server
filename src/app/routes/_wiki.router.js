@@ -175,7 +175,7 @@ export default (app, router, admin) => {
    * @apiParam {Number}         limit       Maximum number of returned tags (default: 50)
    * @apiParam {Number}         skip        Number of records to skip during search (default: 0)
    * @apiParam {String}         search      String that matches a tag's _id
-   * @apiParam {String}         relatedTo   The _id of a tag to which all returned tags have to be related
+   * @apiParam {String[]}       relatedTo   The _id of a tag to which all returned tags have to be related
    * @apiParam {String}         sortBy      A valid field name of the WikiTag model for sorting the result by it
    * @apiParam {Number/String}  sortOrder   Valid sort option for mongodb (-1,1 or 'ascending','descending')
    * @apiParam {Boolean}        populate    Whether or not to populate the tags with the associated entries
@@ -197,7 +197,7 @@ export default (app, router, admin) => {
       }
 
       if (req.body.relatedTo) {
-        query.related = req.body.relatedTo;
+        query.related = { $in: req.body.relatedTo };
       }
 
       // set sort of query

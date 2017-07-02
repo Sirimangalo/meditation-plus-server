@@ -156,7 +156,7 @@ describe('Wiki Routes', () => {
                 { _id: 'tree', count: 3, entries: [ entry._id ], related: ['grass', 'green'] },
                 { _id: 'grass', count: 2, related: ['tree'] },
                 { _id: 'green', count: 4, related: ['tree', 'frog'] },
-                { _id: 'frog', count: 1, related: ['green'] }
+                { _id: 'frog', count: 1, related: ['green', 'blue'] }
               ])
               .then(err => done());
           });
@@ -197,11 +197,12 @@ describe('Wiki Routes', () => {
       randomUser
         .post('/api/wiki/tags')
         .expect(200)
-        .send({ relatedTo: 'tree' })
+        .send({ relatedTo: ['tree', 'blue'] })
         .end((err, res) => {
-          expect(res.body.length).to.equal(2);
-          expect(res.body[0]._id).to.equal('grass');
-          expect(res.body[1]._id).to.equal('green');
+          expect(res.body.length).to.equal(3);
+          expect(res.body[0]._id).to.equal('frog');
+          expect(res.body[1]._id).to.equal('grass');
+          expect(res.body[2]._id).to.equal('green');
           done(err);
         });
     });

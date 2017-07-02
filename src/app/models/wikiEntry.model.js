@@ -11,4 +11,9 @@ let wikiEntrySchema = mongoose.Schema({
   timestamps: true
 });
 
+// add text index for full text search on the description field
+wikiEntrySchema.index({
+  description: 'text'
+});
+
 export default mongoose.model('WikiEntry', wikiEntrySchema);
