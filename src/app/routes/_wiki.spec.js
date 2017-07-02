@@ -19,42 +19,42 @@ let admin = new AuthedSupertest(
 );
 
 describe('Wiki Routes', () => {
-  let entry, tag;
+  describe('POST /api/wiki/new', () => {
+    let entry, tag;
 
-  beforeEach(done => {
-    WikiEntry.remove(() => {
-      entry = new WikiEntry({
-        url: 'https://youtu.be/Ef4X_5MmVnU',
-        title: 'Testvideo',
-        startAt: 0,
-        tags: ['Evening Dhamma']
-      });
+    randomUser.authorize();
 
-      entry.save(err => {
-        if (err) return done(err);
+    beforeEach(done => {
+      WikiEntry.remove(() => {
+        entry = new WikiEntry({
+          url: 'https://youtu.be/Ef4X_5MmVnU',
+          title: 'Testvideo',
+          startAt: 0,
+          tags: ['Evening Dhamma']
+        });
 
-        WikiTag.remove(() => {
-          tag = new WikiTag({
-            _id: 'Evening Dhamma',
-            count: 1,
-            entries: [ entry._id ]
-          });
+        entry.save(err => {
+          if (err) return done(err);
 
-          tag.save(err => {
-            if (err) return done(err);
-            done();
+          WikiTag.remove(() => {
+            tag = new WikiTag({
+              _id: 'Evening Dhamma',
+              count: 1,
+              entries: [ entry._id ]
+            });
+
+            tag.save(err => {
+              if (err) return done(err);
+              done();
+            });
           });
         });
       });
     });
-  });
 
-  afterEach(() => {
-    return WikiTag.remove().exec() & WikiEntry.remove().exec();
-  });
-
-  describe('POST /api/wiki/new', () => {
-    randomUser.authorize();
+    afterEach(() => {
+      return WikiTag.remove().exec() & WikiEntry.remove().exec();
+    });
 
     it('should respond with 400 when missing parameters', done => {
       randomUser
@@ -130,6 +130,108 @@ describe('Wiki Routes', () => {
         })
         .expect(200)
         .end(err => done(err));
+    });
+  });
+
+  describe('POST /api/wiki/tags', () => {
+    let entry, tags;
+
+    randomUser.authorize();
+
+    beforeEach(done => {
+      WikiEntry.remove(() => {
+        entry = new WikiEntry({
+          url: 'https://youtu.be/Ef4X_5MmVnU',
+          title: 'Testvideo',
+          startAt: 0,
+          tags: ['Evening Dhamma']
+        });
+
+        entry.save(err => {
+          if (err) return done(err);
+
+          WikiTag.remove(() => {
+            WikiTag
+              .insertMany([
+                { _id: 'tree', count: 3, entries: [ entry._id ], related: ['grass', 'green'] },
+                { _id: 'grass', count: 2, related: ['tree'] },
+                { _id: 'green', count: 4, related: ['tree', 'frog'] },
+                { _id: 'frog', count: 1, related: ['green'] }
+              ])
+              .then(err => done());
+          });
+        });
+      });
+    });
+
+    afterEach(() => {
+      return WikiEntry.remove().exec() & WikiTag.remove().exec();
+    });
+
+    it('should limit and skip correctly', done => {
+      randomUser
+        .post('/api/wiki/tags')
+        .expect(200)
+        .send({ limit: 2, skip: 1 })
+        .end((err, res) => {
+          expect(res.body.length).to.equal(2);
+          expect(res.body[0]._id).to.equal('grass');
+          done(err);
+        });
+    });
+
+    it('should find tags by search string', done => {
+      randomUser
+        .post('/api/wiki/tags')
+        .expect(200)
+        .send({ search: 'gr' })
+        .end((err, res) => {
+          expect(res.body.length).to.equal(2);
+          expect(res.body[0]._id).to.equal('grass');
+          expect(res.body[1]._id).to.equal('green');
+          done(err);
+        });
+    });
+
+    it('should find tags related to given tag', done => {
+      randomUser
+        .post('/api/wiki/tags')
+        .expect(200)
+        .send({ relatedTo: 'tree' })
+        .end((err, res) => {
+          expect(res.body.length).to.equal(2);
+          expect(res.body[0]._id).to.equal('grass');
+          expect(res.body[1]._id).to.equal('green');
+          done(err);
+        });
+    });
+
+    it('should sort result correctly', done => {
+      randomUser
+        .post('/api/wiki/tags')
+        .expect(200)
+        .send({ sortBy: 'count', sortOrder: 'ascending' })
+        .end((err, res) => {
+          expect(res.body.length).to.equal(4);
+          expect(res.body[0]._id).to.equal('frog');
+          expect(res.body[3]._id).to.equal('green');
+          done(err);
+        });
+    });
+
+    it('should populate entries correctly', done => {
+      randomUser
+        .post('/api/wiki/tags')
+        .expect(200)
+        .send({ search: 'tree', populate: true })
+        .end((err, res) => {
+          expect(res.body.length).to.equal(1);
+          expect(res.body[0].entries[0]).to.have.property('url');
+          expect(res.body[0].entries[0]).to.have.property('title');
+          expect(res.body[0].entries[0]).to.have.property('startAt');
+          expect(res.body[0].entries[0]).to.have.property('tags');
+          done(err);
+        });
     });
   });
 });

@@ -1,6 +1,7 @@
 import WikiEntry from '../models/wikiEntry.model.js';
 import WikiTag from '../models/wikiTag.model.js';
 import youtubeHelper from '../helper/youtube.js';
+import regExpEscape from 'escape-string-regexp';
 
 /**
  * Extracts the YouTube video ID from a url.
@@ -17,14 +18,6 @@ function extractId (url) {
 }
 
 export default (app, router, admin) => {
-
-  router.get('/api/wiki/tags', async (req, res) => {
-    try {
-
-    } catch (err) {
-      res.status(500).send(err);
-    }
-  });
 
   // query
   router.post('/api/wiki', async (req, res) => {
@@ -170,37 +163,53 @@ export default (app, router, admin) => {
 
       res.sendStatus(200);
     } catch (err) {
-      console.log(err);
       res.status(500).send(err);
     }
   });
 
-  router.get('/api/wiki/tags', async (req, res) => {
+  /**
+   * @api {get} /api/wiki/tags Get a list of tags matching certain params
+   * @apiName GetTags
+   * @apiGroup Wiki
+   *
+   * @apiParam {Number}         limit       Maximum number of returned tags (default: 50)
+   * @apiParam {Number}         skip        Number of records to skip during search (default: 0)
+   * @apiParam {String}         search      String that matches a tag's _id
+   * @apiParam {String}         relatedTo   The _id of a tag to which all returned tags have to be related
+   * @apiParam {String}         sortBy      A valid field name of the WikiTag model for sorting the result by it
+   * @apiParam {Number/String}  sortOrder   Valid sort option for mongodb (-1,1 or 'ascending','descending')
+   * @apiParam {Boolean}        populate    Whether or not to populate the tags with the associated entries
+   *
+   * @apiSuccess {Number}   increment           value of hours to add
+   */
+  router.post('/api/wiki/tags', async (req, res) => {
     try {
       // limit & pagination
-      const maxPerPage = req.query.maxResults ? req.query.maxResults : 50;
-      const page = req.query.page ? req.query.page : 1;
+      const limit = req.body.limit ? req.body.limit : 50;
+      const skip = req.body.skip ? req.body.skip : 0;
+      const populating = req.body.populate === true ? 'entries' : '';
 
       // build search query
       const query = {}, sorting = {};
 
-      if (req.query.search) {
-        query._id = { $regex: new RegExp('^' + req.query.search, 'i') };
+      if (req.body.search) {
+        query._id = { $regex: new RegExp('^' + regExpEscape(req.body.search), 'i') };
       }
 
-      if (req.query.relatedTo) {
-        query.relatedTo = { $elemMatch: req.query.relatedTo };
+      if (req.body.relatedTo) {
+        query.related = req.body.relatedTo;
       }
 
       // set sort of query
-      const sortBy = req.query.sortBy ? req.query.sortBy : '_id';
-      sorting[sortBy] = req.query.sortOrder ? req.query.sortOrder : 1;
+      const sortBy = req.body.sortBy ? req.body.sortBy : '_id';
+      sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : 1;
 
       // find matching tags
       const result = await WikiTag
         .find(query)
-        .limit(maxPerPage)
-        .skip((page - 1) * maxPerPage)
+        .populate(populating)
+        .limit(limit)
+        .skip(skip)
         .sort(sorting)
         .then();
 
