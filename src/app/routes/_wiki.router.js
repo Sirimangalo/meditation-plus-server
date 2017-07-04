@@ -49,7 +49,7 @@ export default (app, router, admin) => {
 
       const videoId = extractId(url);
       if (!videoId) {
-        return res.status(400).send('Unsupported url of video.')
+        return res.status(400).send('Unsupported url of video.');
       }
 
       // Check video
@@ -118,7 +118,7 @@ export default (app, router, admin) => {
         .then();
 
       if (!tags || !existingTag) {
-        return res.status(403).send('Please provide at least one existing tag.')
+        return res.status(403).send('Please provide at least one existing tag.');
       }
 
       // All checks done!
@@ -184,7 +184,6 @@ export default (app, router, admin) => {
    */
   router.post('/api/wiki/tags', async (req, res) => {
     try {
-      // limit & pagination
       const limit = req.body.limit ? req.body.limit : 50;
       const skip = req.body.skip ? req.body.skip : 0;
       const populating = req.body.populate === true ? 'entries' : '';

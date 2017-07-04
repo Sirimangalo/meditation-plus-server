@@ -1,14 +1,9 @@
-import { app } from '../../server.conf.js';
-import supertest from 'supertest';
 import { expect } from 'chai';
-import {describe, it} from 'mocha';
+import { describe, it } from 'mocha';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import WikiEntry from '../models/wikiEntry.model.js';
 import WikiTag from '../models/wikiTag.model.js';
 
-let ObjectId = require('mongoose').Types.ObjectId;
-
-const request = supertest(app);
 let randomUser = new AuthedSupertest();
 let admin = new AuthedSupertest(
   'Admin User',
@@ -134,7 +129,7 @@ describe('Wiki Routes', () => {
   });
 
   describe('POST /api/wiki/tags', () => {
-    let entry, tags;
+    let entry;
 
     randomUser.authorize();
 
@@ -158,7 +153,7 @@ describe('Wiki Routes', () => {
                 { _id: 'green', count: 4, related: ['tree', 'frog'] },
                 { _id: 'frog', count: 1, related: ['green', 'blue'] }
               ])
-              .then(err => done());
+              .then(() => done());
           });
         });
       });
