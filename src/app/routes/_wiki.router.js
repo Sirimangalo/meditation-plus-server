@@ -31,6 +31,15 @@ export default (app, router, admin) => {
     }
   });
 
+  /**
+   * @api {get} /api/wiki/new Submit a new video
+   * @apiName New
+   * @apiGroup Wiki
+   *
+   * @apiParam {String}         url           Link to a YouTube video from Bhante Yuttadhammo's channel
+   * @apiParam {String}         tags          Comma separated list of tags
+   * @apiParam {String}         description   Further description of the content (optional)
+   */
   router.post('/api/wiki/new', async (req, res) => {
     try {
       let url = req.body.url ? req.body.url : '';
