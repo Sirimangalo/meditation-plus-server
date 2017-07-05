@@ -126,9 +126,11 @@ export default (app, router, io) => {
 
         push.send({
           'notifications.message': true,
+          // make sure the user is not meditating
+          lastMeditation: { $lt: new Date() },
           username: mentions.indexOf('@all') > -1 && user && user.role && user.role === 'ROLE_ADMIN'
             ? { $exists: true, $ne: user.username }
-            : { $in: mentions.map(s => s.substring(1))}
+            : { $in: mentions.map(s => s.substring(1)) }
         }, {
           title: 'New Message',
           body: messageText,
