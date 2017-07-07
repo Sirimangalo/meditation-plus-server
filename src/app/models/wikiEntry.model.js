@@ -13,6 +13,7 @@ let wikiEntrySchema = mongoose.Schema({
 
 // add text index for full text search on the description field
 wikiEntrySchema.index({
+  title: 'text',
   description: 'text'
 });
 

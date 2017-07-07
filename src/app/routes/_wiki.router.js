@@ -1,32 +1,59 @@
 import WikiEntry from '../models/wikiEntry.model.js';
 import WikiTag from '../models/wikiTag.model.js';
+import wikiHelper from '../helper/wiki.js';
 import youtubeHelper from '../helper/youtube.js';
 import regExpEscape from 'escape-string-regexp';
 
-/**
- * Extracts the YouTube video ID from a url.
- *
- * Credit: https://stackoverflow.com/a/9102270
- *
- * @param  {String} url Link to a YouTube video
- * @return {String}     Extracted ID or empty string
- */
-function extractId (url) {
-  const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^###\&\?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length == 11 ? match[2] : '';
-}
-
 export default (app, router, admin) => {
 
-  // query
+  /**
+   * @api {get} /api/wiki Search for entries (= videos) in the wiki
+   * @apiName Search
+   * @apiGroup Wiki
+   *
+   * @apiParam {String}         search      String that matches an entry (title, description)
+   * @apiParam {String[]}       tags        List of tags to which a result should match
+   * @apiParam {Number}         limit       Maximum number of returned tags (default: 50)
+   * @apiParam {Number}         skip        Number of records to skip during search (default: 0)
+   * @apiParam {String}         sortBy      A valid field name of the WikiTag model for sorting the result by it
+   * @apiParam {Number/String}  sortOrder   Valid sort option for mongodb (-1,1 or 'ascending','descending')
+   *
+   * @apiSuccess {any[]}        result      List of matching entries
+   */
   router.post('/api/wiki', async (req, res) => {
     try {
-      // Params:
-      // - search text
-      // - tags
-      // - sortBy?!
+      const search = req.body.search ? req.body.search : '';
+      const limit = req.body.limit ? req.body.limit : 15;
+      const skip = req.body.skip ? req.body.skip : 0;
+
+      const query = {};
+
+      if (search) {
+        query['$text'] = {
+          $search: search
+        }
+      }
+
+      if (req.body.tags) {
+        query['tags'] = {
+          $all: req.body.tags
+        }
+      }
+
+      const sorting = {};
+      const sortBy = req.body.sortBy ? req.body.sortBy : 'publishedAt';
+      sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : -1;
+
+      const result = await WikiEntry
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sorting)
+        .then();
+
+      res.json(result);
     } catch (err) {
+      console.log(err);
       res.status(500).send(err);
     }
   });
@@ -56,7 +83,7 @@ export default (app, router, admin) => {
       // Check url validity
       // ==================
 
-      const videoId = extractId(url);
+      const videoId = wikiHelper.extractId(url);
       if (!videoId) {
         return res.status(400).send('Unsupported url of video.');
       }
@@ -112,11 +139,7 @@ export default (app, router, admin) => {
       // Check tags
       // ==========
 
-      // convert comma separated list of tags into array
-      tags = tags.split(',').map(s => s.trim()).filter(x => x.length > 2);
-
-      // remove duplicate items
-      tags = [...new Set(tags)];
+      tags = wikiHelper.extractTags(tags);
 
       // try to find at least one tag within the provided ones that already exists
       // on another entry
@@ -181,9 +204,9 @@ export default (app, router, admin) => {
    * @apiName GetTags
    * @apiGroup Wiki
    *
-   * @apiParam {Number}         limit       Maximum number of returned tags (default: 50)
-   * @apiParam {Number}         skip        Number of records to skip during search (default: 0)
    * @apiParam {String}         search      String that matches a tag's _id
+   * @apiParam {Number}         limit       Maximum number of returned tags
+   * @apiParam {Number}         skip        Number of records to skip during search
    * @apiParam {String[]}       relatedTo   The _id of a tag to which all returned tags have to be related
    * @apiParam {String}         sortBy      A valid field name of the WikiTag model for sorting the result by it
    * @apiParam {Number/String}  sortOrder   Valid sort option for mongodb (-1,1 or 'ascending','descending')
@@ -216,8 +239,8 @@ export default (app, router, admin) => {
       const result = await WikiTag
         .find(query)
         .populate(populating)
-        .limit(limit)
         .skip(skip)
+        .limit(limit)
         .sort(sorting)
         .then();
 
