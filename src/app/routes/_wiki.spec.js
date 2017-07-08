@@ -64,28 +64,28 @@ describe('Wiki Routes', () => {
               _id: ObjectId('123456789011'),
               title: 'A random title',
               description: 'The description is pretty random, too.',
-              url: 'any2',
+              videoId: 'Ef4X_5Many1',
               tags: ['random', 'tagA', 'test']
             },
             {
               _id: ObjectId('123456789012'),
               title: 'A static title',
               description: 'The description is pretty static, too.',
-              url: 'any1',
+              videoId: 'Ef4X_5Many2',
               tags: ['static', 'tagB', 'test']
             },
             {
               _id: ObjectId('123456789013'),
               title: 'Another static title',
               description: 'But the no explanatory description.',
-              url: 'any3',
+              videoId: 'Ef4X_5Many3',
               tags: ['static', 'tagB', 'test']
             },
             {
               _id: ObjectId('123456789014'),
               title: 'A random, static title',
               description: 'The randomness of static text text search.',
-              url: 'any4',
+              videoId: 'Ef4X_5Many4',
               tags: ['static', 'random', 'tagA', 'tagB', 'test']
             }
           ])
@@ -131,13 +131,13 @@ describe('Wiki Routes', () => {
       randomUser
         .post('/api/wiki')
         .send({
-          sortBy: 'url',
+          sortBy: 'videoId',
           sortOrder: 'descending'
         })
         .expect(200)
         .end((err, res) => {
-          expect(res.body[0].url).to.equal('any4');
-          expect(res.body[3].url).to.equal('any1');
+          expect(res.body[0].videoId).to.have.string('any4');
+          expect(res.body[3].videoId).to.have.string('any1');
           done(err);
         });
     })
@@ -152,11 +152,24 @@ describe('Wiki Routes', () => {
         .expect(200)
         .end((err, res) => {
           expect(res.body.length).to.equal(2);
-          expect(res.body[0].url).to.equal('any3');
+          expect(res.body[0].videoId).to.have.string('any3');
           done(err);
         });
     });
 
+    it('should find a video via url', done => {
+      randomUser
+        .post('/api/wiki')
+        .send({
+          search: 'url=https://www.youtube.com/watch?v=Ef4X_5Many3'
+        })
+        .expect(200)
+        .end((err, res) => {
+          console.log(res.body);
+          expect(res.body[0].videoId).to.equal('Ef4X_5Many3');
+          done(err);
+        });
+    });
   });
 
   describe('POST /api/wiki/new', () => {
@@ -167,7 +180,7 @@ describe('Wiki Routes', () => {
     beforeEach(done => {
       WikiEntry.remove(() => {
         entry = new WikiEntry({
-          url: 'https://youtu.be/Ef4X_5MmVnU',
+          videoId: 'Ef4X_5MmVnU',
           title: 'Testvideo',
           startAt: 0,
           tags: ['Evening Dhamma']
@@ -280,7 +293,7 @@ describe('Wiki Routes', () => {
     beforeEach(done => {
       WikiEntry.remove(() => {
         entry = new WikiEntry({
-          url: 'https://youtu.be/Ef4X_5MmVnU',
+          videoId: 'Ef4X_5MmVnU',
           title: 'Testvideo',
           startAt: 0,
           tags: ['Evening Dhamma']
@@ -366,7 +379,7 @@ describe('Wiki Routes', () => {
         .send({ search: 'tree', populate: true })
         .end((err, res) => {
           expect(res.body.length).to.equal(1);
-          expect(res.body[0].entries[0]).to.have.property('url');
+          expect(res.body[0].entries[0]).to.have.property('videoId');
           expect(res.body[0].entries[0]).to.have.property('title');
           expect(res.body[0].entries[0]).to.have.property('startAt');
           expect(res.body[0].entries[0]).to.have.property('tags');

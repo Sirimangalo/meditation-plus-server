@@ -29,8 +29,13 @@ export default (app, router, admin) => {
       const query = {};
 
       if (search) {
-        query['$text'] = {
-          $search: search
+        // feature for searching entry by video url
+        if (search.match(/url\=/gi) !== null) {
+          query['videoId'] = wikiHelper.extractId(search.substring(4));
+        } else {
+          query['$text'] = {
+            $search: search
+          }
         }
       }
 
@@ -39,6 +44,8 @@ export default (app, router, admin) => {
           $all: req.body.tags
         }
       }
+
+      console.log(query);
 
       const sorting = {};
       const sortBy = req.body.sortBy ? req.body.sortBy : 'publishedAt';
@@ -116,15 +123,12 @@ export default (app, router, admin) => {
       let startAt = url.match(/(\?|\&)t\=[0-9]+/gi);
       startAt = startAt ? parseInt(startAt[0].substring(3)) : 0;
 
-      // update (verified) url to a normalized form
-      url = 'https://youtu.be/' + apiResults.id;
-
       // Check for duplicate entries
       // ===========================
 
       const duplicate = await WikiEntry
         .findOne({
-          url: url,
+          videoId: videoId,
           startAt: {
             $gte: startAt > 15 ? startAt - 15 : 0,
             $lte: startAt + 15
@@ -160,7 +164,7 @@ export default (app, router, admin) => {
 
       // first add a new entry without the tags
       let entry = await WikiEntry.create({
-        url: url,
+        videoId: videoId,
         startAt: startAt,
         title: apiResults.snippet.title,
         description: description ? description : apiResults.snippet.description,
@@ -245,23 +249,6 @@ export default (app, router, admin) => {
         .then();
 
       res.json(result);
-    } catch (err) {
-      res.status(500).send(err);
-    }
-  });
-
-  router.post('/api/wiki/entries', async (req, res) => {
-    try {
-      // 1. Check if at least 1 tag with more than 1 entries related stays after modification
-    } catch (err) {
-      res.status(500).send(err);
-    }
-  });
-
-  // modify tags & description
-  router.post('/api/wiki/modify', async (req, res) => {
-    try {
-      // 1. Check if at least 1 tag with more than 1 entries related stays after modification
     } catch (err) {
       res.status(500).send(err);
     }
