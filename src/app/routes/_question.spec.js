@@ -3,8 +3,6 @@ import supertest from 'supertest';
 import { expect } from 'chai';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import Question from '../models/question.model.js';
-import Broadcast from '../models/broadcast.model';
-//import moment from 'moment';
 
 const request = supertest(app);
 let user = new AuthedSupertest();
