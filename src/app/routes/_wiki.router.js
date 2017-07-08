@@ -45,8 +45,6 @@ export default (app, router, admin) => {
         }
       }
 
-      console.log(query);
-
       const sorting = {};
       const sortBy = req.body.sortBy ? req.body.sortBy : 'publishedAt';
       sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : -1;

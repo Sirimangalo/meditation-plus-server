@@ -165,7 +165,6 @@ describe('Wiki Routes', () => {
         })
         .expect(200)
         .end((err, res) => {
-          console.log(res.body);
           expect(res.body[0].videoId).to.equal('Ef4X_5Many3');
           done(err);
         });
