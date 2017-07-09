@@ -32,11 +32,7 @@ export default (app, router, io, admin) => {
             .limit(perPage)
             .skip(perPage * page)
           : Question
-            .find({answered: { $ne: true }})
-        // why is there no pagination?
-        // .limit(perPage)
-        // .skip(perPage * page)
-      ;
+            .find({answered: { $ne: true }});
 
       let questions = await query
         .sort(
