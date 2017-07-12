@@ -27,19 +27,18 @@ export default (app, router, io, admin) => {
       const filterAnswered = req.query.filterAnswered === 'true';
       const page = req.query.page || 0;
       const query = filterAnswered
-        ? Question
-          .find({answered: { $eq: true }})
-          .limit(perPage)
-          .skip(perPage * page)
-        : Question
-          .find({answered: { $ne: true }})
-        ;
+          ? Question
+            .find({answered: { $eq: true }})
+            .limit(perPage)
+            .skip(perPage * page)
+          : Question
+            .find({answered: { $ne: true }});
 
       let questions = await query
         .sort(
           filterAnswered
-          ? [['answeredAt', 'descending']]
-          : [['numOfLikes', 'descending'], ['createdAt', 'ascending']]
+            ? [['answeredAt', 'descending']]
+            : [['numOfLikes', 'descending'], ['createdAt', 'ascending']]
         )
         .populate('user', 'name gravatarHash lastMeditation country username')
         .populate('broadcast', 'started videoUrl')
@@ -167,16 +166,16 @@ export default (app, router, io, admin) => {
         return res.sendStatus(400);
       }
 
-      // check if already liked
-      for (let like of entry.likes) {
-        if (like == req.user._doc._id) {
-          return res.sendStatus(400);
-        }
-      }
-
       // add like
       if (typeof entry.likes === 'undefined') {
         entry.likes = [];
+      }
+
+      // check if already liked
+      for (let like of entry.likes) {
+        if (like === req.user._doc._id) {
+          return res.sendStatus(400);
+        }
       }
 
       entry.numOfLikes = entry.numOfLikes ? entry.numOfLikes + 1 : 1;
@@ -206,8 +205,7 @@ export default (app, router, io, admin) => {
         return res.sendStatus(400);
       }
 
-      if (req.user._doc.role !== 'ROLE_ADMIN'
-        && entry.user._id === req.user._doc._id) {
+      if (req.user._doc.role !== 'ROLE_ADMIN') {
         res.sendStatus(403);
         return;
       }
@@ -315,7 +313,7 @@ export default (app, router, io, admin) => {
         .exec();
 
       if (req.user._doc.role !== 'ROLE_ADMIN'
-        && result.user === req.user._doc._id) {
+        && result[0].user != req.user._doc._id) {
         return res.sendStatus(403);
       }
 
