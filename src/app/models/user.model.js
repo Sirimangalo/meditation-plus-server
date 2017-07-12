@@ -29,8 +29,10 @@ let userSchema = mongoose.Schema({
     message: { type: Boolean, default: true },
     meditation: Boolean,
     question: { type: Boolean, default: true },
-    testimonial: Boolean, // relevant for admins only
-    livestream: Boolean
+    livestream: Boolean,
+    // relevant for admins only
+    testimonial: Boolean,
+    schedule: Boolean,
   }
 });
 
