@@ -38,7 +38,7 @@ The `server.conf.js` file is expecting certain `environment` `variables` to be s
   # this, but it will certainly suffice
   "SESSION_SECRET" : "the session secrect",
   # You can generate a key with a Google account at https://console.developers.google.com/
-  # (needs Google Cloud messaging and YouTube Data v3 API to be activated first)
+  # (needs Google Cloud Messaging and YouTube Data API to be activated first)
   "GOOGLE_API_KEY" : "the google api key"
 }
 ```
