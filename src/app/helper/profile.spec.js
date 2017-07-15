@@ -63,7 +63,7 @@ describe('ProfileHelper', () => {
 
     profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-02'));
     expect(meditations.currentConsecutiveDays)
-        .to.equal(2, 'start with 2 consecutive days');
+      .to.equal(2, 'start with 2 consecutive days');
 
     meditations.lastDay = moment('2016-09-02');
 
@@ -73,7 +73,7 @@ describe('ProfileHelper', () => {
     meditations.lastDay = moment('2016-09-03');
     profileHelper.calculateConsecutiveDays(meditations, moment('2016-09-05'));
     expect(meditations.currentConsecutiveDays)
-        .to.equal(0, 'reset to 0 if duration is more than one day');
+      .to.equal(0, 'reset to 0 if duration is more than one day');
   });
 
   it('should add badge on 10 consecutive days', () => {

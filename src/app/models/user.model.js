@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
 let userSchema = mongoose.Schema({
-  username: { type: String, unique: true, validate: /^[a-zA-Z][a-zA-Z0-9-_\.]{3,20}$/},
+  username: { type: String, unique: true, validate: /^[a-zA-Z][a-zA-Z0-9-_.]{3,20}$/ },
   local : {
     password : String,
     email : { type : String, unique : true }

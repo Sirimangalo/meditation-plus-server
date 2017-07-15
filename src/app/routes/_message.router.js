@@ -23,8 +23,8 @@ export default (app, router, io) => {
       let messages = await Message
         .find(
           req.user._doc.role === 'ROLE_ADMIN'
-          ? { deleted: { $ne: true } }
-          : {}
+            ? { deleted: { $ne: true } }
+            : {}
         )
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
@@ -157,10 +157,11 @@ export default (app, router, io) => {
    */
   router.put('/api/message/:id', async (req, res) => {
     try {
-      let message = await Message.findOne({
-        _id: ObjectId(req.params.id)
-      })
-      .exec();
+      let message = await Message
+        .findOne({
+          _id: ObjectId(req.params.id)
+        })
+        .exec();
 
       if (!message) return res.sendStatus(404);
 
@@ -211,10 +212,11 @@ export default (app, router, io) => {
    */
   router.delete('/api/message/:id', async (req, res) => {
     try {
-      let message = await Message.findOne({
-        _id: ObjectId(req.params.id)
-      })
-      .exec();
+      let message = await Message
+        .findOne({
+          _id: ObjectId(req.params.id)
+        })
+        .exec();
 
       if (!message) return res.sendStatus(404);
 

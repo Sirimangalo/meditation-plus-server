@@ -51,7 +51,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {get} /api/appointment/:id Get single appointment
    * @apiName GetAppointment
    * @apiGroup Appointment
@@ -72,7 +72,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {put} /api/appointment/:id Update appointment
    * @apiName UpdateAppointment
    * @apiGroup Appointment
