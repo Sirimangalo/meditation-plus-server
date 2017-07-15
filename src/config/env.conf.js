@@ -17,13 +17,13 @@ export function validateEnvVariables() {
   validateNodeEnvironment();
 
   // For Express/Passport
-  if (!process.env.SESSION_SECRET)
+  if (config.SESSION_SECRET && process.env.SESSION_SECRET !== config.SESSION_SECRET)
     process.env.SESSION_SECRET = config.SESSION_SECRET;
 
-  if (!process.env.PORT)
+  if (config.PORT && process.env.PORT !== config.PORT)
     process.env.PORT = config.PORT;
 
-  if (!process.env.GOOGLE_API_KEY)
+  if (config.GOOGLE_API_KEY && process.env.GOOGLE_API_KEY !== config.GOOGLE_API_KEY)
     process.env.GOOGLE_API_KEY = config.GOOGLE_API_KEY;
 
   // Set the appropriate MongoDB URI
