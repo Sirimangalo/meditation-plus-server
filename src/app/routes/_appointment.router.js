@@ -165,7 +165,7 @@ export default (app, router, io, admin) => {
         body: req.user._doc.name +
           (toggle ? ' canceled appointment at ' : ' signed up for ') +
           moment().day(appointment.weekDay).format('dddd') + ', ' +
-          parseHour(appointment.hour + await settingsHelper.get('appointmentIncrement')) + '.',
+          parseHour(appointment.hour + await settingsHelper.get('appointmentIncrement') * 100) + '.',
         data: {
           url: '/schedule'
         }
