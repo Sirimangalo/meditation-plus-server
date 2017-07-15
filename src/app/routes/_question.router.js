@@ -27,12 +27,12 @@ export default (app, router, io, admin) => {
       const filterAnswered = req.query.filterAnswered === 'true';
       const page = req.query.page || 0;
       const query = filterAnswered
-          ? Question
-            .find({answered: { $eq: true }})
-            .limit(perPage)
-            .skip(perPage * page)
-          : Question
-            .find({answered: { $ne: true }});
+        ? Question
+          .find({answered: { $eq: true }})
+          .limit(perPage)
+          .skip(perPage * page)
+        : Question
+          .find({answered: { $ne: true }});
 
       let questions = await query
         .sort(

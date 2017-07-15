@@ -127,11 +127,11 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
-   * @api {put} /api/user/:id Update user
-   * @apiName UpdateUser
-   * @apiGroup User
-   */
+  /**
+  * @api {put} /api/user/:id Update user
+  * @apiName UpdateUser
+  * @apiGroup User
+  */
   router.put('/api/user/:id', admin, async (req, res) => {
     try {
       let user = await User.findById(req.params.id);

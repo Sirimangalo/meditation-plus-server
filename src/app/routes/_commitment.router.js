@@ -16,10 +16,10 @@ export default (app, router, admin) => {
   router.get('/api/commitment', async (req, res) => {
     try {
       const result = await Commitment
-      .find()
-      .populate('users', 'name gravatarHash username')
-      .lean()
-      .then();
+        .find()
+        .populate('users', 'name gravatarHash username')
+        .lean()
+        .then();
 
       res.json(result);
     } catch (err) {
@@ -38,11 +38,11 @@ export default (app, router, admin) => {
   router.get('/api/commitment/user', async (req, res) => {
     try {
       const result = await Commitment
-      .findOne({
-        users: new ObjectId(req.user._doc._id)
-      })
-      .lean()
-      .then();
+        .findOne({
+          users: new ObjectId(req.user._doc._id)
+        })
+        .lean()
+        .then();
 
       res.json(result);
     } catch (err) {
@@ -61,9 +61,9 @@ export default (app, router, admin) => {
   router.get('/api/commitment/:id', admin, async (req, res) => {
     try {
       const result = await Commitment
-      .findOne({ _id: req.params.id })
-      .lean()
-      .then();
+        .findOne({ _id: req.params.id })
+        .lean()
+        .then();
 
       if (!result) return res.sendStatus(404);
       res.json(result);
@@ -106,8 +106,8 @@ export default (app, router, admin) => {
       res.sendStatus(201);
     } catch (err) {
       res
-      .status(err.name === 'ValidationError' ? 400 : 500)
-      .send(err);
+        .status(err.name === 'ValidationError' ? 400 : 500)
+        .send(err);
     }
   });
 
@@ -179,9 +179,9 @@ export default (app, router, admin) => {
   router.delete('/api/commitment/:id', admin, async (req, res) => {
     try {
       const result = await Commitment
-      .find({ _id: req.params.id })
-      .remove()
-      .exec();
+        .find({ _id: req.params.id })
+        .remove()
+        .exec();
 
       res.json(result);
     } catch (err) {

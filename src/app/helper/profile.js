@@ -123,7 +123,7 @@ export class ProfileHelper {
       // only one day ago = consecutive day
       if (duration.asDays() === 1) {
         meditations.currentConsecutiveDays =
-            meditations.currentConsecutiveDays == 0
+          meditations.currentConsecutiveDays == 0
             ? 2
             : meditations.currentConsecutiveDays + 1;
 
