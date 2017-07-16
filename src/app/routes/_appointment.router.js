@@ -168,7 +168,10 @@ export default (app, router, io, admin) => {
           parseHour(appointment.hour + await settingsHelper.get('appointmentIncrement') * 100) + '.',
         data: {
           url: '/schedule'
-        }
+        },
+        icon: req.user._doc && req.user._doc.gravatarHash
+          ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
+          : null
       });
 
       res.sendStatus(204);
