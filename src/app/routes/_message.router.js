@@ -136,7 +136,10 @@ export default (app, router, io) => {
           body: messageText,
           data: {
             url: '/home;tab=chat'
-          }
+          },
+          icon: req.user._doc && req.user._doc.gravatarHash
+            ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
+            : null
         });
       }
 
