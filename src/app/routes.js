@@ -12,7 +12,7 @@ import liveRoutes from './routes/_livestream.router.js';
 import settingsRoutes from './routes/_settings.router.js';
 import analyticsRoutes from './routes/_analytics.router.js';
 import pushRoutes from './routes/_push.router.js';
-
+import mongoose from 'mongoose';
 import User from './models/user.model.js';
 
 export default (app, router, passport, io) => {
@@ -75,6 +75,13 @@ export default (app, router, passport, io) => {
   settingsRoutes(app, router, admin);
   analyticsRoutes(app, router, admin);
   pushRoutes(app, router);
+
+  // Provide a simple status page
+  // Return 204 (No Content) when mongoose is connected
+  // Otherwise 503 (Service Unavailable)
+  router.get('/status', (req, res) => {
+    return res.sendStatus(mongoose.connection.readyState ? 204 : 503);
+  });
 
   // Route to handle all Angular requests
   router.get('*', (req, res) => {

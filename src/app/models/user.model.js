@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
 let userSchema = mongoose.Schema({
-  username: { type: String, unique: true, validate: /^[a-zA-Z][a-zA-Z0-9-_\.]{3,20}$/},
+  username: { type: String, unique: true, validate: /^[a-zA-Z][a-zA-Z0-9-_.]{3,20}$/ },
   local : {
     password : String,
     email : { type : String, unique : true }
@@ -16,7 +16,7 @@ let userSchema = mongoose.Schema({
   website: { type: String, maxlength: 100 },
   country: String,
   lastActive: Date,
-  lastMeditation: Date,
+  lastMeditation: { type: Date, required: true, default: new Date(0) },
   lastLike: Date,
   sound: { type: String, default: '/assets/audio/bell1.mp3' },
   stableBell: { type: Boolean, default: false },
@@ -29,8 +29,10 @@ let userSchema = mongoose.Schema({
     message: { type: Boolean, default: true },
     meditation: Boolean,
     question: { type: Boolean, default: true },
-    testimonial: Boolean, // relevant for admins only
-    livestream: Boolean
+    livestream: Boolean,
+    // relevant for admins only
+    testimonial: Boolean,
+    schedule: Boolean,
   }
 });
 

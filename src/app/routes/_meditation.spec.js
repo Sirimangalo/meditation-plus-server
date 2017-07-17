@@ -181,26 +181,26 @@ describe('Meditation Routes', () => {
 
     it('should like meditations when authenticated', done => {
       user
-      .post('/api/meditation/like')
-      .expect(204)
-      .end(err => {
-        if (err) done(err);
-        // one like should be found
-        user
-        .get('/api/meditation')
-        .expect(200)
-        .end((err, res) => {
-          if (err) return done(err);
-          try {
-            expect(res.body.length).to.equal(1);
-            expect(res.body[0].numOfLikes).to.equal(1);
-            done();
-          } catch(e) {
-            //console.log('exception', e);
-            done(e);
-          }
+        .post('/api/meditation/like')
+        .expect(204)
+        .end(err => {
+          if (err) done(err);
+          // one like should be found
+          user
+            .get('/api/meditation')
+            .expect(200)
+            .end((err, res) => {
+              if (err) return done(err);
+              try {
+                expect(res.body.length).to.equal(1);
+                expect(res.body[0].numOfLikes).to.equal(1);
+                done();
+              } catch(e) {
+                //console.log('exception', e);
+                done(e);
+              }
+            });
         });
-      });
     });
   });
 

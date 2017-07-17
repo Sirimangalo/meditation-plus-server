@@ -1,5 +1,13 @@
 import Appointment from '../models/appointment.model.js';
 import { logger } from '../helper/logger.js';
+import moment from 'moment';
+import push from '../helper/push.js';
+import settingsHelper from '../helper/settings.js';
+
+function parseHour(hour) {
+  const hourStr = '0000' + hour.toString();
+  return hourStr.substr(-4, 2) + ':' + hourStr.substr(-2, 2);
+}
 
 export default (app, router, io, admin) => {
 
@@ -43,7 +51,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {get} /api/appointment/:id Get single appointment
    * @apiName GetAppointment
    * @apiGroup Appointment
@@ -64,7 +72,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {put} /api/appointment/:id Update appointment
    * @apiName UpdateAppointment
    * @apiGroup Appointment
@@ -139,14 +147,32 @@ export default (app, router, io, admin) => {
       }
 
       // toggle registration for current user
-      appointment.user = appointment.user
-        && appointment.user == req.user._doc._id
+      const toggle = appointment.user && appointment.user == req.user._doc._id;
+      appointment.user = toggle
         ? null
         : req.user._doc;
 
       await appointment.save();
       // sending broadcast WebSocket for taken/fred appointment
       io.sockets.emit('appointment', appointment);
+
+      // send push notification to admins
+      push.send({
+        'notifications.schedule': true,
+        role: 'ROLE_ADMIN'
+      }, {
+        title: toggle ? 'Appointment canceled' : 'New Appointment',
+        body: req.user._doc.name +
+          (toggle ? ' canceled appointment at ' : ' signed up for ') +
+          moment().day(appointment.weekDay).format('dddd') + ', ' +
+          parseHour(appointment.hour + await settingsHelper.get('appointmentIncrement') * 100) + '.',
+        data: {
+          url: '/schedule'
+        },
+        icon: req.user._doc && req.user._doc.gravatarHash
+          ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
+          : null
+      });
 
       res.sendStatus(204);
     } catch (err) {

@@ -10,8 +10,8 @@ export default (user, time) => {
   }
 
   const detectedTz = timezones
-      .filter(tz => tz.value === user.timezone)
-      .reduce(tz => tz);
+    .filter(tz => tz.value === user.timezone)
+    .reduce(tz => tz);
 
   if (!detectedTz) {
     return moment(time).utc();
