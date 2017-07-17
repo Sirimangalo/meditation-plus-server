@@ -1,5 +1,4 @@
 const FS = require("q-io/fs");
-import User from '../app/models/user.model'
 import mongooseConf from '../config/mongoose.conf.js';
 import {validateEnvVariables} from '../config/env.conf.js';
 import mongoose from 'mongoose';
@@ -8,56 +7,34 @@ function getKlass(tableName) {
     let klass = require(`../app/models/${tableName}.model`)
     if (!klass)
         throw new Error(`file ../app/models/${tableName}.model not found`)
-    klass = klass.default // import default
+    klass = klass.default // import default equivalent
     if (!klass)
         throw new Error(`file definition ../app/models/${tableName}.model not found`)
-
     return klass
 }
 
-async function saveRow(klass, data) {
 
-    let row = new klass(data)
-    console.log('saving')
-    return await row.save()
-//return 'ok'
-}
-async function parse_json(content) {
+async function parse_json(tableName, content) {
     const fileContent = JSON.parse(content);
-
-    let tableName = 'user';
     let klass = getKlass(tableName)
-
-    const data = fileContent[0];
-    let saveResult = 0
-
-    /*
-     saveResult = fileContent.map(async(d)=> {
-     return await saveRow(klass,d)
-     })
-*/
-    // can't use .map for some reason with await
-    for (let i = 0; i<fileContent.length;i++) {
-        await saveRow(klass,fileContent[i])
+    try {
+        for (let i = 0; i < fileContent.length; i++) {
+            let row = new klass(fileContent[i])
+            await row.save() // do it inside for loop so will stop at first error (duplicate data)
+        }
+    } catch (err) {
+        console.log('saving err', err.message)
     }
-     // saveResult = await saveRow(klass, data)
-    console.log('after saving')
-    return saveResult // can not have await as last statment in a function
 }
 
-async function read_json(filepath) {
-    //move try to main?
+async function readJson(t, filepath) {
     try {
         let content = await FS.read(filepath)
-        await parse_json(content)
+        await parse_json(t, content)
+        console.log(t + ' processing finished')
     } catch (err) {
-        console.log('error in handler ' + err)
+        console.log('readJson error ' + err)
     }
-    finally {
-        mongoose.connection.close();
-        console.log('exit')
-    }
-
 }
 
 function init() {
@@ -66,8 +43,13 @@ function init() {
 }
 
 
-module.exports = function start(tables) {
+module.exports = async function start(tables) {
 
     init()
-    tables.map(t => read_json(`./dev-data/${t}.json`))
+
+    let promises = tables.map(t => readJson(t, `./dev-data/${t}.json`))
+    let results = await Promise.all(promises); // magic statement to wait on a loop
+
+    console.log('after all processing')
+    mongoose.connection.close();
 }
