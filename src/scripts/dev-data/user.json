@@ -1,6 +1,42 @@
 [
   {
-    "user": "admin",
-    "password": "aaa"
+    "username": "admin",
+    "name": "admin",
+    "map-local": {
+      "password": "password",
+      "email": "bobz@bobmail.info"
+    },
+    "role": "ROLE_ADMIN",
+    "verified": true
+  },
+  {
+    "username": "kelly",
+    "name": "kelly",
+    "map-local": {
+      "password": "password",
+      "email": "kelly128@bobmail.info"
+    },
+    "role": "ROLE_USER",
+    "verified": true
+  },
+  {
+    "username": "maka",
+    "name": "maka",
+    "map-local": {
+      "password": "password",
+      "email": "maka88@bobmail.info"
+    },
+    "role": "ROLE_USER",
+    "verified": true
+  },
+  {
+    "username": "tommy",
+    "name": "tommy",
+    "map-local": {
+      "password": "password",
+      "email": "tom128@bobmail.info"
+    },
+    "role": "ROLE_USER",
+    "verified": true
   }
 ]

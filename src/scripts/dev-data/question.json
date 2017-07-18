@@ -1,0 +1,24 @@
+[
+  {
+    "text": "what is capital of China",
+    "map-user": {
+      "username": "tommy"
+    }
+  },
+  {
+    "text": "what is capital of Greece",
+    "map-user": {
+      "username": "kelly"
+    }
+  },
+  {
+    "text": "what is capital of Canada",
+    "map-user": {
+      "username": "kelly"
+    },
+    "answered": true,
+    "answeringAt": "2017-07-14 04:41:03.506Z",
+    "answeredAt": "2017-07-14 04:41:11.270Z"
+  }
+]
+
