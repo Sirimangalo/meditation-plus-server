@@ -1,0 +1,20 @@
+[
+  {
+    "text": "tommy reply hello :bus:",
+    "map-user": {
+      "username": "tommy"
+    }
+  },
+  {
+    "text": "kelly reply hello :grinning:",
+    "map-user": {
+      "username": "kelly"
+    }
+  },
+  {
+    "text": "kelly refer to @tommy",
+    "map-user": {
+      "username": "kelly"
+    }
+  }
+]

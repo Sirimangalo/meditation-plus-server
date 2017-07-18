@@ -2,9 +2,9 @@
   {
     "username": "admin",
     "name": "admin",
-    "user-local": {
+    "map-local": {
       "password": "password",
-      "email": "admin@example.com"
+      "email": "bobz@bobmail.info"
     },
     "role": "ROLE_ADMIN",
     "verified": true
@@ -12,9 +12,9 @@
   {
     "username": "kelly",
     "name": "kelly",
-    "user-local": {
+    "map-local": {
       "password": "password",
-      "email": "kelly@example.com"
+      "email": "kelly128@bobmail.info"
     },
     "role": "ROLE_USER",
     "verified": true
@@ -22,9 +22,9 @@
   {
     "username": "maka",
     "name": "maka",
-    "user-local": {
+    "map-local": {
       "password": "password",
-      "email": "maka@example.com"
+      "email": "maka88@bobmail.info"
     },
     "role": "ROLE_USER",
     "verified": true
@@ -32,9 +32,9 @@
   {
     "username": "tommy",
     "name": "tommy",
-    "user-local": {
+    "map-local": {
       "password": "password",
-      "email": "tommy@example.com"
+      "email": "tom128@bobmail.info"
     },
     "role": "ROLE_USER",
     "verified": true

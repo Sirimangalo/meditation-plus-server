@@ -101,8 +101,8 @@ let password_functor = async (data) => {
     return {local:ret}
 }
 const mapping = {
-    "user-id": user_id_functor,
-    "user-local": password_functor
+    "map-user": user_id_functor,
+    "map-local": password_functor
 }
 
 

@@ -2,15 +2,22 @@
   {
     "weekDay": 2,
     "hour": 1500,
-    "user-id": {
+    "map-user": {
       "username": "kelly"
     }
   },
   {
     "weekDay": 3,
     "hour": 1500,
-    "user-id": {
+    "map-user": {
       "username": "tommy"
+    }
+  },
+  {
+    "weekDay": 3,
+    "hour": 2000,
+    "map-user": {
+      "username": "maka"
     }
   }
 ]
