@@ -1,0 +1,16 @@
+[
+  {
+    "weekDay": 2,
+    "hour": 1500,
+    "user-id": {
+      "username": "kelly"
+    }
+  },
+  {
+    "weekDay": 3,
+    "hour": 1500,
+    "user-id": {
+      "username": "tommy"
+    }
+  }
+]

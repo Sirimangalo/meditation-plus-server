@@ -1,6 +1,42 @@
 [
   {
-    "user": "admin",
-    "password": "aaa"
+    "username": "admin",
+    "name": "admin",
+    "user-local": {
+      "password": "password",
+      "email": "admin@example.com"
+    },
+    "role": "ROLE_ADMIN",
+    "verified": true
+  },
+  {
+    "username": "kelly",
+    "name": "kelly",
+    "user-local": {
+      "password": "password",
+      "email": "kelly@example.com"
+    },
+    "role": "ROLE_USER",
+    "verified": true
+  },
+  {
+    "username": "maka",
+    "name": "maka",
+    "user-local": {
+      "password": "password",
+      "email": "maka@example.com"
+    },
+    "role": "ROLE_USER",
+    "verified": true
+  },
+  {
+    "username": "tommy",
+    "name": "tommy",
+    "user-local": {
+      "password": "password",
+      "email": "tommy@example.com"
+    },
+    "role": "ROLE_USER",
+    "verified": true
   }
 ]

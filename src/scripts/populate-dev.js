@@ -24,11 +24,11 @@ async function saveRow(klass, data) {
     if (!existing) {
 
         let find_result = {}
-        let keys = _.keys(mapping)
+        let mapped_data = _.pick(data, _.keys(mapping))
+        let keys = _.keys(mapped_data)
         let find_err = false
 
-        for (let i = 0; i < keys.length; i++) {
-            let k = keys[i]
+        for (let k of keys) {
             let res = await mapping[k](data[k])
 
             if (res) {
@@ -45,7 +45,6 @@ async function saveRow(klass, data) {
         if (!find_err) {
             // merge custom mapped field back to data
             let new_data = Object.assign(clean_data, find_result)
-            console.log(new_data)
             let row = new klass(new_data)
             await row.save()
             console.log("saving row", data)
@@ -56,13 +55,16 @@ async function saveRow(klass, data) {
     }
 }
 async function parse_json(tableName, content) {
+    // json content file has to be an array
     const fileContent = JSON.parse(content);
     let klass = getKlass(tableName)
-    for (let i = 0; i < fileContent.length; i++) {
-        await saveRow(klass, fileContent[i])
+    for (let row of fileContent) {
+        try {
+            await saveRow(klass, row)
+        } catch (err) {
+            console.log('save exception ' + err.message, row)
+        }
 
-        // let row = new klass(fileContent[i])
-        // await row.save() // do it inside for loop so will stop at first error (duplicate data)
     }
 }
 
@@ -71,7 +73,7 @@ async function readJson(t, filepath) {
         console.log('start file ', filepath)
         let content = await FS.read(filepath)
         await parse_json(t, content)
-        console.log('file processing finished', filepath,"\n\n")
+        console.log('file processing finished', filepath, "\n\n")
     } catch (err) {
         console.log('readJson error ' + err)
     }
@@ -91,62 +93,18 @@ let user_id_functor = async (data) => {
     return null
 }
 
+let password_functor = async (data) => {
+    let ret = data
+    let klass = getKlass('user')
+
+    ret.password = new klass().generateHash(ret.password)
+    return {local:ret}
+}
 const mapping = {
-    "user-id": user_id_functor
+    "user-id": user_id_functor,
+    "user-local": password_functor
 }
 
-/**
- * not used normally, for testing new functor
- * @returns {Promise.<void>}
- */
-async function test() {
-    let data = {
-        "weekDay": 2,
-        "hour": 1155,
-        "user-id": {"username": "kelly"}
-    }
-
-    // find duplicate
-    let clean_data = _.omit(data, _.keys(mapping))
-    let tableName = 'appointment'
-    let klass = getKlass(tableName)
-    console.log("clean_data", clean_data)
-    let existing = await klass.findOne(clean_data)
-
-    if (!existing) {
-
-        let find_result = {}
-        let keys = _.keys(mapping)
-        let find_err = false
-
-        for (let i = 0; i < keys.length; i++) {
-            let k = keys[i]
-            let res = await mapping[k](data[k])
-
-            if (res) {
-                //collect find_result
-                find_result = Object.assign(find_result, res)
-            }
-            else {
-                find_err = true
-                console.log(`mapping error: ${k} not found`, data[k])
-                break
-            }
-        }
-
-        if (!find_err) {
-            // merge custom mapped field back to data
-            let new_data = Object.assign(clean_data, find_result)
-            console.log(new_data)
-            let row = new klass(new_data)
-            await row.save()
-            console.log("saving " + tableName + " row")
-        }
-    }
-    else {
-        console.log("duplicate " + tableName + " row")
-    }
-}
 
 module.exports = async function start(tables) {
 
@@ -156,9 +114,9 @@ module.exports = async function start(tables) {
         await readJson(t, `./dev-data/${t}.json`)
     }
     /*
-    let promises = tables.map(t => readJson(t, `./dev-data/${t}.json`))
-    let results = await Promise.all(promises); // magic statement to wait on a loop
-*/
+     let promises = tables.map(t => readJson(t, `./dev-data/${t}.json`))
+     let results = await Promise.all(promises); // magic statement to wait on a loop
+     */
 
     console.log('after all processing')
     mongoose.connection.close();

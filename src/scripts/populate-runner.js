@@ -4,6 +4,6 @@ require('babel-polyfill');
 
 
 // const tables = ['user']
-const tables = ['appointment']
+const tables = ['user','appointment']
 // run es6 file
 require('./populate-dev')(tables)
