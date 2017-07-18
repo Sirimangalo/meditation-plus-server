@@ -1,8 +1,8 @@
 import Appointment from '../models/appointment.model.js';
+import Settings from '../models/settings.model.js';
 import { logger } from '../helper/logger.js';
 import moment from 'moment';
 import push from '../helper/push.js';
-import settingsHelper from '../helper/settings.js';
 
 function parseHour(hour) {
   const hourStr = '0000' + hour.toString();
@@ -37,7 +37,17 @@ export default (app, router, io, admin) => {
         .lean()
         .exec();
 
+      const settings = await Settings.findOne();
+      const increment = settings && settings.appointmentsIncrement
+        ? settings.appointmentsIncrement
+        : 0;
+
       result.map(entry => {
+        // add global increment
+        entry.hour = (entry.hour + 100 * increment);
+        // handle overflow and negative overflow
+        entry.hour = ((entry.hour % 2400) + 2400) % 2400;
+
         if (json.hours.indexOf(entry.hour) < 0) {
           json.hours.push(entry.hour);
         }
@@ -66,6 +76,15 @@ export default (app, router, io, admin) => {
         .lean();
 
       if (!result) return res.sendStatus(404);
+
+      const settings = await Settings.findOne();
+
+      if (settings && settings.appointmentsIncrement) {
+        result.hour = (result.hour + 100 * settings.appointmentsIncrement);
+        // handle overflow and negative overflow
+        result.hour = ((result.hour % 2400) + 2400) % 2400;
+      }
+
       res.json(result);
     } catch (err) {
       res.send(err);
@@ -147,32 +166,13 @@ export default (app, router, io, admin) => {
       }
 
       // toggle registration for current user
-      const toggle = appointment.user && appointment.user == req.user._doc._id;
-      appointment.user = toggle
+      appointment.user = appointment.user && appointment.user == req.user._doc._id
         ? null
         : req.user._doc;
 
       await appointment.save();
       // sending broadcast WebSocket for taken/fred appointment
       io.sockets.emit('appointment', appointment);
-
-      // send push notification to admins
-      push.send({
-        'notifications.schedule': true,
-        role: 'ROLE_ADMIN'
-      }, {
-        title: toggle ? 'Appointment canceled' : 'New Appointment',
-        body: req.user._doc.name +
-          (toggle ? ' canceled appointment at ' : ' signed up for ') +
-          moment().day(appointment.weekDay).format('dddd') + ', ' +
-          parseHour(appointment.hour + await settingsHelper.get('appointmentIncrement') * 100) + '.',
-        data: {
-          url: '/schedule'
-        },
-        icon: req.user._doc && req.user._doc.gravatarHash
-          ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
-          : null
-      });
 
       res.sendStatus(204);
     } catch (err) {
@@ -222,6 +222,34 @@ export default (app, router, io, admin) => {
       res.json(result);
     } catch (err) {
       res.send(err);
+    }
+  });
+
+  /**
+   * @api {put} /api/appointment/updateHours Update all appointment hours
+   * @apiName UpdateAppointment
+   * @apiGroup Appointment
+   */
+  router.post('/api/appointment/updateHours', admin, async (req, res) => {
+    try {
+      if (typeof(req.body.increment) !== 'number') {
+        return res.sendStatus(400);
+      }
+
+      let appointments = await Appointment
+        .find()
+        .exec();
+
+      for (let app of appointments) {
+        app.hour = (app.hour + 100 * req.body.increment);
+        // handle overflow and negative overflow
+        app.hour = ((app.hour % 2400) + 2400) % 2400;
+        await app.save();
+      }
+
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(500).send(err);
     }
   });
 };

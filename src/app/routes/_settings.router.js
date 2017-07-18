@@ -1,15 +1,44 @@
-import settingsHelper from '../helper/settings.js';
+import Settings from '../models/settings.model.js';
 
 export default (app, router, admin) => {
   /**
-   * @api {post} /api/settings/appointments Update appointment's increment (of hours) parameter
-   * @apiName UpdateAppointmentIncrement
+   * @api {get} /api/settings Get the settings entity
+   * @apiName GetSettings
    * @apiGroup Settings
    */
-  router.post('/api/settings/appointments', admin, async (req, res) => {
+  router.get('/api/settings', admin, async (req, res) => {
     try {
-      const increment = req.body.increment ? req.body.increment : 0;
-      await settingsHelper.set('appointmentIncrement', increment);
+      const settings = await Settings.findOne();
+
+      if (!settings) {
+        return res.sendStatus(400);
+      }
+
+      res.json(settings);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
+  /**
+   * @api {put} /api/settings Get the settings entity
+   * @apiName SetSettingsProperty
+   * @apiGroup Settings
+   */
+  router.put('/api/settings/:property', admin, async (req, res) => {
+    try {
+      if (!req.params.property || typeof(req.body.value) === 'undefined') {
+        return res.sendStatus(400);
+      }
+
+      let settings = await Settings.findOne();
+
+      if (!settings) {
+        return res.sendStatus(404);
+      }
+
+      settings[req.params.property] = req.body.value;
+      await settings.save();
 
       res.sendStatus(200);
     } catch (err) {
@@ -18,17 +47,22 @@ export default (app, router, admin) => {
   });
 
   /**
-   * @api {get} /api/settings/appointments Get appointment's increment (of hours) parameter
-   * @apiName GetAppointmentIncrement
+   * @api {delete} /api/settings Get the settings entity
+   * @apiName DeleteSettingsProperty
    * @apiGroup Settings
-   *
-   * @apiSuccess {Number}   increment           value of hours to add
    */
-  router.get('/api/settings/appointments', async (req, res) => {
+  router.delete('/api/settings/:property', admin, async (req, res) => {
     try {
-      const increment = await settingsHelper.get('appointmentIncrement');
+      const settings = await Settings.findOne();
 
-      res.json(increment ? increment : 0);
+      if (!settings || !req.params.property) {
+        return res.sendStatus(400);
+      }
+
+      delete settings[req.params.property];
+      await settings.save();
+
+      res.sendStatus(200);
     } catch (err) {
       res.status(500).send(err);
     }
