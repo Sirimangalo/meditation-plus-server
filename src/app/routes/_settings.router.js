@@ -11,7 +11,7 @@ export default (app, router, admin) => {
       const settings = await Settings.findOne();
 
       if (!settings) {
-        return res.sendStatus(400);
+        return res.sendStatus(404);
       }
 
       res.json(settings);
@@ -31,15 +31,12 @@ export default (app, router, admin) => {
         return res.sendStatus(400);
       }
 
-      let settings = await Settings.findOne();
-
-      if (!settings) {
-        // create new settings entity if there is none
-        settings = await Settings.create();
-      }
-
+      const settings = {};
       settings[req.params.property] = req.body.value;
-      await settings.save();
+
+      await Settings.findOneAndUpdate({}, settings, {
+        upsert: true
+      });
 
       res.sendStatus(200);
     } catch (err) {

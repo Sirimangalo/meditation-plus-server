@@ -3,11 +3,7 @@ import Settings from '../models/settings.model.js';
 import { logger } from '../helper/logger.js';
 import moment from 'moment';
 import push from '../helper/push.js';
-
-function parseHour(hour) {
-  const hourStr = '0000' + hour.toString();
-  return hourStr.substr(-4, 2) + ':' + hourStr.substr(-2, 2);
-}
+import appointHelper from '../helper/appointment.js';
 
 export default (app, router, io, admin) => {
 
@@ -43,10 +39,7 @@ export default (app, router, io, admin) => {
         : 0;
 
       result.map(entry => {
-        // add global increment
-        entry.hour = (entry.hour + 100 * increment);
-        // handle overflow and negative overflow
-        entry.hour = ((entry.hour % 2400) + 2400) % 2400;
+        entry = appointHelper.addIncrement(entry, increment);
 
         if (json.hours.indexOf(entry.hour) < 0) {
           json.hours.push(entry.hour);
@@ -74,7 +67,7 @@ export default (app, router, io, admin) => {
    */
   router.get('/api/appointment/:id', admin, async (req, res) => {
     try {
-      const result = await Appointment
+      let result = await Appointment
         .findOne({ _id: req.params.id })
         .lean();
 
@@ -83,9 +76,7 @@ export default (app, router, io, admin) => {
       const settings = await Settings.findOne();
 
       if (settings && settings.appointmentsIncrement) {
-        result.hour = (result.hour + 100 * settings.appointmentsIncrement);
-        // handle overflow and negative overflow
-        result.hour = ((result.hour % 2400) + 2400) % 2400;
+        result = appointHelper.addIncrement(result, settings.appointmentsIncrement);
       }
 
       res.json(result);
