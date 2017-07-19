@@ -5,7 +5,7 @@ const appointmentHelper = {
    * @param  {Number} hour Number representing time
    * @return {String}      'HH:mm' formatted time
    */
-  parseHour: hour => {
+  printHour: hour => {
     const hourStr = '0000' + hour.toString();
     return hourStr.substr(-4, 2) + ':' + hourStr.substr(-2, 2);
   },
