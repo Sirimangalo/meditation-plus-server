@@ -1,10 +1,7 @@
-import { app } from '../../server.conf.js';
-import supertest from 'supertest';
 import { expect } from 'chai';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import Settings from '../models/settings.model.js';
 
-const request = supertest(app);
 let user = new AuthedSupertest();
 let admin = new AuthedSupertest(
   'Admin User',

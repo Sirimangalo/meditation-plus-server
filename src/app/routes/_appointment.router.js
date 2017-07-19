@@ -1,8 +1,6 @@
 import Appointment from '../models/appointment.model.js';
 import Settings from '../models/settings.model.js';
 import { logger } from '../helper/logger.js';
-import moment from 'moment';
-import push from '../helper/push.js';
 import appointHelper from '../helper/appointment.js';
 
 export default (app, router, io, admin) => {
