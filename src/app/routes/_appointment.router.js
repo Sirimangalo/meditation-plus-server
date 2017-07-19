@@ -54,6 +54,9 @@ export default (app, router, io, admin) => {
         json.appointments.push(entry);
       });
 
+      // sort hours ascending
+      json.hours.sort((a, b) => (a - b));
+
       res.json(json);
     } catch (err) {
       logger.error('Appointment Error', err);

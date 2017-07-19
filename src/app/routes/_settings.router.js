@@ -34,32 +34,11 @@ export default (app, router, admin) => {
       let settings = await Settings.findOne();
 
       if (!settings) {
-        return res.sendStatus(404);
+        // create new settings entity if there is none
+        settings = await Settings.create();
       }
 
       settings[req.params.property] = req.body.value;
-      await settings.save();
-
-      res.sendStatus(200);
-    } catch (err) {
-      res.status(500).send(err);
-    }
-  });
-
-  /**
-   * @api {delete} /api/settings Get the settings entity
-   * @apiName DeleteSettingsProperty
-   * @apiGroup Settings
-   */
-  router.delete('/api/settings/:property', admin, async (req, res) => {
-    try {
-      const settings = await Settings.findOne();
-
-      if (!settings || !req.params.property) {
-        return res.sendStatus(400);
-      }
-
-      delete settings[req.params.property];
       await settings.save();
 
       res.sendStatus(200);
