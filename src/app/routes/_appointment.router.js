@@ -218,32 +218,4 @@ export default (app, router, io, admin) => {
       res.send(err);
     }
   });
-
-  /**
-   * @api {put} /api/appointment/updateHours Update all appointment hours
-   * @apiName UpdateAppointment
-   * @apiGroup Appointment
-   */
-  router.post('/api/appointment/updateHours', admin, async (req, res) => {
-    try {
-      if (typeof(req.body.increment) !== 'number') {
-        return res.sendStatus(400);
-      }
-
-      let appointments = await Appointment
-        .find()
-        .exec();
-
-      for (let app of appointments) {
-        app.hour = (app.hour + 100 * req.body.increment);
-        // handle overflow and negative overflow
-        app.hour = ((app.hour % 2400) + 2400) % 2400;
-        await app.save();
-      }
-
-      res.sendStatus(200);
-    } catch (err) {
-      res.status(500).send(err);
-    }
-  });
 };

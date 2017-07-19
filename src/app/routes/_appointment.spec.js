@@ -71,8 +71,9 @@ describe('Appointment Routes', () => {
           expect(res.body).to.have.property('appointments');
           expect(res.body.hours.length).to.equal(1);
           expect(res.body.appointments.length).to.equal(1);
+          // hour & day should be incremented
           expect(res.body.hours[0]).to.equal(300);
-          expect(res.body.appointments[0].weekDay).to.equal(1);
+          expect(res.body.appointments[0].weekDay).to.equal(2);
           done(err);
         });
     });

@@ -27,7 +27,7 @@ const appointmentHelper = {
       entry.weekDay = entry.weekDay === 0 ? 6 : entry.weekDay - 1;
       entry.hour += 2400;
     } else if (entry.hour >= 2400) {
-      // change day to next day if positive hour
+      // change day to next day if positive overflow
       entry.weekDay = (entry.weekDay + 1) % 7;
       entry.hour %= 2400;
     }

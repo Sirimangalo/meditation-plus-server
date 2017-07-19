@@ -21,8 +21,8 @@ export default (app, router, admin) => {
   });
 
   /**
-   * @api {put} /api/settings Get the settings entity
-   * @apiName SetSettingsProperty
+   * @api {put} /api/settings Change the settings entity
+   * @apiName SetProperty
    * @apiGroup Settings
    */
   router.put('/api/settings/:property', admin, async (req, res) => {
@@ -34,6 +34,7 @@ export default (app, router, admin) => {
       const settings = {};
       settings[req.params.property] = req.body.value;
 
+      // update or create settings
       await Settings.findOneAndUpdate({}, settings, {
         upsert: true
       });
