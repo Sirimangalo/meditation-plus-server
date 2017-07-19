@@ -5,7 +5,6 @@ import {validateEnvVariables} from '../config/env.conf.js';
 import mongoose from 'mongoose';
 import _ from 'lodash';
 
-
 /**
  * convert modelName parameter to a class definition
  * @param modelName
@@ -38,8 +37,7 @@ async function saveRow(klass, data) {
       if (res) {
         //collect findResult
         findResult = Object.assign(findResult, res);
-      }
-      else {
+      } else {
         findErr = true;
         cconsole.red(`mapping error: ${k} not found`, data[k]);
         break;
@@ -53,6 +51,7 @@ async function saveRow(klass, data) {
       await row.save();
       cconsole.green('saving row', data);
     }
+
   } else {
     cconsole.red('duplicate row', data);
   }
@@ -68,7 +67,6 @@ async function parse_json(tableName, content) {
     } catch (err) {
       cconsole.red('save exception ' + err.message, row);
     }
-
   }
 }
 
@@ -94,9 +92,11 @@ function init() {
 let userMapper = async (data) => {
   let model = getModel('user');
   let user = await model.findOne(data);
-  if (user)
+  if (user) {
     return {user: user._id};
-  return null;
+  } else {
+    return null;
+  }
 };
 
 /**
@@ -125,7 +125,6 @@ const mapping = {
  */
 module.exports = async function start(tables) {
   init();
-  //  await test() // when developing new mapping functor
   for (let t of tables) {
     await readJson(t, `./dev-data/${t}.json`);
   }
