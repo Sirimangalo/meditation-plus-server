@@ -1,8 +1,10 @@
-const FS = require('q-io/fs');
+import FS from'q-io/fs';
+import cconsole  from 'colored-console';
 import mongooseConf from '../config/mongoose.conf.js';
 import {validateEnvVariables} from '../config/env.conf.js';
 import mongoose from 'mongoose';
 import _ from 'lodash';
+
 
 /**
  * convert modelName parameter to a class definition
@@ -39,7 +41,7 @@ async function saveRow(klass, data) {
       }
       else {
         findErr = true;
-        console.log(`mapping error: ${k} not found`, data[k]);
+        cconsole.red(`mapping error: ${k} not found`, data[k]);
         break;
       }
     }
@@ -49,10 +51,10 @@ async function saveRow(klass, data) {
       let newData = Object.assign(cleanData, findResult);
       let row = new klass(newData);
       await row.save();
-      console.log('saving row', data);
+      cconsole.green('saving row', data);
     }
   } else {
-    console.log('duplicate row', data);
+    cconsole.red('duplicate row', data);
   }
 }
 async function parse_json(tableName, content) {
@@ -63,7 +65,7 @@ async function parse_json(tableName, content) {
     try {
       await saveRow(model, row);
     } catch (err) {
-      console.log('save exception ' + err.message, row);
+      cconsole.red('save exception ' + err.message, row);
     }
 
   }
@@ -71,12 +73,12 @@ async function parse_json(tableName, content) {
 
 async function readJson(t, filepath) {
   try {
-    console.log('start file ', filepath);
+    cconsole.green('start file ', filepath);
     let content = await FS.read(filepath);
     await parse_json(t, content);
-    console.log('file processing finished', filepath, '\n\n');
+    cconsole.green('file processing finished', filepath, '\n\n');
   } catch (err) {
-    console.log('readJson error ' + err);
+    cconsole.red('readJson error ' + err);
   }
 }
 
@@ -107,6 +109,7 @@ let userLocalMapper = async (data) => {
   ret.password = new model().generateHash(ret.password);
   return {local: ret};
 };
+
 /**
  * mapping dictionary that map a field in the dev-data jsons
  */
@@ -121,12 +124,11 @@ const mapping = {
  * @returns {Promise.<void>}
  */
 module.exports = async function start(tables) {
-
   init();
   //  await test() // when developing new mapping functor
   for (let t of tables) {
     await readJson(t, `./dev-data/${t}.json`);
   }
-  console.log('after all processing');
+  cconsole.blue('after all processing');
   mongoose.connection.close();
 };
