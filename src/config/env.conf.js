@@ -1,5 +1,6 @@
 import config from './config.json';
 import { logger } from '../app/helper/logger.js';
+import webpush from 'web-push';
 
 // Check each necessary node `environment variable` to see if a
 // value has been set and if not, use the `config` object to
@@ -25,6 +26,11 @@ export function validateEnvVariables() {
 
   if (config.GOOGLE_API_KEY && process.env.GOOGLE_API_KEY !== config.GOOGLE_API_KEY)
     process.env.GOOGLE_API_KEY = config.GOOGLE_API_KEY;
+
+  // set API key for push notifications
+  if (process.env.GOOGLE_API_KEY) {
+    webpush.setGCMAPIKey(process.env.GOOGLE_API_KEY);
+  }
 
   // Set the appropriate MongoDB URI
   validateMongoUri();
