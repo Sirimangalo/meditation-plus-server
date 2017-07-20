@@ -5,7 +5,7 @@ let settingsSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
-  appointmentTicker: [{
+  appointmentsTicker: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PushSubscriptions',
     default: []
