@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import Settings from '../models/settings.model.js';
 
-let ObjectId = require('mongoose').Types.ObjectId;
 let user = new AuthedSupertest();
 let admin = new AuthedSupertest(
   'Admin User',
@@ -24,9 +23,9 @@ describe('Settings Routes', () => {
       settings = new Settings({
         appointmentsIncrement: 5,
         appointmentsTicker: [
-          ObjectId(123),
-          ObjectId(124),
-          ObjectId(125)
+          'endpoint 123',
+          'endpoint 124',
+          'endpoint 125'
         ]
       });
 
@@ -99,7 +98,7 @@ describe('Settings Routes', () => {
       admin
         .put('/api/settings/appointmentsTicker')
         .send({
-          value: [ObjectId(132)]
+          value: ['endpoint 132']
         })
         .expect(200)
         .end(err => done(err));
