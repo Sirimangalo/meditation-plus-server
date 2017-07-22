@@ -62,8 +62,8 @@ const sendTicker = async () => {
 
   // notification object for push message
   const notification = {
-    title: nextAppointment.user.name,
-    body: `is scheduled for ${appointHelper.printHour(nextAppointment.hour)}`,
+    title: 'Next Appointment',
+    body: `${nextAppointment.user.name} is scheduled for ${appointHelper.printHour(nextAppointment.hour)}`,
     tag: 'appointment-ticker',
     icon: nextAppointment.user.gravatarHash.length === 32
       ? `https://www.gravatar.com/avatar/${nextAppointment.user.gravatarHash}?s=192`
