@@ -6,8 +6,7 @@ let settingsSchema = mongoose.Schema({
     default: 0
   },
   appointmentsTicker: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PushSubscriptions',
+    type: String,
     default: []
   }]
 });
