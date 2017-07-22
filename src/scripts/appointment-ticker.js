@@ -4,6 +4,7 @@ import {validateEnvVariables} from '../config/env.conf.js';
 import {logger} from '../app/helper/logger.js';
 import Appointment from '../app/models/appointment.model.js';
 import Settings from '../app/models/settings.model.js';
+// eslint-disable-next-line
 import User from '../app/models/user.model.js';
 import PushSubscriptions from '../app/models/push.model.js';
 import appointHelper from '../app/helper/appointment.js';
