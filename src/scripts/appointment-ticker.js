@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import mongooseConf from '../config/mongoose.conf.js';
 import {validateEnvVariables} from '../config/env.conf.js';
+import {logger} from '../app/helper/logger.js';
 import Appointment from '../app/models/appointment.model.js';
 import Settings from '../app/models/settings.model.js';
 import User from '../app/models/user.model.js';
@@ -80,4 +81,5 @@ const sendTicker = async () => {
   mongoose.connection.close();
 };
 
+logger.info('Sending notifications about next appointment');
 sendTicker();
