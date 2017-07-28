@@ -7,16 +7,16 @@ import regExpEscape from 'escape-string-regexp';
 export default (app, router, admin) => {
 
   /**
-   * @api {get} /api/wiki Search for entries (= videos) in the wiki
+   * @api {post} /api/wiki Search for entries (= videos) in the wiki
    * @apiName Search
    * @apiGroup Wiki
    *
    * @apiParam {String}         search      String that matches an entry (title, description)
-   * @apiParam {String[]}       tags        List of tags to which a result should match
-   * @apiParam {Number}         limit       Maximum number of returned tags (default: 50)
+   * @apiParam {String[]}       tags        List of tags results should contain
+   * @apiParam {Number}         limit       Maximum number of returned tags (default: 15)
    * @apiParam {Number}         skip        Number of records to skip during search (default: 0)
-   * @apiParam {String}         sortBy      A valid field name of the WikiTag model for sorting the result by it
-   * @apiParam {Number/String}  sortOrder   Valid sort option for mongodb (-1,1 or 'ascending','descending')
+   * @apiParam {String}         sortBy      Sort result by this field of the WikiTag model
+   * @apiParam {Number/String}  sortOrder   Valid sort option (-1,1,'ascending','descending', ...)
    *
    * @apiSuccess {any[]}        result      List of matching entries
    */
@@ -47,7 +47,7 @@ export default (app, router, admin) => {
 
       const sorting = {};
       const sortBy = req.body.sortBy ? req.body.sortBy : 'publishedAt';
-      sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : -1;
+      sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : 'descending';
 
       const result = await WikiEntry
         .find(query)
@@ -58,13 +58,12 @@ export default (app, router, admin) => {
 
       res.json(result);
     } catch (err) {
-      console.log(err);
       res.status(500).send(err);
     }
   });
 
   /**
-   * @api {get} /api/wiki/new Submit a new video
+   * @api {post} /api/wiki/new Submit a new video
    * @apiName New
    * @apiGroup Wiki
    *
@@ -134,8 +133,9 @@ export default (app, router, admin) => {
         })
         .then();
 
-      if (duplicate) {
-        return res.status(400).send('There already exists a duplicate entry for this video.');
+      if (duplicate && duplicate.user != req.user._doc._id &&
+        req.user._doc.role !== 'ROLE_ADMIN') {
+        return res.status(403).send('There already exists a duplicate entry for this video.');
       }
 
       // Check tags
@@ -156,7 +156,7 @@ export default (app, router, admin) => {
       }
 
       // All checks done!
-      // Continue with adding new entry to wiki. This process is because
+      // Continue with adding the new entry. This process is because
       // of the references between the WikiTag and WikiEntry model a bit
       // complicated.
 
@@ -166,16 +166,16 @@ export default (app, router, admin) => {
         startAt: startAt,
         title: apiResults.snippet.title,
         description: description ? description : apiResults.snippet.description,
-        publishedAt: apiResults.snippet.publishedAt
+        publishedAt: apiResults.snippet.publishedAt,
+        user: req.user._doc
       });
 
-
-      // update already existing tags
+      // update tags
       for (const tag of tags) {
         await WikiTag
           .update({
             _id: tag
-          },{
+          }, {
             _id: tag,
             // increase count of records for tag by 1
             $inc: {
@@ -202,7 +202,7 @@ export default (app, router, admin) => {
   });
 
   /**
-   * @api {get} /api/wiki/tags Get a list of tags matching certain params
+   * @api {post} /api/wiki/tags Get a list of tags matching certain params
    * @apiName GetTags
    * @apiGroup Wiki
    *
@@ -252,8 +252,31 @@ export default (app, router, admin) => {
     }
   });
 
-  router.delete('/api/wiki/:id', admin, async (req, res) => {
+  router.delete('/api/wiki/:id', async (req, res) => {
     try {
+      let result = await WikiEntry
+        .findOne({ _id: req.params.id })
+        .exec();
+
+      if (req.user._doc.role !== 'ROLE_ADMIN'
+        && result.user != req.user._doc._id) {
+        return res.sendStatus(403);
+      }
+
+      // remove reference from associated tags
+      await WikiTag.update({ entries: result._id }, {
+        $pull: { entries: result._id },
+        $inc: { count: -1 }
+      });
+
+      // remove unused tags
+      await WikiTag.remove({
+        count: 0
+      });
+
+      await result.remove();
+
+      res.sendStatus(204);
     } catch (err) {
       res.status(500).send(err);
     }

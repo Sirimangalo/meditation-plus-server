@@ -7,6 +7,12 @@ import WikiTag from '../models/wikiTag.model.js';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 let randomUser = new AuthedSupertest();
+let randomUser2 = new AuthedSupertest(
+  'Testuser',
+  'testing',
+  'test@test.tt',
+  'password'
+);
 let admin = new AuthedSupertest(
   'Admin User',
   'admin',
@@ -50,7 +56,6 @@ describe('Wiki Routes', () => {
       expect(wikiHelper.extractTags(' one  ,  two,   three     ,')).to.eql(['one', 'two', 'three']);
       expect(wikiHelper.extractTags('one,one,  one     , two,three,  two')).to.eql(['one', 'two', 'three']);
     });
-
   });
 
   describe('POST /api/wiki', () => {
@@ -65,28 +70,32 @@ describe('Wiki Routes', () => {
               title: 'A random title',
               description: 'The description is pretty random, too.',
               videoId: 'Ef4X_5Many1',
-              tags: ['random', 'tagA', 'test']
+              tags: ['random', 'tagA', 'test'],
+              user: randomUser.user
             },
             {
               _id: ObjectId('123456789012'),
               title: 'A static title',
               description: 'The description is pretty static, too.',
               videoId: 'Ef4X_5Many2',
-              tags: ['static', 'tagB', 'test']
+              tags: ['static', 'tagB', 'test'],
+              user: randomUser.user
             },
             {
               _id: ObjectId('123456789013'),
               title: 'Another static title',
               description: 'But the no explanatory description.',
               videoId: 'Ef4X_5Many3',
-              tags: ['static', 'tagB', 'test']
+              tags: ['static', 'tagB', 'test'],
+              user: randomUser.user
             },
             {
               _id: ObjectId('123456789014'),
               title: 'A random, static title',
               description: 'The randomness of static text text search.',
               videoId: 'Ef4X_5Many4',
-              tags: ['static', 'random', 'tagA', 'tagB', 'test']
+              tags: ['static', 'random', 'tagA', 'tagB', 'test'],
+              user: randomUser.user
             }
           ])
           .then(() => done());
@@ -175,6 +184,8 @@ describe('Wiki Routes', () => {
     let entry, tag;
 
     randomUser.authorize();
+    randomUser2.authorize();
+    admin.authorize();
 
     beforeEach(done => {
       WikiEntry.remove(() => {
@@ -182,7 +193,8 @@ describe('Wiki Routes', () => {
           videoId: 'Ef4X_5MmVnU',
           title: 'Testvideo',
           startAt: 0,
-          tags: ['Evening Dhamma']
+          tags: ['Evening Dhamma'],
+          user: randomUser.user
         });
 
         entry.save(err => {
@@ -219,7 +231,7 @@ describe('Wiki Routes', () => {
         .post('/api/wiki/new')
         .send({
           url: 'https://vimeo.com/189919038',
-          tags: 'tag1,tag2,tag3'
+          tags: 'Evening Dhamma,tag1,tag2,tag3'
         })
         .expect(400)
         .end(err => done(err));
@@ -230,20 +242,20 @@ describe('Wiki Routes', () => {
         .post('/api/wiki/new')
         .send({
           url: 'https://www.youtube.com/watch?v=C0DPdy98e4c',
-          tags: 'tag1,tag2,tag3'
+          tags: 'Evening Dhamma,tag1,tag2,tag3'
         })
         .expect(403)
         .end(err => done(err));
     });
 
-    it('should respond with 400 when similar entry already exists', done => {
-      randomUser
+    it('should respond with 403 when similar entry already exists', done => {
+      randomUser2
         .post('/api/wiki/new')
         .send({
           url: 'https://www.youtube.com/watch?v=Ef4X_5MmVnU',
-          tags: 'tag1,tag2,tag3'
+          tags: 'Evening Dhamma,tag1,tag2,tag3'
         })
-        .expect(400)
+        .expect(403)
         .end(err => done(err));
     });
 
@@ -282,6 +294,28 @@ describe('Wiki Routes', () => {
         .expect(200)
         .end(err => done(err));
     });
+
+    it('should allow admins to modify existing entries', done => {
+      admin
+        .post('/api/wiki/new')
+        .send({
+          url: 'https://www.youtube.com/watch?v=Ef4X_5MmVnU',
+          tags: 'Evening Dhamma,tag1,tag4,tag5'
+        })
+        .expect(200)
+        .end(err => done(err));
+    });
+
+    it('should allow owner to modify his entry', done => {
+      randomUser
+        .post('/api/wiki/new')
+        .send({
+          url: 'https://www.youtube.com/watch?v=Ef4X_5MmVnU',
+          tags: 'Evening Dhamma,tag10'
+        })
+        .expect(200)
+        .end(err => done(err));
+    });
   });
 
   describe('POST /api/wiki/tags', () => {
@@ -295,7 +329,8 @@ describe('Wiki Routes', () => {
           videoId: 'Ef4X_5MmVnU',
           title: 'Testvideo',
           startAt: 0,
-          tags: ['Evening Dhamma']
+          tags: ['Evening Dhamma'],
+          user: randomUser.user
         });
 
         entry.save(err => {
@@ -383,6 +418,119 @@ describe('Wiki Routes', () => {
           expect(res.body[0].entries[0]).to.have.property('startAt');
           expect(res.body[0].entries[0]).to.have.property('tags');
           done(err);
+        });
+    });
+  });
+
+  describe('DELETE /api/wiki', () => {
+    randomUser.authorize();
+    randomUser2.authorize();
+    admin.authorize();
+
+    beforeEach(done => {
+      WikiEntry.remove(() => {
+        WikiEntry
+          .insertMany([
+            {
+              _id: ObjectId('123456789011'),
+              title: 'Video A',
+              videoId: 'Ef4X_5Many1',
+              tags: ['tagA'],
+              user: randomUser.user
+            },
+            {
+              _id: ObjectId('123456789012'),
+              title: 'Video B',
+              videoId: 'Ef4X_5Many2',
+              tags: ['tagB', 'tagA'],
+              user: randomUser.user
+            }
+          ])
+          .then(() => {
+            WikiTag.remove(() => {
+              WikiTag
+                .insertMany([
+                  {
+                    _id: 'tagA',
+                    entries: [ObjectId('123456789011'), ObjectId('123456789012')],
+                    count: 2,
+                    related: ['tagB']
+                  },
+                  {
+                    _id: 'tagB',
+                    entries: [ObjectId('123456789012')],
+                    count: 1,
+                    related: ['tagA']
+                  }
+                ])
+                .then(() => done());
+            });
+          });
+      });
+    });
+
+    afterEach(() => {
+      return WikiEntry.remove().exec() & WikiTag.remove().exec();
+    });
+
+    it('should respond with 403 when unauthorized', done => {
+      randomUser2
+        .delete('/api/wiki/123456789012')
+        .expect(403)
+        .end(err => done(err));
+    });
+
+    it('should respond with 204 and delete record if is admin', done => {
+      admin
+        .delete('/api/wiki/123456789011')
+        .expect(204)
+        .end(err => {
+          WikiEntry
+            .findOne({
+              videoId: 'Ef4X_5Many1'
+            })
+            .then(res => {
+              expect(res).to.equal(null);
+              done(err);
+            });
+        });
+    });
+
+    it('should respond with 204 and delete record if is owner', done => {
+      randomUser
+        .delete('/api/wiki/123456789011')
+        .expect(204)
+        .end(err => {
+          if (err) return done(err);
+
+          WikiEntry
+            .findOne({
+              videoId: 'Ef4X_5Many1'
+            })
+            .then(res => {
+              expect(res).to.equal(null);
+              done(err);
+            });
+        });
+    });
+
+    it('should remove references from tags if removed', done => {
+      randomUser
+        .delete('/api/wiki/123456789012')
+        .expect(204)
+        .end(err => {
+          if (err) return done(err);
+
+          WikiTag
+            .findOne({
+              _id: 'tagB'
+            })
+            .then(res => {
+              expect(res.count).to.equal(1);
+              expect(res.entries.length).to.equal(1);
+              expect(res.entries.indexOf(ObjectId('123456789011'))).to.equal(-1);
+              done(err);
+            });
         });
     });
   });
