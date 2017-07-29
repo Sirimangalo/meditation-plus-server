@@ -48,14 +48,6 @@ describe('Wiki Routes', () => {
         expect(wikiHelper.extractId(url)).to.equal('Ef4X_5MmVnU');
       }
     });
-
-    it('should correctly extract tags from string', () => {
-      expect(wikiHelper.extractTags('one,two,three')).to.eql(['one', 'two', 'three']);
-      expect(wikiHelper.extractTags('one,    2   , three')).to.eql(['one', 'three']);
-      expect(wikiHelper.extractTags('tag,a way too long name for a tag name in the wiki')).to.eql(['tag']);
-      expect(wikiHelper.extractTags(' one  ,  two,   three     ,')).to.eql(['one', 'two', 'three']);
-      expect(wikiHelper.extractTags('one,one,  one     , two,three,  two')).to.eql(['one', 'two', 'three']);
-    });
   });
 
   describe('POST /api/wiki', () => {

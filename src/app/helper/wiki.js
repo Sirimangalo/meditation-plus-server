@@ -11,13 +11,6 @@ export default {
     const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^###\&\?]*).*/;
     const match = url.match(regExp);
     return match && match[2].length == 11 ? match[2] : '';
-  },
-
-  /**
-   * Convert a string of comma separated tags into an array.
-   * @param  {String}   str Tags as string
-   * @return {String[]}     List of tags as array
-   */
-  extractTags: (str) =>
-    [...new Set(str.split(',').map(s => s.trim()).filter(x => x.length > 2 && x.length < 35))]
+  }
 };
+

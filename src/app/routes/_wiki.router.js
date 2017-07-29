@@ -141,7 +141,9 @@ export default (app, router, admin) => {
       // Check tags
       // ==========
 
-      tags = wikiHelper.extractTags(tags);
+      tags = tags
+        .map(s => s.trim())
+        .filter(x => x.length > 2 && x.length < 35);
 
       // try to find at least one tag within the provided ones that already exists
       // on another entry
@@ -197,6 +199,7 @@ export default (app, router, admin) => {
 
       res.sendStatus(200);
     } catch (err) {
+      console.log(err);
       res.status(500).send(err);
     }
   });
@@ -207,12 +210,12 @@ export default (app, router, admin) => {
    * @apiGroup Wiki
    *
    * @apiParam {String}         search      String that matches a tag's _id
-   * @apiParam {Number}         limit       Maximum number of returned tags
-   * @apiParam {Number}         skip        Number of records to skip during search
    * @apiParam {String[]}       relatedTo   The _id of a tag to which all returned tags have to be related
+   * @apiParam {Boolean}        populate    Whether or not to populate the tags with the associated entries
    * @apiParam {String}         sortBy      A valid field name of the WikiTag model for sorting the result by it
    * @apiParam {Number/String}  sortOrder   Valid sort option for mongodb (-1,1 or 'ascending','descending')
-   * @apiParam {Boolean}        populate    Whether or not to populate the tags with the associated entries
+   * @apiParam {Number}         limit       Maximum number of returned tags
+   * @apiParam {Number}         skip        Number of records to skip during search
    *
    * @apiSuccess {Number}   increment           value of hours to add
    */
@@ -229,13 +232,13 @@ export default (app, router, admin) => {
         query._id = { $regex: new RegExp('^' + regExpEscape(req.body.search), 'i') };
       }
 
-      if (req.body.relatedTo) {
+      if (req.body.relatedTo && req.body.relatedTo.length > 0) {
         query.related = { $in: req.body.relatedTo };
       }
 
       // set sort of query
       const sortBy = req.body.sortBy ? req.body.sortBy : '_id';
-      sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : 1;
+      sorting[sortBy] = req.body.sortOrder ? req.body.sortOrder : 'ascending';
 
       // find matching tags
       const result = await WikiTag
