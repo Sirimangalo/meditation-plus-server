@@ -184,7 +184,7 @@ export default (app, router, io) => {
       io.sockets.emit('meditation', 'no content');
 
       // setup PUSH notification if allowed
-      if (user.notifications.meditation) {
+      if (!req.body.start && user.notifications.meditation) {
         if (walking) {
           setTimeout(() => push.send({
             _id: user._id
