@@ -15,7 +15,17 @@ let wikiEntrySchema = mongoose.Schema({
 // add text index for full text search on the description field
 wikiEntrySchema.index({
   title: 'text',
-  description: 'text'
+  description: 'text',
+  tags: 'text'
+}, {
+  // searching for title and description should be the preferred
+  // fields. Those results will be higher ranked by increasing
+  // their weights.
+  weights: {
+    title: 4,
+    description: 4,
+    tags: 1
+  }
 });
 
 export default mongoose.model('WikiEntry', wikiEntrySchema);
