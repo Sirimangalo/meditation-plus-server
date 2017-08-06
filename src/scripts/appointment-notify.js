@@ -56,8 +56,7 @@ const sendTicker = async () => {
     .then();
 
   if (!subs || !subs.length) {
-    // ... the push subscription for the endpoints are deprecated
-    // or don't exist
+    // ... the push subscription for the endpoints are deprecated or don't exist
     mongoose.connection.close();
     return;
   }
@@ -71,6 +70,10 @@ const sendTicker = async () => {
       ? `https://www.gravatar.com/avatar/${nextAppointment.user.gravatarHash}?s=192`
       : null,
     silent: true,
+    data: {
+      url: '/schedule',
+      sticky: true
+    },
     sticky: true // not supported by browsers (yet)
   };
 
