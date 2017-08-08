@@ -77,8 +77,8 @@ export class ProfileHelper {
     const ts = meditations.timespan;
 
     // adding times of last 10 months
-    meditations.lastMonths[date.format('MMM')] =
-      this.setValue(meditations.lastMonths[date.format('MMM')], value, add);
+    meditations.lastMonths[date.format('MMM YY')] =
+      this.setValue(meditations.lastMonths[date.format('MMM YY')], value, add);
 
     // adding times of last 10 weeks
     if (date >= ts.tenWeeksAgo) {
