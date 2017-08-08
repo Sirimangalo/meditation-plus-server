@@ -13,26 +13,26 @@ const appointmentHelper = {
   /**
    * Adds increment of hours to an appointment.
    *
-   * @param  {Object} entry     Appointment object
-   * @param  {Number} increment Amount of hours to add
-   * @return {Object}           Modified appointment object
+   * @param  {Object} appointment   Appointment object
+   * @param  {Number} increment     Amount of hours to add
+   * @return {Object}               Modified appointment object
    */
-  addIncrement: (entry, increment) => {
+  addIncrement: (appointment, increment) => {
     // add increment
-    entry.hour = (entry.hour + 100 * increment);
+    appointment.hour = (appointment.hour + 100 * increment);
 
     // handle possible overflow
-    if (entry.hour < 0) {
+    if (appointment.hour < 0) {
       // change day to previous day if negative hour
-      entry.weekDay = entry.weekDay === 0 ? 6 : entry.weekDay - 1;
-      entry.hour += 2400;
-    } else if (entry.hour >= 2400) {
+      appointment.weekDay = appointment.weekDay === 0 ? 6 : appointment.weekDay - 1;
+      appointment.hour += 2400;
+    } else if (appointment.hour >= 2400) {
       // change day to next day if positive overflow
-      entry.weekDay = (entry.weekDay + 1) % 7;
-      entry.hour %= 2400;
+      appointment.weekDay = (appointment.weekDay + 1) % 7;
+      appointment.hour %= 2400;
     }
 
-    return entry;
+    return appointment;
   }
 };
 
