@@ -1,4 +1,3 @@
-
 import { app } from '../../server.conf.js';
 import supertest from 'supertest';
 import { expect } from 'chai';
@@ -16,10 +15,10 @@ let userBasicInfos = {
 };
 let randomUser = new AuthedSupertest();
 let user2 = new AuthedSupertest(
- 'Second User',
- 'user2',
- 'user2@sirimangalo.org',
- 'password'
+  'Second User',
+  'user2',
+  'user2@sirimangalo.org',
+  'password'
 );
 let admin = new AuthedSupertest(
   'Admin User',
@@ -75,21 +74,21 @@ describe('Profile Routes', () => {
 
     it('should respond with 401 when not authenticated', done => {
       request
-      .get('/api/profile')
-      .expect(401)
-      .end(err => done(err));
+        .get('/api/profile')
+        .expect(401)
+        .end(err => done(err));
     });
 
     it('should respond with profile details for the connected user', done => {
       user2
-      .get('/api/profile')
-      .expect(200)
-      .end((err, res) => {
-        expect(res.body.name).to.equal('Second User');
-        expect(res.body.local.email).to.equal('user2@sirimangalo.org');
-        expect(res.body.local.password).to.be.undefined;
-        done(err);
-      });
+        .get('/api/profile')
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.name).to.equal('Second User');
+          expect(res.body.local.email).to.equal('user2@sirimangalo.org');
+          expect(res.body.local.password).to.be.undefined;
+          done(err);
+        });
     });
   });
 
@@ -100,29 +99,29 @@ describe('Profile Routes', () => {
 
     it('should respond with 401 when not authenticated', done => {
       request
-      .get(`/api/profile/${profile._id}`)
-      .expect(401)
-      .end(err => done(err));
+        .get(`/api/profile/${profile._id}`)
+        .expect(401)
+        .end(err => done(err));
     });
 
     it('should respond with 404 when profile does not exist (wrong id)', done => {
       let wrongId = '000f0f00bcf00cd000000000';
       randomUser
-      .get(`/api/profile/${wrongId}`)
-      .expect(404)
-      .end(err => done(err));
+        .get(`/api/profile/${wrongId}`)
+        .expect(404)
+        .end(err => done(err));
     });
 
     it('should respond with the profile', done => {
       randomUser
-      .get(`/api/profile/${profile._id}`)
-      .expect(200)
-      .end((err, res) => {
-        expect(res.body.name).to.equal(userBasicInfos.name);
-        expect(res.body.local.email).to.equal(userBasicInfos.email);
-        expect(res.body.local.password).to.be.undefined;
-        done(err);
-      });
+        .get(`/api/profile/${profile._id}`)
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.name).to.equal(userBasicInfos.name);
+          expect(res.body.local.email).to.equal(userBasicInfos.email);
+          expect(res.body.local.password).to.be.undefined;
+          done(err);
+        });
     });
   });
 
@@ -133,29 +132,29 @@ describe('Profile Routes', () => {
 
     it('should respond with 401 when not authenticated', done => {
       request
-      .get(`/api/profile/username/${profile.username}`)
-      .expect(401)
-      .end(err => done(err));
+        .get(`/api/profile/username/${profile.username}`)
+        .expect(401)
+        .end(err => done(err));
     });
 
     it('should respond with 404 when profile does not exist (wrong username)', done => {
       randomUser
-      .get('/api/profile/username/reallydoesnotexist')
-      .expect(404)
-      .end(err => done(err));
+        .get('/api/profile/username/reallydoesnotexist')
+        .expect(404)
+        .end(err => done(err));
     });
 
     it('should respond with the profile', done => {
       randomUser
-      .get(`/api/profile/username/${profile.username}`)
-      .expect(200)
-      .end((err, res) => {
-        expect(res.body.name).to.equal(userBasicInfos.name);
-        expect(res.body.username).to.equal(userBasicInfos.username);
-        expect(res.body.local.email).to.equal(userBasicInfos.email);
-        expect(res.body.local.password).to.be.undefined;
-        done(err);
-      });
+        .get(`/api/profile/username/${profile.username}`)
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.name).to.equal(userBasicInfos.name);
+          expect(res.body.username).to.equal(userBasicInfos.username);
+          expect(res.body.local.email).to.equal(userBasicInfos.email);
+          expect(res.body.local.password).to.be.undefined;
+          done(err);
+        });
     });
   });
 
@@ -211,9 +210,9 @@ describe('Profile Routes', () => {
 
     it('should respond with 401 when not authenticated', done => {
       request
-      .put('/api/profile')
-      .expect(401)
-      .end(err => done(err));
+        .put('/api/profile')
+        .expect(401)
+        .end(err => done(err));
     });
 
     it('should respond with 200 when user profile updated', done => {
@@ -225,21 +224,21 @@ describe('Profile Routes', () => {
       user2
         .put('/api/profile')
         .send(tmpCustomUserInfo)
-      .expect(200)
-      .end((err) => {
-        if (err) return done(err);
-        // check if really updated
-        user2
-          .get('/api/profile')
-          .expect(200)
-          .end((err, res) => {
-            expect(res.body.name).to.equal('Second User PUT');
-            expect(res.body.local.email).to.equal('user2put@sirimangalo.org');
-            expect(res.body.local.password).to.be.undefined;
-            expect(res.body.timezone).to.equal('UTC');
-            done(err);
-          });
-      });
+        .expect(200)
+        .end((err) => {
+          if (err) return done(err);
+          // check if really updated
+          user2
+            .get('/api/profile')
+            .expect(200)
+            .end((err, res) => {
+              expect(res.body.name).to.equal('Second User PUT');
+              expect(res.body.local.email).to.equal('user2put@sirimangalo.org');
+              expect(res.body.local.password).to.be.undefined;
+              expect(res.body.timezone).to.equal('UTC');
+              done(err);
+            });
+        });
     });
 
     it('should respond with 400 when wrong timezone format', done => {

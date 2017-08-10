@@ -77,8 +77,8 @@ export class ProfileHelper {
     const ts = meditations.timespan;
 
     // adding times of last 10 months
-    meditations.lastMonths[date.format('MMM')] =
-      this.setValue(meditations.lastMonths[date.format('MMM')], value, add);
+    meditations.lastMonths[date.format('MMM YY')] =
+      this.setValue(meditations.lastMonths[date.format('MMM YY')], value, add);
 
     // adding times of last 10 weeks
     if (date >= ts.tenWeeksAgo) {
@@ -123,7 +123,7 @@ export class ProfileHelper {
       // only one day ago = consecutive day
       if (duration.asDays() === 1) {
         meditations.currentConsecutiveDays =
-            meditations.currentConsecutiveDays == 0
+          meditations.currentConsecutiveDays == 0
             ? 2
             : meditations.currentConsecutiveDays + 1;
 

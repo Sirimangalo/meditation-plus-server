@@ -1,5 +1,7 @@
 import Appointment from '../models/appointment.model.js';
+import Settings from '../models/settings.model.js';
 import { logger } from '../helper/logger.js';
+import appointHelper from '../helper/appointment.js';
 
 export default (app, router, io, admin) => {
 
@@ -29,12 +31,22 @@ export default (app, router, io, admin) => {
         .lean()
         .exec();
 
+      const settings = await Settings.findOne();
+      const increment = settings && settings.appointmentsIncrement
+        ? settings.appointmentsIncrement
+        : 0;
+
       result.map(entry => {
+        entry = appointHelper.addIncrement(entry, increment);
+
         if (json.hours.indexOf(entry.hour) < 0) {
           json.hours.push(entry.hour);
         }
         json.appointments.push(entry);
       });
+
+      // sort hours ascending
+      json.hours.sort((a, b) => (a - b));
 
       res.json(json);
     } catch (err) {
@@ -43,7 +55,7 @@ export default (app, router, io, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {get} /api/appointment/:id Get single appointment
    * @apiName GetAppointment
    * @apiGroup Appointment
@@ -53,18 +65,25 @@ export default (app, router, io, admin) => {
    */
   router.get('/api/appointment/:id', admin, async (req, res) => {
     try {
-      const result = await Appointment
+      let result = await Appointment
         .findOne({ _id: req.params.id })
         .lean();
 
       if (!result) return res.sendStatus(404);
+
+      const settings = await Settings.findOne();
+
+      if (settings && settings.appointmentsIncrement) {
+        result = appointHelper.addIncrement(result, settings.appointmentsIncrement);
+      }
+
       res.json(result);
     } catch (err) {
       res.send(err);
     }
   });
 
-   /**
+  /**
    * @api {put} /api/appointment/:id Update appointment
    * @apiName UpdateAppointment
    * @apiGroup Appointment
@@ -139,8 +158,7 @@ export default (app, router, io, admin) => {
       }
 
       // toggle registration for current user
-      appointment.user = appointment.user
-        && appointment.user == req.user._doc._id
+      appointment.user = appointment.user && appointment.user == req.user._doc._id
         ? null
         : req.user._doc;
 

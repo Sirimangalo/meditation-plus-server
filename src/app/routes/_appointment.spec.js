@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { expect } from 'chai';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import Appointment from '../models/appointment.model.js';
+import Settings from '../models/settings.model.js';
 
 const request = supertest(app);
 let user = new AuthedSupertest();
@@ -21,24 +22,34 @@ let admin = new AuthedSupertest(
 );
 
 describe('Appointment Routes', () => {
-  let appointment;
+  let appointment, settings;
 
   beforeEach(done => {
-    Appointment.remove(() => {
-      appointment = new Appointment({
-        weekDay: 1,
-        hour: 12
-      });
+    Settings.remove(() => {
+      Appointment.remove(() => {
+        settings = new Settings({
+          appointmentsIncrement: 15
+        });
 
-      appointment.save(err => {
-        if (err) return done(err);
-        done();
+        appointment = new Appointment({
+          weekDay: 1,
+          hour: 1200
+        });
+
+        settings.save(err => {
+          if (err) return done(err);
+
+          appointment.save(err => {
+            if (err) return done(err);
+            done();
+          });
+        });
       });
     });
   });
 
   afterEach(() => {
-    return Appointment.remove().exec();
+    return Appointment.remove().exec() & Settings.remove().exec();
   });
 
   describe('GET /api/appointment', () => {
@@ -60,8 +71,9 @@ describe('Appointment Routes', () => {
           expect(res.body).to.have.property('appointments');
           expect(res.body.hours.length).to.equal(1);
           expect(res.body.appointments.length).to.equal(1);
-          expect(res.body.hours[0]).to.equal(12);
-          expect(res.body.appointments[0].weekDay).to.equal(1);
+          // hour & day should be incremented
+          expect(res.body.hours[0]).to.equal(300);
+          expect(res.body.appointments[0].weekDay).to.equal(2);
           done(err);
         });
     });
@@ -69,7 +81,7 @@ describe('Appointment Routes', () => {
     it('should respond with more data when added', done => {
       Appointment.create({
         weekDay: 2,
-        hour: 13
+        hour: 700
       }).then((res, err) => {
         if (err) return done(err);
 
@@ -80,6 +92,8 @@ describe('Appointment Routes', () => {
             expect(res.body).to.have.property('hours');
             expect(res.body).to.have.property('appointments');
             expect(res.body.hours.length).to.equal(2);
+            expect(res.body.hours[0]).to.equal(300);
+            expect(res.body.hours[1]).to.equal(2200);
             expect(res.body.appointments.length).to.equal(2);
             done(err);
           });
@@ -89,7 +103,7 @@ describe('Appointment Routes', () => {
     it('should only add hours once', done => {
       Appointment.create({
         weekDay: 1,
-        hour: 12
+        hour: 1200
       }).then((res, err) => {
         if (err) return done(err);
 

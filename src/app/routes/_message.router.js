@@ -23,8 +23,8 @@ export default (app, router, io) => {
       let messages = await Message
         .find(
           req.user._doc.role === 'ROLE_ADMIN'
-          ? { deleted: { $ne: true } }
-          : {}
+            ? { deleted: { $ne: true } }
+            : {}
         )
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
@@ -126,15 +126,20 @@ export default (app, router, io) => {
 
         push.send({
           'notifications.message': true,
+          // make sure the user is not meditating
+          lastMeditation: { $lt: new Date() },
           username: mentions.indexOf('@all') > -1 && user && user.role && user.role === 'ROLE_ADMIN'
             ? { $exists: true, $ne: user.username }
-            : { $in: mentions.map(s => s.substring(1))}
+            : { $in: mentions.map(s => s.substring(1)) }
         }, {
-          title: 'New Message',
+          title: req.user._doc.name || 'New Message',
           body: messageText,
           data: {
             url: '/home;tab=chat'
-          }
+          },
+          icon: req.user._doc && req.user._doc.gravatarHash
+            ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
+            : null
         });
       }
 
@@ -155,10 +160,11 @@ export default (app, router, io) => {
    */
   router.put('/api/message/:id', async (req, res) => {
     try {
-      let message = await Message.findOne({
-        _id: ObjectId(req.params.id)
-      })
-      .exec();
+      let message = await Message
+        .findOne({
+          _id: ObjectId(req.params.id)
+        })
+        .exec();
 
       if (!message) return res.sendStatus(404);
 
@@ -209,10 +215,11 @@ export default (app, router, io) => {
    */
   router.delete('/api/message/:id', async (req, res) => {
     try {
-      let message = await Message.findOne({
-        _id: ObjectId(req.params.id)
-      })
-      .exec();
+      let message = await Message
+        .findOne({
+          _id: ObjectId(req.params.id)
+        })
+        .exec();
 
       if (!message) return res.sendStatus(404);
 

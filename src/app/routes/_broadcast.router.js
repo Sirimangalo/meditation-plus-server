@@ -31,7 +31,7 @@ export default (app, router, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {get} /api/broadcast/:id Get single broadcast
    * @apiName GetBroadcast
    * @apiGroup Broadcast
@@ -53,7 +53,7 @@ export default (app, router, admin) => {
     }
   });
 
-   /**
+  /**
    * @api {put} /api/broadcast/:id Update broadcast
    * @apiName UpdateBroadcast
    * @apiGroup Broadcast
