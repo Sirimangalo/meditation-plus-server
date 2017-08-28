@@ -8,10 +8,14 @@ export default (app, router, admin) => {
    */
   router.get('/api/settings', admin, async (req, res) => {
     try {
-      const settings = await Settings.findOne();
+      let settings = await Settings.findOneAndUpdate({}, {}, {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true
+      });
 
       if (!settings) {
-        return res.sendStatus(404);
+        settings = new Settings();
       }
 
       res.json(settings);
@@ -36,7 +40,9 @@ export default (app, router, admin) => {
 
       // update or create settings
       await Settings.findOneAndUpdate({}, settings, {
-        upsert: true
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true
       });
 
       res.sendStatus(200);
