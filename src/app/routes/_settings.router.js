@@ -8,15 +8,13 @@ export default (app, router, admin) => {
    */
   router.get('/api/settings', admin, async (req, res) => {
     try {
+      // Find settings entity or create a new one with the in the
+      // Settings model defined defaults.
       let settings = await Settings.findOneAndUpdate({}, {}, {
         new: true,
         upsert: true,
         setDefaultsOnInsert: true
       });
-
-      if (!settings) {
-        settings = new Settings();
-      }
 
       res.json(settings);
     } catch (err) {
@@ -38,7 +36,8 @@ export default (app, router, admin) => {
       const settings = {};
       settings[req.params.property] = req.body.value;
 
-      // update or create settings
+      // Find settings entity or create a new one with the in the
+      // Settings model defined defaults and then update it.
       await Settings.findOneAndUpdate({}, settings, {
         new: true,
         upsert: true,
