@@ -10,7 +10,7 @@ export default (app, router, admin) => {
     try {
       // Find settings entity or create a new one with the in the
       // Settings model defined defaults.
-      let settings = await Settings.findOneAndUpdate({}, {}, {
+      const settings = await Settings.findOneAndUpdate({}, {}, {
         new: true,
         upsert: true,
         setDefaultsOnInsert: true
