@@ -70,11 +70,17 @@ const appointmentHelper = {
   getNow: async (user, reconnect = false) => {
     if (!user) return null;
 
-    // appointments are formatted in this timezone
-    const now = moment.tz('America/Toronto');
-
-    // load global increment for appointments
+    // load settings entity
     const settings = await Settings.findOne();
+
+    // list of users that will act as callees
+    const callees = settings.appointmentsCallees
+      ? settings.appointmentsCallees
+      : [];
+
+    // appointments are formatted in this timezone
+    const now = moment.tz(settings.appointmentsTimezone);
+
     const increment = settings && settings.appointmentIncrement
       ? settings.appointmentIncrement
       : 0;
@@ -103,16 +109,16 @@ const appointmentHelper = {
     }
 
     // check if user is admin and marked as teacher
-    const isTeacher = user.role === 'ROLE_ADMIN' && user.username === 'yuttadhammo';
+    const isCallee = user.role === 'ROLE_ADMIN' && callees.indexOf(user._id) > 0;
     // check if appointment is the one of requested user
     const isOwnAppointment = doc.user._id.toString() === user._id.toString()
     // check whether the time now is before 10 minutes after the appointment starts
     const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10 + 60 * increment, 'minutes'));
 
 
-    if (doc && (isTeacher || isOwnAppointment && (reconnect || isAppOnTime))) {
+    if (doc && (isCallee || isOwnAppointment && (reconnect || isAppOnTime))) {
 
-      if (!isTeacher && !reconnect) {
+      if (!isCallee && !reconnect) {
         // register the user's request to initiate an appointment.
         // Use 'await' in order to not confuse the count of
         // the appointments before this update with the count
