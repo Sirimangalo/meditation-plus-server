@@ -186,21 +186,39 @@ export default (app, router, io) => {
       // setup PUSH notification if allowed
       if (!req.body.start && user.notifications.meditation) {
         if (walking) {
-          setTimeout(() => push.send({
-            _id: user._id
-          }, {
-            title: 'Walking done',
-            vibrate: [100]
-          }), walking * 60000);
+          setTimeout(() => {
+            // check if meditation has been stopped
+            Meditation
+              .findOne({ _id: created._id })
+              .then(doc => {
+                if (doc && doc.walking == walking) {
+                  push.send({
+                    _id: user._id
+                  }, {
+                    title: 'Walking done',
+                    vibrate: [100]
+                  });
+                }
+              });
+          }, walking * 60000);
         }
 
         if (sitting) {
-          setTimeout(() => push.send({
-            _id: user._id
-          }, {
-            title: 'Sitting done',
-            vibrate: [100]
-          }), (walking + sitting) * 60000);
+          setTimeout(() => {
+            // check if meditation has been stopped
+            Meditation
+              .findOne({ _id: created._id })
+              .then(doc => {
+                if (doc && doc.sitting == sitting) {
+                  push.send({
+                    _id: user._id
+                  }, {
+                    title: 'Sitting done',
+                    vibrate: [100]
+                  });
+                }
+              });
+          }, (walking + sitting) * 60000);
         }
       }
 
