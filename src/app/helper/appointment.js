@@ -87,29 +87,29 @@ const appointmentHelper = {
 
     // find any appointment for right now
     const doc = await Appointment
-        .findOne({
-          weekDay: now.weekday(),
-          hour: {
-            $lte: timeToNumber(
-              // 5 minutes before appointment
-              now.clone().add(5 + 60 * increment , 'minutes')
-            ),
-            $gte: timeToNumber(
-              // 25 minutes after appointment
-              now.clone().subtract(25 + 60 * increment, 'minutes')
-            )
-          },
-          user: { $exists: true, $ne: null }
-        })
-        .populate('user', 'name gravatarHash')
-        .exec();
+      .findOne({
+        weekDay: now.weekday(),
+        hour: {
+          $lte: timeToNumber(
+            // 5 minutes before appointment
+            now.clone().add(5 + 60 * increment , 'minutes')
+          ),
+          $gte: timeToNumber(
+            // 25 minutes after appointment
+            now.clone().subtract(25 + 60 * increment, 'minutes')
+          )
+        },
+        user: { $exists: true, $ne: null }
+      })
+      .populate('user', 'name gravatarHash')
+      .exec();
 
     if (!doc) {
       return null;
     }
 
     // check if user is admin and marked as teacher
-    const isCallee = user.role === 'ROLE_ADMIN' && callees.indexOf(user._id) > 0;
+    const isCallee = user.role === 'ROLE_ADMIN' && user.appointmentsCallee;
     // check if appointment is the one of requested user
     const isOwnAppointment = doc.user._id.toString() === user._id.toString()
     // check whether the time now is before 10 minutes after the appointment starts

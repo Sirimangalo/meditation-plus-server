@@ -3,9 +3,6 @@ import push from '../app/helper/push.js';
 
 export default (socket, io) => {
 
-  /**
-   * Define helper functions
-   */
   const user = () => socket.decoded_token._doc;
   const roomLength = () => io.sockets.adapter.rooms['Videochat']
     ? io.sockets.adapter.rooms['Videochat'].length
@@ -35,15 +32,17 @@ export default (socket, io) => {
     if (join === true && appointment && roomLen < 2 && !inRoom()) {
       // let socket join the room 'Videochat' where the exchanging of data and messages happens
       socket.join('Videochat');
+      socket.emit('videochat:joined');
 
-      if (roomLen === 0) {
-        // notify other participant
-        const isAppHolder = userNow._id.toString() === appointment.user._id.toString();
-        push.send({
-          'notifications.appointment': true,
-          _id: isAppHolder ? { $ne: null } : appointment.user,
-          username:  isAppHolder ? 'yuttadhammo' : { $ne: null }
-        }, {
+      // notify other party
+      if (roomLen() === 1) {
+        const recipient = user().appointmentsCallee
+          ? { _id: appointment.user }
+          : {
+              role: 'ROLE_ADMIN',
+              appointmentsCallee: true
+            };
+        push.send(recipient, {
           title: 'Appointment Call Incoming',
           body: 'Please click on this notification or go to the schedule page',
           data: {
@@ -52,50 +51,24 @@ export default (socket, io) => {
         });
       }
 
-      // use an abitrary condition for determining the roles for WebRTC
-      const isInitiator = (roomLen > 0);
 
-      // let client know whether he has the initiator role (technical info for WebRTC)
-      socket.emit('videochat:status', { rtcInitiator: isInitiator });
-
-      // let other party in room know the opposite role.
-      socket.broadcast.to('Videochat').emit('videochat:status', { rtcInitiator: !isInitiator });
-
-      // send status message and signal clients to connect now if everybody is there
-      io.to('Videochat').emit('videochat:status', {
-        doConnect: isInitiator,
-        message: isInitiator ? 'Connecting' : 'Waiting for opponent'
-      });
-
-      // send info message about joined user in chat
-      io.to('Videochat').emit('videochat:message', {
-        user: {
-          _id: userNow._id,
-          name: userNow.name,
-          username: userNow.username,
-          gravatarHash: userNow.gravatarHash,
-          country: userNow.country
-        },
-        text: '...joined the appointment.'
-      });
+      // // send info message about joined user in chat
+      // io.to('Videochat').emit('videochat:message', {
+      //   user: {
+      //     _id: userNow._id,
+      //     name: userNow.name,
+      //     username: userNow.username,
+      //     gravatarHash: userNow.gravatarHash,
+      //     country: userNow.country
+      //   },
+      //   text: '...joined the appointment.'
+      // });
     }
   });
 
-  /**
-   * The ':reconnect' event is being used when a user disconnects
-   * without reason.
-   */
-  socket.on('videochat:reconnect', () => {
-    if (!inRoom()) {
-      return;
-    }
-
-    io.to('Videochat').emit('videochat:status', {
-      connected: false,
-      message: 'Trying to reconnect... Please hold on.',
-      doConnect: true
-    });
-  });
+  socket.on('videochat:connect', () =>
+    socket.emit('videochat:ready', inRoom() && roomLen() === 2)
+  );
 
   /**
    * The ':message' event is being used for sending and receiving
@@ -151,14 +124,12 @@ export default (socket, io) => {
   /**
    * The ':leave' event is being used for ending the appointment.
    */
-  socket.on('videochat:leave', () => {
+  socket.on('videochat:end', () => {
     if (!inRoom()) {
       return;
     }
 
+    io.to('Videochat').emit('videochat:ended', true);
     socket.leave('Videochat');
-    io.to('Videochat').emit('videochat:status', {
-      doEnd: true
-    });
   });
 }

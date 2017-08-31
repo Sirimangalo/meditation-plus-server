@@ -35,7 +35,8 @@ let userSchema = mongoose.Schema({
     // relevant for admins only
     testimonial: Boolean,
   },
-  appointments: [{ type: Date }]
+  appointments: [{ type: Date }],
+  appointmentsCallee: Boolean
 });
 
 userSchema.methods.generateHash = function(password) {
