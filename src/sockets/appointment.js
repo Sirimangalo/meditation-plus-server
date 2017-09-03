@@ -3,11 +3,20 @@ import push from '../app/helper/push.js';
 
 export default (socket, io) => {
 
+  /**
+   * method for retrieving user information from the socket
+   */
   const user = () => socket.decoded_token._doc;
-  const roomLength = () => io.sockets.adapter.rooms['Videochat']
-    ? io.sockets.adapter.rooms['Videochat'].length
-    : 0;
-  const inRoom = () => io.sockets.adapter.sids[socket.id]['Videochat'] ? true : false;
+
+  /**
+   * method for getting the room length
+   */
+  const roomLength = () => io.sockets.adapter.rooms['AppointCall'].length || 0;
+
+  /**
+   * method for checking if the socket has joined the room
+   */
+  const inRoom = () => io.sockets.adapter.sids[socket.id]['AppointCall'] ? true : false;
 
 
   /**
@@ -22,17 +31,18 @@ export default (socket, io) => {
     const roomLen = roomLength();
     const userNow = user();
 
-    // if an authorized user is already in the room 'Videochat', then this means that a
+    // if an authorized user is already in the room 'AppointCall', then this means that a
     // reconnect is given (-> second parameter).
     const appointment = await appointHelper.getNow(userNow, roomLen === 1 && !inRoom());
+    console.log('SOCKET: APPPOINT', appointment);
     socket.emit('appointment', appointment);
 
 
     // join appointment if requested and possible
     if (join === true && appointment && roomLen < 2 && !inRoom()) {
-      // let socket join the room 'Videochat' where the exchanging of data and messages happens
-      socket.join('Videochat');
-      socket.emit('videochat:joined');
+      // let socket join the room 'AppointCall' where the exchanging of data and messages happens
+      socket.join('AppointCall');
+      socket.emit('appointment:joined');
 
       // notify other party
       if (roomLen() === 1) {
@@ -48,26 +58,14 @@ export default (socket, io) => {
           data: {
             url: '/schedule/call'
           }
+          // TODO: call icon
         });
       }
-
-
-      // // send info message about joined user in chat
-      // io.to('Videochat').emit('videochat:message', {
-      //   user: {
-      //     _id: userNow._id,
-      //     name: userNow.name,
-      //     username: userNow.username,
-      //     gravatarHash: userNow.gravatarHash,
-      //     country: userNow.country
-      //   },
-      //   text: '...joined the appointment.'
-      // });
     }
   });
 
-  socket.on('videochat:connect', () =>
-    socket.emit('videochat:ready', inRoom() && roomLen() === 2)
+  socket.on('appointment:connect', () =>
+    socket.emit('appointment:ready', inRoom() && roomLen() === 2)
   );
 
   /**
@@ -76,14 +74,14 @@ export default (socket, io) => {
    *
    * @param  {String} message       Message to deliver
    */
-  socket.on('videochat:message', message => {
-    if (!inRoom() || !message || message.length > 500) {
+  socket.on('appointment:message', message => {
+    if (!inRoom() || typeof(message) !== 'string' || message.length > 500) {
       return;
     }
 
     const userNow = user();
 
-    io.to('Videochat').emit('videochat:message', {
+    io.to('AppointCall').emit('appointment:message', {
       user: {
         _id: userNow._id,
         name: userNow.name,
@@ -99,12 +97,12 @@ export default (socket, io) => {
    * The ':toggledMedia' event is being used when a user
    * disables his microphone/camera
    */
-  socket.on('videochat:toggledMedia', (audio, video) => {
+  socket.on('appointment:toggledMedia', (audio, video) => {
     if (!inRoom()) {
       return;
     }
 
-    socket.broadcast.to('Videochat').emit('videochat:toggledMedia', { audio, video });
+    socket.broadcast.to('AppointCall').emit('appointment:toggledMedia', { audio, video });
   });
 
   /**
@@ -113,23 +111,23 @@ export default (socket, io) => {
    *
    * @param  {any} data     Signaling data
    */
-  socket.on('videochat:signal', data => {
+  socket.on('appointment:signal', data => {
     if (!inRoom()) {
       return;
     }
 
-    socket.broadcast.to('Videochat').emit('videochat:signal', data);
+    socket.broadcast.to('AppointCall').emit('appointment:signal', data);
   });
 
   /**
    * The ':leave' event is being used for ending the appointment.
    */
-  socket.on('videochat:end', () => {
+  socket.on('appointment:end', () => {
     if (!inRoom()) {
       return;
     }
 
-    io.to('Videochat').emit('videochat:ended', true);
-    socket.leave('Videochat');
+    io.to('AppointCall').emit('appointment:ended', true);
+    socket.leave('AppointCall');
   });
 }

@@ -1,7 +1,7 @@
 import * as socketiotJwt from 'socketio-jwt';
 import Message from '../app/models/message.model.js';
 import { logger } from '../app/helper/logger.js';
-import videochat from './videochat.js';
+import appointmentConfernce from './appointment.js';
 
 // This file contains the most basic functionality for server Socket.io
 // functionality.
@@ -29,7 +29,7 @@ export default (io) => {
 
     socket.emit('connection', { latestMessage });
 
-    videochat(socket, io);
+    appointmentConfernce(socket, io);
 
     socket.on('disconnect', () => {
       logger.info('a user disconnected');
