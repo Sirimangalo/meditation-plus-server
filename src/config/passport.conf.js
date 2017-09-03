@@ -7,8 +7,7 @@ import LocalStrategy from 'passport-local';
 import User from '../app/models/user.model.js';
 import md5 from 'md5';
 import randomstring from 'randomstring';
-
-const reservedUsernames = ['yuttadhammo', 'doug', 'martin', 'robin', 'sebastian'];
+import reservedUsernames from '../app/helper/reserved-usernames.json';
 
 export default (passport) => {
   // Define length boundaries for expected parameters
@@ -83,7 +82,7 @@ export default (passport) => {
       }, (err, user) => {
         if (err) return done(err);
 
-        if (user || reservedUsernames.includes(req.body.username) ) {
+        if (user || reservedUsernames.includes(req.body.username.toLowerCase()) ) {
           // Email or username already taken.
           // Invoke `done` with `false` to indicate authentication failure
           return done(null, false, { signupMessage : 'That email or username is already taken.' });
