@@ -84,13 +84,13 @@ const appointmentHelper = {
 
     if (settings.appointmentsIncrement) {
       // add global increment
-      nextAppointment = appointHelper.addIncrement(nextAppointment, settings.appointmentsIncrement);
+      nextAppointment = this.addIncrement(nextAppointment, settings.appointmentsIncrement);
     }
 
     // notification object for push message
     const notification = {
       title: 'Next Appointment',
-      body: `${nextAppointment.user.name} is scheduled for ${appointHelper.printHour(nextAppointment.hour)} ${now.format('z')}`,
+      body: `${nextAppointment.user.name} is scheduled for ${this.printHour(nextAppointment.hour)} ${now.format('z')}`,
       tag: 'appointment-ticker',
       icon: nextAppointment.user.gravatarHash.length === 32
         ? `https://www.gravatar.com/avatar/${nextAppointment.user.gravatarHash}?s=192`
