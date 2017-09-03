@@ -1,6 +1,6 @@
 import Message from '../models/message.model.js';
 let ObjectId = require('mongoose').Types.ObjectId;
-import moment from 'moment';
+import moment from 'moment-timezone';
 import push from '../helper/push.js';
 
 export default (app, router, io) => {

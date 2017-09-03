@@ -3,7 +3,7 @@ import { ProfileHelper } from '../helper/profile.js';
 import md5 from 'md5';
 import { logger } from '../helper/logger.js';
 import timezone from '../helper/timezone.js';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
