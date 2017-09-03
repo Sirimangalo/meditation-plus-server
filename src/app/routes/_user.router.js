@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import appointHelper from '../helper/appointment.js';
 
 export default (app, router, io, admin) => {
 
@@ -149,6 +150,11 @@ export default (app, router, io, admin) => {
 
       if (updatePassword) {
         user.local.password = updatePassword;
+      }
+
+      // Send first appointment notification right after updating
+      if (user.notifications && user.notifications.appointment) {
+        appointHelper.notify();
       }
 
       await user.save();

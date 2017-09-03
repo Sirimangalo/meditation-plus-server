@@ -18,22 +18,17 @@ export default (app, router) => {
       if (!user) return res.sendStatus(403);
 
       const subscription = JSON.stringify(req.body);
-      const dup = await PushSubscriptions.findOne({ endpoint: endpoint });
+      const doc =  await PushSubscriptions.findOneAndUpdate({ endpoint: endpoint }, {
+        username: user.username,
+        endpoint: endpoint,
+        subscription: subscription
+      }, {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true
+      });
 
-      if (dup) {
-        await dup.update({
-          username: user.username,
-          subscription: subscription
-        });
-      } else {
-        await PushSubscriptions.create({
-          username: user.username,
-          endpoint: endpoint,
-          subscription: subscription
-        });
-      }
-
-      res.sendStatus(204);
+      res.json(doc);
     } catch (err) {
       res.status(500).send(err);
     }

@@ -1,6 +1,6 @@
 import User from '../models/user.model.js';
 import Meditation from '../models/meditation.model.js';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 let ObjectId = require('mongoose').Types.ObjectId;
 
