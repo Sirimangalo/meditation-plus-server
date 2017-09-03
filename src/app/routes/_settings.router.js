@@ -6,7 +6,7 @@ export default (app, router, admin) => {
    * @apiName GetSettings
    * @apiGroup Settings
    */
-  router.get('/api/settings', admin, async (req, res) => {
+  router.get('/api/settings', async (req, res) => {
     try {
       // Find settings entity or create a new one with the in the
       // Settings model defined defaults.
