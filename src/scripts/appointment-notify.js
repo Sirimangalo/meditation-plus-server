@@ -11,4 +11,3 @@ const doIt = async () => await appointHelper.notify();
 doIt();
 
 logger.info('Sending notifications about next appointment');
-sendTicker();
