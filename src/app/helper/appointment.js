@@ -45,7 +45,7 @@ let appointmentHelper = {
 /**
  * Sends Push Notifications to all subscribed Aamins
  */
-appointHelper.notify = async () => {
+appointmentHelper.notify = async () => {
   const settings = await Settings.findOne();
 
   if (!settings || !settings.appointmentsTimezone) {
@@ -85,13 +85,13 @@ appointHelper.notify = async () => {
 
   if (settings.appointmentsIncrement) {
     // add global increment
-    nextAppointment = appointHelper.addIncrement(nextAppointment, settings.appointmentsIncrement);
+    nextAppointment = appointmentHelper.addIncrement(nextAppointment, settings.appointmentsIncrement);
   }
 
   // notification object for push message
   const notification = {
     title: 'Next Appointment',
-    body: `${nextAppointment.user.name} is scheduled for ${appointHelper.printHour(nextAppointment.hour)} ${now.format('z')}`,
+    body: `${nextAppointment.user.name} is scheduled for ${appointmentHelper.printHour(nextAppointment.hour)} ${now.format('z')}`,
     tag: 'appointment-ticker',
     icon: nextAppointment.user.gravatarHash.length === 32
       ? `https://www.gravatar.com/avatar/${nextAppointment.user.gravatarHash}?s=192`
