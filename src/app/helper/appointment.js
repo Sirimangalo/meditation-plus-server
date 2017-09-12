@@ -1,6 +1,6 @@
+import {logger} from '../helper/logger.js';
 import Settings from '../models/settings.model.js';
 import Appointment from '../models/appointment.model.js';
-import PushSubscriptions from '../models/push.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 import webpush from 'web-push';
@@ -51,6 +51,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
 
   if (!settings) {
     resolve('Could not load settings entity. Aborting.');
+    return;
   }
 
   // Find admins subscribed to appointments
@@ -63,6 +64,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
 
   if (!subscribedUsers) {
     resolve('No users subscribed. Aborting.');
+    return;
   }
 
   // Find next appointment for today
@@ -82,6 +84,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
 
   if (!nextAppointment) {
     resolve('No appointment found. Aborting.');
+    return;
   }
 
   if (settings.appointmentsIncrement) {
@@ -110,7 +113,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
       try {
         await webpush.sendNotification(JSON.parse(sub.subscription), JSON.stringify(notification));
       } catch (err) {
-        console.log(err);
+        logger.error(err);
       }
     }
   }
