@@ -1,10 +1,20 @@
 import FS from'q-io/fs';
-import cconsole  from 'colored-console';
+import Winston  from 'winston';
 import mongooseConf from '../config/mongoose.conf.js';
 import {validateEnvVariables} from '../config/env.conf.js';
 import mongoose from 'mongoose';
 import _ from 'lodash';
 
+let logger = new Winston.Logger({
+  transports: [
+    new Winston.transports.Console({
+      level: 'debug',
+      handleExceptions: true,
+      json: false,
+      colorize: true
+    })
+  ]
+});
 /**
  * convert modelName parameter to a class definition
  * @param modelName
@@ -39,7 +49,7 @@ async function saveRow(klass, data) {
         findResult = Object.assign(findResult, res);
       } else {
         findErr = true;
-        cconsole.red(`mapping error: ${k} not found`, data[k]);
+        logger.error(`mapping error: ${k} not found`, data[k]);
         break;
       }
     }
@@ -49,11 +59,11 @@ async function saveRow(klass, data) {
       let newData = Object.assign(cleanData, findResult);
       let row = new klass(newData);
       await row.save();
-      cconsole.green('saving row', data);
+      logger.info('saving row', data);
     }
 
   } else {
-    cconsole.red('duplicate row', data);
+    logger.error('duplicate row', data);
   }
 }
 
@@ -65,19 +75,19 @@ async function parse_json(tableName, content) {
     try {
       await saveRow(model, row);
     } catch (err) {
-      cconsole.red('save exception ' + err.message, row);
+      logger.error('save exception ' + err.message, row);
     }
   }
 }
 
 async function readJson(t, filepath) {
   try {
-    cconsole.green('start file ', filepath);
+    logger.info('start file ', filepath);
     let content = await FS.read(filepath);
     await parse_json(t, content);
-    cconsole.green('file processing finished', filepath, '\n\n');
+    logger.info('file processing finished', filepath, '\n\n');
   } catch (err) {
-    cconsole.red('readJson error ' + err);
+    logger.error('readJson error ' + err);
   }
 }
 
@@ -124,10 +134,11 @@ const mapping = {
  * @returns {Promise.<void>}
  */
 module.exports = async function start(tables) {
+    
   init();
   for (let t of tables) {
     await readJson(t, `./dev-data/${t}.json`);
   }
-  cconsole.blue('after all processing');
+  logger.info('after all processing');
   mongoose.connection.close();
 };
