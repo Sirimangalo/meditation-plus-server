@@ -1,20 +1,10 @@
 import FS from'q-io/fs';
-import Winston  from 'winston';
+import {logger}  from '../app/helper/logger';
 import mongooseConf from '../config/mongoose.conf.js';
 import {validateEnvVariables} from '../config/env.conf.js';
 import mongoose from 'mongoose';
 import _ from 'lodash';
 
-let logger = new Winston.Logger({
-  transports: [
-    new Winston.transports.Console({
-      level: 'debug',
-      handleExceptions: true,
-      json: false,
-      colorize: true
-    })
-  ]
-});
 /**
  * convert modelName parameter to a class definition
  * @param modelName
