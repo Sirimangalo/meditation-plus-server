@@ -7,7 +7,12 @@ import appointHelper from '../app/helper/appointment.js';
 validateEnvVariables();
 mongooseConf(mongoose);
 
-const doIt = async () => await appointHelper.notify();
-doIt();
-
 logger.info('Sending notifications about next appointment');
+
+appointHelper
+  .notify()
+  .then((res) => {
+    logger.info(res);
+    mongoose.connection.close()
+  });
+

@@ -1,5 +1,6 @@
 import Settings from '../models/settings.model.js';
 import Appointment from '../models/appointment.model.js';
+import PushSubscriptions from '../models/push.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 import webpush from 'web-push';
@@ -45,23 +46,23 @@ let appointmentHelper = {
 /**
  * Sends Push Notifications to all subscribed Aamins
  */
-appointmentHelper.notify = async () => {
+appointmentHelper.notify = () => new Promise(async (resolve) => {
   const settings = await Settings.findOne();
 
-  if (!settings || !settings.appointmentsTimezone) {
-    return;
+  if (!settings) {
+    resolve('Could not load settings entity. Aborting.');
   }
 
   // Find admins subscribed to appointments
   const subscribedUsers = await User
     .find({
       role: 'ROLE_ADMIN',
-      'notfications.appointment': { $exists: true, $ne: [] }
+      'notifications.appointment': { $exists: true, $ne: [] }
     })
     .populate('notifications.appointment');
 
   if (!subscribedUsers) {
-    return;
+    resolve('No users subscribed. Aborting.');
   }
 
   // Find next appointment for today
@@ -80,7 +81,7 @@ appointmentHelper.notify = async () => {
 
 
   if (!nextAppointment) {
-    return;
+    resolve('No appointment found. Aborting.');
   }
 
   if (settings.appointmentsIncrement) {
@@ -104,9 +105,17 @@ appointmentHelper.notify = async () => {
     sticky: true // not supported by browsers (yet)
   };
 
-  subscribedUsers.map(user =>
-    webpush.sendNotification(JSON.parse(user.notifications.appointment.subscription), JSON.stringify(notification))
-  );
-};
+  for (const user of subscribedUsers) {
+    for (const sub of user.notifications.appointment) {
+      try {
+        await webpush.sendNotification(JSON.parse(sub.subscription), JSON.stringify(notification));
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+
+  resolve('Notifications were send. Exiting.');
+});
 
 export default appointmentHelper;
