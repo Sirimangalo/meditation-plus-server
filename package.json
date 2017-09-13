@@ -92,6 +92,7 @@
     "phantomjs-polyfill": "0.0.2",
     "phantomjs-prebuilt": "^2.1.14",
     "protractor": "^5.1.1",
+    "q-io": "^1.13.4",
     "raw-loader": "^0.5.1",
     "remap-istanbul": "^0.9.5",
     "rimraf": "^2.6.1",
