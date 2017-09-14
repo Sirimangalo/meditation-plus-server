@@ -166,6 +166,9 @@ export default (app, router, io, admin) => {
       // sending broadcast WebSocket for taken/fred appointment
       io.sockets.emit('appointment', appointment);
 
+      // notify possible updates
+      appointHelper.notify().then();
+
       res.sendStatus(204);
     } catch (err) {
       res.status(400).send(err);
@@ -193,6 +196,9 @@ export default (app, router, io, admin) => {
       // sending broadcast WebSocket for taken/fred appointment
       io.sockets.emit('appointment', appointment);
 
+      // notify possible updates
+      appointHelper.notify().then();
+
       res.sendStatus(200);
     } catch (err) {
       res.send(err);
@@ -210,6 +216,9 @@ export default (app, router, io, admin) => {
         .find({ _id: req.params.id })
         .remove()
         .exec();
+
+      // notify possible updates
+      appointHelper.notify().then();
 
       res.json(result);
     } catch (err) {
