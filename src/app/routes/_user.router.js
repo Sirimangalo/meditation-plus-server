@@ -154,7 +154,7 @@ export default (app, router, io, admin) => {
 
       // Send first appointment notification right after updating
       if (user.notifications && user.notifications.appointment) {
-        appointHelper.notify();
+        appointHelper.notify().then();
       }
 
       await user.save();
