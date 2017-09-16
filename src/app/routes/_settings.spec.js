@@ -36,20 +36,15 @@ describe('Settings Routes', () => {
   });
 
   describe('GET /api/settings', () => {
-    it('should respond with 401 when not authorized', done => {
+    it('should respond with settings entity', done => {
       user
-        .get('/api/settings')
-        .expect(401)
-        .end(err => done(err));
-    });
-
-    it('should respond with settings entity if authorized', done => {
-      admin
         .get('/api/settings')
         .expect(200)
         .end((err, res) => {
           expect(res.body).to.have.property('appointmentsIncrement');
+          expect(res.body).to.have.property('appointmentsTimezone');
           expect(res.body.appointmentsIncrement).to.equal(5);
+          expect(res.body.appointmentsTimezone).to.equal('America/Toronto');
           done(err);
         });
     });

@@ -2,7 +2,7 @@ import { app } from '../../server.conf.js';
 import supertest from 'supertest';
 import { expect } from 'chai';
 import {describe, it} from 'mocha';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import  User from '../models/user.model.js';
 

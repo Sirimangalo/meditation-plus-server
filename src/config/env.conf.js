@@ -1,4 +1,5 @@
 import config from './config.json';
+import webpush from 'web-push';
 import { logger } from '../app/helper/logger.js';
 
 // Check each necessary node `environment variable` to see if a
@@ -25,6 +26,9 @@ export function validateEnvVariables() {
 
   if (config.GOOGLE_API_KEY && process.env.GOOGLE_API_KEY !== config.GOOGLE_API_KEY)
     process.env.GOOGLE_API_KEY = config.GOOGLE_API_KEY;
+
+  // Set API key for webpush
+  webpush.setGCMAPIKey(process.env.GOOGLE_API_KEY);
 
   // Set the appropriate MongoDB URI
   validateMongoUri();

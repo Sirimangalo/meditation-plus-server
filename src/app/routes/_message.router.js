@@ -1,6 +1,6 @@
 import Message from '../models/message.model.js';
 let ObjectId = require('mongoose').Types.ObjectId;
-import moment from 'moment';
+import moment from 'moment-timezone';
 import push from '../helper/push.js';
 
 export default (app, router, io) => {
@@ -137,7 +137,7 @@ export default (app, router, io) => {
           data: {
             url: '/home;tab=chat'
           },
-          icon: req.user._doc && req.user._doc.gravatarHash
+          icon: req.user._doc.gravatarHash.length === 32
             ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
             : null
         });

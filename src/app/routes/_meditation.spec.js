@@ -3,7 +3,7 @@ import supertest from 'supertest';
 import { expect } from 'chai';
 import { AuthedSupertest } from '../helper/authed-supertest.js';
 import Meditation from '../models/meditation.model.js';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 const request = supertest(app);
 let user = new AuthedSupertest();

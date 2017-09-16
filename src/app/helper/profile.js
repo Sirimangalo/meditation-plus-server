@@ -1,6 +1,6 @@
 import Meditation from '../models/meditation.model.js';
 import timezone from '../helper/timezone.js';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 export class ProfileHelper {
   async calculateStats(user) {

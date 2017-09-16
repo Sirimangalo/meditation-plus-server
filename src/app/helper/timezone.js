@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'moment-timezone';
 const timezones = require('timezones.json');
 
 /**

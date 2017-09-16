@@ -12,5 +12,6 @@ script:
   - cp src/config/config.json.travis src/config/config.json
   - yarn lint && yarn test && yarn docs && yarn build
   - cp -R src/app/helper/mail-templates dist/app/helper/mail-templates
+  - cp src/app/helper/reserved-usernames.json dist/app/helper/reserved-usernames.json
 after_success:
   - sh deploy.sh
