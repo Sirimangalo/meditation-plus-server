@@ -11,7 +11,9 @@ export default (socket, io) => {
   /**
    * method for getting the room length
    */
-  const roomLength = () => io.sockets.adapter.rooms['AppointCall'].length || 0;
+  const roomLength = () => io.sockets.adapter.rooms['AppointCall']
+    ? io.sockets.adapter.rooms['AppointCall'].length
+    : 0;
 
   /**
    * method for checking if the socket has joined the room
@@ -34,9 +36,11 @@ export default (socket, io) => {
     // if an authorized user is already in the room 'AppointCall', then this means that a
     // reconnect is given (-> second parameter).
     const appointment = await appointHelper.getNow(userNow, roomLen === 1 && !inRoom());
-    console.log('SOCKET: APPPOINT', appointment);
-    socket.emit('appointment', appointment);
 
+    socket.emit('appointment', {
+      appointment: appointment,
+      started: appointment ? roomLen > 0 : true
+    });
 
     // join appointment if requested and possible
     if (join === true && appointment && roomLen < 2 && !inRoom()) {
@@ -45,28 +49,35 @@ export default (socket, io) => {
       socket.emit('appointment:joined');
 
       // notify other party
-      if (roomLen() === 1) {
-        const recipient = user().appointmentsCallee
-          ? { _id: appointment.user }
-          : {
-              role: 'ROLE_ADMIN',
-              appointmentsCallee: true
-            };
-        push.send(recipient, {
-          title: 'Appointment Call Incoming',
-          body: 'Please click on this notification or go to the schedule page',
-          data: {
-            url: '/schedule/call'
-          }
-          // TODO: call icon
+      if (roomLength() === 1) {
+        push.send(
+          user().appointmentsCallee
+            ? { _id: appointment.user }
+            : {
+                role: 'ROLE_ADMIN',
+                appointmentsCallee: true
+              },
+          {
+            title: 'Appointment Call Incoming',
+            body: 'Please click on this notification or go to the schedule page',
+            data: {
+              url: '/schedule/call'
+            }
+            // TODO: call icon
         });
       }
     }
   });
 
-  socket.on('appointment:connect', () =>
-    socket.emit('appointment:ready', inRoom() && roomLen() === 2)
-  );
+  socket.on('appointment:ready', () => {
+    const ready = inRoom() && roomLength() === 2;
+
+    socket.emit('appointment:ready', { ready: ready, initiator: false });
+
+    if (ready) {
+      socket.broadcast.to('AppointCall').emit('appointment:ready', { ready: ready, initiator: true });
+    }
+  });
 
   /**
    * The ':message' event is being used for sending and receiving
@@ -75,7 +86,7 @@ export default (socket, io) => {
    * @param  {String} message       Message to deliver
    */
   socket.on('appointment:message', message => {
-    if (!inRoom() || typeof(message) !== 'string' || message.length > 500) {
+    if (!inRoom() || !message || typeof(message) !== 'string' || message.length > 500) {
       return;
     }
 
@@ -122,12 +133,19 @@ export default (socket, io) => {
   /**
    * The ':leave' event is being used for ending the appointment.
    */
-  socket.on('appointment:end', () => {
+  socket.on('appointment:leave', endCall => {
+    console.log('LEAVE', endCall);
     if (!inRoom()) {
       return;
     }
 
-    io.to('AppointCall').emit('appointment:ended', true);
+    if (endCall) {
+      socket.broadcast.to('AppointCall').emit('appointment:ended', true);
+    } else {
+      console.log('HERE');
+      socket.broadcast.to('AppointCall').emit('appointment:ready', { ready: false, initiator: false });
+    }
+
     socket.leave('AppointCall');
   });
 }

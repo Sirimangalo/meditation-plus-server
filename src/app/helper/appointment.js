@@ -5,6 +5,18 @@ import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 import webpush from 'web-push';
 
+/**
+ * Converts Date or moment object to Integer representing the time.
+ *
+ * @param  {moment/Date}   Date or moment object
+ * @return {Number}        Time as Number
+ */
+function timeToNumber(time): Number {
+  return time instanceof Date
+    ? time.getHours() * 100 + time.getMinutes()
+    : (time instanceof moment ? time.hours() * 100 + time.minutes() : 0);
+}
+
 let appointmentHelper = {
   /**
    * Parses hour as String.
@@ -137,74 +149,77 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
  *
  * @return                     the appointment object
  */
-appointmentHelper.getNow = async (user, reconnect = false) => {
-    if (!user) return null;
+appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resolve) => {
+  if (!user) {
+    return resolve(null);
+  }
 
-    // load settings entity
-    const settings = await Settings.findOne();
+  // load settings entity
+  const settings = await Settings.findOne();
 
-    // list of users that will act as callees
-    const callees = settings.appointmentsCallees
-      ? settings.appointmentsCallees
-      : [];
+  // list of users that will act as callees
+  const callees = settings.appointmentsCallees
+    ? settings.appointmentsCallees
+    : [];
 
-    // appointments are formatted in this timezone
-    const now = moment.tz(settings.appointmentsTimezone);
+  // appointments are formatted in this timezone
+  const now = moment.tz(settings.appointmentsTimezone);
 
-    const increment = settings && settings.appointmentIncrement
-      ? settings.appointmentIncrement
-      : 0;
+  const increment = settings && settings.appointmentIncrement
+    ? settings.appointmentIncrement
+    : 0;
 
-    // find any appointment for right now
-    const doc = await Appointment
-      .findOne({
-        weekDay: now.weekday(),
-        hour: {
-          $lte: appointmentHelper.printHour(
-            // 5 minutes before appointment
-            now.clone().add(5 + 60 * increment , 'minutes')
-          ),
-          $gte: appointmentHelper.printHour(
-            // 25 minutes after appointment
-            now.clone().subtract(25 + 60 * increment, 'minutes')
-          )
-        },
-        user: { $exists: true, $ne: null }
-      })
-      .populate('user', 'name gravatarHash')
-      .exec();
+  // find any appointment for right now
+  const doc = await Appointment
+    .findOne({
+      weekDay: now.weekday(),
+      hour: {
+        $lte: timeToNumber(
+          // 5 minutes before appointment
+          now.clone().add(5 + 60 * increment , 'minutes')
+        ),
+        $gte: timeToNumber(
+          // 25 minutes after appointment
+          now.clone().subtract(25 + 60 * increment, 'minutes')
+        )
+      },
+      user: { $exists: true, $ne: null }
+    })
+    .populate('user', 'name username gravatarHash')
+    .exec();
 
-    if (!doc) {
-      return null;
+  if (!doc) {
+    return resolve(null);
+  }
+
+  // check if user is admin and marked as teacher
+  const isCallee = user.role === 'ROLE_ADMIN' && user.appointmentsCallee === true;
+
+  // check if appointment is the one of requested user
+  const isOwnAppointment = doc.user._id.toString() === user._id.toString()
+  // check whether the time now is before 10 minutes after the appointment starts
+  const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10 + 60 * increment, 'minutes'));
+
+
+  if (doc && (isCallee || isOwnAppointment && (reconnect || isAppOnTime))) {
+
+    if (!isCallee && !reconnect) {
+      // register the user's request to initiate an appointment.
+      // Use 'await' in order to not confuse the count of
+      // the appointments before this update with the count
+      // afterwards.
+      await User
+        .findOneAndUpdate({
+          _id: user._id
+        }, {
+          $addToSet: { appointments: moment.utc().startOf('day').toDate() }
+        });
     }
 
-    // check if user is admin and marked as teacher
-    const isCallee = user.role === 'ROLE_ADMIN' && user.appointmentsCallee;
-    // check if appointment is the one of requested user
-    const isOwnAppointment = doc.user._id.toString() === user._id.toString()
-    // check whether the time now is before 10 minutes after the appointment starts
-    const isAppOnTime = doc.hour >= appointmentHelper.printHour(now.clone().subtract(10 + 60 * increment, 'minutes'));
+    return resolve(doc);
+  }
 
-
-    if (doc && (isCallee || isOwnAppointment && (reconnect || isAppOnTime))) {
-
-      if (!isCallee && !reconnect) {
-        // register the user's request to initiate an appointment.
-        // Use 'await' in order to not confuse the count of
-        // the appointments before this update with the count
-        // afterwards.
-        await User
-          .findOneAndUpdate({
-            _id: user._id
-          }, {
-            $addToSet: { appointments: moment.utc().startOf('day').toDate() }
-          });
-      }
-
-      return doc;
-    }
-
-    return null;
-};
+  resolve(null);
+});
 
 export default appointmentHelper;
