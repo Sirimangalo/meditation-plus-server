@@ -54,9 +54,9 @@ export default (socket, io) => {
           user().appointmentsCallee
             ? { _id: appointment.user }
             : {
-                role: 'ROLE_ADMIN',
-                appointmentsCallee: true
-              },
+              role: 'ROLE_ADMIN',
+              appointmentsCallee: true
+            },
           {
             title: 'Appointment Call Incoming',
             body: 'Please click on this notification or go to the schedule page',
@@ -64,7 +64,8 @@ export default (socket, io) => {
               url: '/schedule/call'
             }
             // TODO: call icon
-        });
+          }
+        );
       }
     }
   });
@@ -141,10 +142,9 @@ export default (socket, io) => {
     if (endCall) {
       socket.broadcast.to('AppointCall').emit('appointment:ended', true);
     } else {
-      console.log('HERE');
       socket.broadcast.to('AppointCall').emit('appointment:ready', { ready: false, initiator: false });
     }
 
     socket.leave('AppointCall');
   });
-}
+};

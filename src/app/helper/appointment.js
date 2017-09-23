@@ -157,11 +157,6 @@ appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resol
   // load settings entity
   const settings = await Settings.findOne();
 
-  // list of users that will act as callees
-  const callees = settings.appointmentsCallees
-    ? settings.appointmentsCallees
-    : [];
-
   // appointments are formatted in this timezone
   const now = moment.tz(settings.appointmentsTimezone);
 
@@ -196,7 +191,7 @@ appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resol
   const isCallee = user.role === 'ROLE_ADMIN' && user.appointmentsCallee === true;
 
   // check if appointment is the one of requested user
-  const isOwnAppointment = doc.user._id.toString() === user._id.toString()
+  const isOwnAppointment = doc.user._id.toString() === user._id.toString();
   // check whether the time now is before 10 minutes after the appointment starts
   const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10 + 60 * increment, 'minutes'));
 
