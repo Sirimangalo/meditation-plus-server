@@ -160,8 +160,8 @@ appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resol
   // appointments are formatted in this timezone
   const now = moment.tz(settings.appointmentsTimezone);
 
-  const increment = settings && settings.appointmentIncrement
-    ? settings.appointmentIncrement
+  const increment = settings && settings.appointmentsIncrement
+    ? settings.appointmentsIncrement
     : 0;
 
   // find any appointment for right now
