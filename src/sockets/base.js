@@ -1,6 +1,7 @@
 import * as socketiotJwt from 'socketio-jwt';
 import Message from '../app/models/message.model.js';
 import { logger } from '../app/helper/logger.js';
+import appointmentConfernce from './appointment.js';
 
 // This file contains the most basic functionality for server Socket.io
 // functionality.
@@ -27,6 +28,8 @@ export default (io) => {
       .then();
 
     socket.emit('connection', { latestMessage });
+
+    appointmentConfernce(socket, io);
 
     socket.on('disconnect', () => {
       logger.info('a user disconnected');
