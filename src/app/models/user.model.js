@@ -26,14 +26,16 @@ let userSchema = mongoose.Schema({
   verifyToken: String,
   recoverUntil: Date,
   notifications: {
+    livestream: Boolean,
     message: { type: Boolean, default: true },
     meditation: Boolean,
     question: { type: Boolean, default: true },
-    livestream: Boolean,
     // relevant for admins only
     testimonial: Boolean,
     appointment: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PushSubscriptions' }]
-  }
+  },
+  appointments: [{ type: Date }],
+  appointmentsCallee: Boolean
 });
 
 userSchema.methods.generateHash = function(password) {

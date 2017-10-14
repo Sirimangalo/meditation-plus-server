@@ -1,6 +1,7 @@
 import * as socketiotJwt from 'socketio-jwt';
 import Message from '../app/models/message.model.js';
 import { logger } from '../app/helper/logger.js';
+import appointmentConfernce from './appointment.js';
 
 // This file contains the most basic functionality for server Socket.io
 // functionality.
@@ -33,6 +34,8 @@ export default (io) => {
 
     // event for getting count of online users
     socket.on('onlinecounter:get', () => socket.emit('onlinecounter:get', io.engine.clientsCount));
+
+    appointmentConfernce(socket, io);
 
     socket.on('disconnect', () => {
       // send out update for onlinecounter
