@@ -18,6 +18,9 @@ export default (io) => {
   io.set('origins', '*:*');
 
   io.on('connection', async socket => {
+    // send out update for onlinecounter
+    socket.broadcast.emit('onlinecounter:changed', 1);
+
     logger.info('a user connected:', socket.decoded_token._doc._id);
     logger.info(socket.id + ' connected via ('+ socket.client.conn.transport.constructor.name +')');
 
@@ -29,9 +32,15 @@ export default (io) => {
 
     socket.emit('connection', { latestMessage });
 
+    // event for getting count of online users
+    socket.on('onlinecounter:get', () => socket.emit('onlinecounter:get', io.engine.clientsCount));
+
     appointmentConfernce(socket, io);
 
     socket.on('disconnect', () => {
+      // send out update for onlinecounter
+      socket.broadcast.emit('onlinecounter:changed', -1);
+
       logger.info('a user disconnected');
     });
   });

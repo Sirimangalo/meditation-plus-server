@@ -34,16 +34,7 @@ export default (app, router, passport, io) => {
           .json({ message: 'missing username' });
       }
 
-      const now = new Date();
-
-      if (!user.lastActive ||
-        (now.getTime() - user.lastActive.getTime()) > 120000) {
-        // sending broadcast WebSocket message when a user switched from offline
-        // to online.
-        io.sockets.emit('user-online', req.user._doc._id);
-      }
-
-      user.lastActive = now;
+      user.lastActive = new Date();
       await user.save();
     }
 
