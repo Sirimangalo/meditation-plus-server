@@ -99,7 +99,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
     .then();
 
 
-  if (!nextAppointment) {
+  if (!nextAppointment || nextAppointment.length < 1) {
     resolve('No appointment found. Aborting.');
     return;
   }
