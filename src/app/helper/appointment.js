@@ -83,14 +83,19 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
   const now = moment.tz(settings.appointmentsTimezone);
 
   let nextAppointment = await Appointment
-    .findOne({
+    .find({
       user: { $exists: true, $ne: null },
       weekDay: now.weekday(),
       hour: {
         $gte: now.hours() * 100 + now.minutes(),
       }
     })
+    .sort({
+      hour: 'asc'
+    })
+    .limit(1)
     .populate('user', 'name gravatarHash')
+    .lean()
     .then();
 
 
@@ -98,6 +103,8 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
     resolve('No appointment found. Aborting.');
     return;
   }
+
+  nextAppointment = nextAppointment[0];
 
   if (settings.appointmentsIncrement) {
     // add global increment
