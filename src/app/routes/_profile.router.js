@@ -122,6 +122,11 @@ export default (app, router) => {
       year: await profileHelper.statsYear(user._id)
     };
 
+    // add field 'totalMeditating' for sum of walking and sitting
+    Object.keys(result).map(key => result[key].map(
+      data => data['totalMeditating'] = data['totalWalking'] + data['totalSitting']
+    ));
+
     res.json(result);
   });
 

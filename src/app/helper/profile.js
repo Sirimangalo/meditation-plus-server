@@ -60,10 +60,6 @@ export default {
         totalSitting: { $sum: '$sitting' },
         numberOfSessions: { $sum: 1 }
       }
-    }, {
-      $project: {
-        totalMeditating: { $add: ['$walking', '$sitting'] }
-      }
     }
   ])
 }
