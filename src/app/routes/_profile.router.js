@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-import { ProfileHelper } from '../helper/profile.js';
+import profileHelper from '../helper/profile.js';
 import md5 from 'md5';
 import { logger } from '../helper/logger.js';
 import timezone from '../helper/timezone.js';
@@ -27,8 +27,6 @@ const getUser = async (query, req, res) =>  {
     if (doc.hideStats && doc._id.toString() !== req.user._doc._id) {
       return res.json(doc);
     }
-
-    doc.meditations = await new ProfileHelper().calculateStats(doc);
 
     return res.json(doc);
   } catch (err) {
@@ -108,6 +106,23 @@ export default (app, router) => {
    */
   router.get('/api/profile/username/:username', async (req, res) => {
     return getUser({ 'username': req.params.username }, req, res);
+  });
+
+  router.get('/api/profile/stats/:username', async (req, res) => {
+    const user = await User.findOne({ username: req.params.username });
+
+    if (!user) {
+      return res.sendStatus(404);
+    }
+
+    const result = {
+      general: await profileHelper.statsGeneral(user._id),
+      week: await profileHelper.statsWeek(user._id),
+      month: await profileHelper.statsMonth(user._id),
+      year: await profileHelper.statsYear(user._id)
+    };
+
+    res.json(result);
   });
 
   /**
