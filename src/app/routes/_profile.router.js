@@ -127,6 +127,9 @@ export default (app, router) => {
       data => data['totalMeditating'] = data['totalWalking'] + data['totalSitting']
     ));
 
+    // add consecutive days
+    result.consecutiveDays = await profileHelper.statsConsecutive(user._id);
+
     res.json(result);
   });
 

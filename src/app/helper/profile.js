@@ -61,5 +61,56 @@ export default {
         numberOfSessions: { $sum: 1 }
       }
     }
-  ])
+  ]),
+  statsConsecutive: async userId => {
+    const daysMeditated = await Meditation.aggregate([
+      { $match: { user: userId } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            day: { $dayOfMonth: '$createdAt' }
+          }
+        }
+      },
+      {
+        $sort: {
+          '_id.year': -1,
+          '_id.month': -1,
+          '_id.day': -1
+        }
+      },
+    ]);
+
+    const result = {
+      current: 0,
+      total: 0
+    };
+
+    if (daysMeditated.length < 2) return result;
+
+    const today = new Date();
+    let dayBefore = daysMeditated[0];
+    let updateCurrent = today.getFullYear() === dayBefore._id.year
+      && today.getMonth() + 1 === dayBefore._id.month
+      && today.getDate() === dayBefore._id.day;
+
+    for (let i = 1; i < daysMeditated.length; i++) {
+      if (daysMeditated[i]._id.year === dayBefore._id.year
+        && daysMeditated[i]._id.month === dayBefore._id.month
+        && daysMeditated[i]._id.day + 1 === dayBefore._id.day) {
+        result.total++;
+        if (updateCurrent) {
+          result.current++;
+        } else {
+          updateCurrent = false;
+        }
+      }
+
+      dayBefore = daysMeditated[i];
+    }
+
+    return result;
+  }
 }
