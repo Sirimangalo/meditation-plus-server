@@ -9,6 +9,7 @@ export default {
         _id: null,
         totalWalking: { $sum: '$walking' },
         totalSitting: { $sum: '$sitting' },
+        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
         avgMeditation: { $avg: { $add: ['$walking', '$sitting']}},
         numberOfSessions: { $sum: 1 }
       }
@@ -26,6 +27,7 @@ export default {
         _id: { $dayOfWeek: '$createdAt' },
         totalWalking: { $sum: '$walking' },
         totalSitting: { $sum: '$sitting' },
+        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
         numberOfSessions: { $sum: 1 }
       }
     }
@@ -42,6 +44,7 @@ export default {
         _id: { $dayOfMonth: '$createdAt' },
         totalWalking: { $sum: '$walking' },
         totalSitting: { $sum: '$sitting' },
+        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
         numberOfSessions: { $sum: 1 }
       }
     }
@@ -58,6 +61,7 @@ export default {
         _id: { $month: '$createdAt' },
         totalWalking: { $sum: '$walking' },
         totalSitting: { $sum: '$sitting' },
+        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
         numberOfSessions: { $sum: 1 }
       }
     }

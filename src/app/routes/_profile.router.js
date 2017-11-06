@@ -119,16 +119,9 @@ export default (app, router) => {
       general: await profileHelper.statsGeneral(user._id),
       week: await profileHelper.statsWeek(user._id),
       month: await profileHelper.statsMonth(user._id),
-      year: await profileHelper.statsYear(user._id)
+      year: await profileHelper.statsYear(user._id),
+      consecutiveDays: await profileHelper.statsConsecutive(user._id)
     };
-
-    // add field 'totalMeditating' for sum of walking and sitting
-    Object.keys(result).map(key => result[key].map(
-      data => data['totalMeditating'] = data['totalWalking'] + data['totalSitting']
-    ));
-
-    // add consecutive days
-    result.consecutiveDays = await profileHelper.statsConsecutive(user._id);
 
     res.json(result);
   });
