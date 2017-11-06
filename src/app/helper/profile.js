@@ -19,7 +19,10 @@ export default {
     {
       $match: {
         user: userId,
-        createdAt: { $gte: moment().startOf('week').toDate() }
+        createdAt: {
+          $gte: moment().startOf('isoweek').toDate(),
+          $lte: moment().toDate()
+        }
       }
     },
     {
@@ -36,7 +39,10 @@ export default {
     {
       $match: {
         user: userId,
-        createdAt: { $gte: moment().startOf('month').toDate() }
+        createdAt: {
+          $gte: moment().startOf('month').toDate(),
+          $lte: moment().toDate()
+        }
       }
     },
     {
@@ -53,7 +59,10 @@ export default {
     {
       $match: {
         user: userId,
-        createdAt: { $gte: moment().startOf('year').toDate() }
+        createdAt: {
+          $gte: moment().subtract(1, 'year').toDate(),
+          $lte: moment().toDate()
+        }
       }
     },
     {
@@ -61,7 +70,7 @@ export default {
         _id: { $month: '$createdAt' },
         totalWalking: { $sum: '$walking' },
         totalSitting: { $sum: '$sitting' },
-        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
+        totalMeditating: { $sum: { $add: ['$walking', '$sitting'] } },
         numberOfSessions: { $sum: 1 }
       }
     }
