@@ -116,10 +116,12 @@ export default (app, router) => {
     }
 
     const result = {
-      general: await profileHelper.statsGeneral(user._id),
-      week: await profileHelper.statsWeek(user._id),
-      month: await profileHelper.statsMonth(user._id),
-      year: await profileHelper.statsYear(user._id),
+      general: (await profileHelper.statsGeneral(user._id))[0],
+      chartData: {
+        year: await profileHelper.statsYear(user._id),
+        month: await profileHelper.statsMonth(user._id),
+        week: await profileHelper.statsWeek(user._id),
+      },
       consecutiveDays: await profileHelper.statsConsecutive(user._id)
     };
 

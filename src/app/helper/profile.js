@@ -7,11 +7,11 @@ export default {
     {
       $group: {
         _id: null,
-        totalWalking: { $sum: '$walking' },
-        totalSitting: { $sum: '$sitting' },
-        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
-        avgMeditation: { $avg: { $add: ['$walking', '$sitting']}},
-        numberOfSessions: { $sum: 1 }
+        walking: { $sum: '$walking' },
+        sitting: { $sum: '$sitting' },
+        total: { $sum: { $add: ['$walking', '$sitting'] } },
+        avgSessionTime: { $avg: { $add: ['$walking', '$sitting'] } },
+        countOfSessions: { $sum: 1 }
       }
     }
   ]),
@@ -28,10 +28,10 @@ export default {
     {
       $group: {
         _id: { $dayOfWeek: '$createdAt' },
-        totalWalking: { $sum: '$walking' },
-        totalSitting: { $sum: '$sitting' },
-        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
-        numberOfSessions: { $sum: 1 }
+        walking: { $sum: '$walking' },
+        sitting: { $sum: '$sitting' },
+        total: { $sum: { $add: ['$walking', '$sitting'] } },
+        countOfSessions: { $sum: 1 }
       }
     }
   ]),
@@ -48,10 +48,10 @@ export default {
     {
       $group: {
         _id: { $dayOfMonth: '$createdAt' },
-        totalWalking: { $sum: '$walking' },
-        totalSitting: { $sum: '$sitting' },
-        totalMeditating: { $sum: { $add: ['$walking', '$sitting']}},
-        numberOfSessions: { $sum: 1 }
+        walking: { $sum: '$walking' },
+        sitting: { $sum: '$sitting' },
+        total: { $sum: { $add: ['$walking', '$sitting'] } },
+        countOfSessions: { $sum: 1 }
       }
     }
   ]),
@@ -68,10 +68,10 @@ export default {
     {
       $group: {
         _id: { $month: '$createdAt' },
-        totalWalking: { $sum: '$walking' },
-        totalSitting: { $sum: '$sitting' },
-        totalMeditating: { $sum: { $add: ['$walking', '$sitting'] } },
-        numberOfSessions: { $sum: 1 }
+        walking: { $sum: '$walking' },
+        sitting: { $sum: '$sitting' },
+        total: { $sum: { $add: ['$walking', '$sitting'] } },
+        countOfSessions: { $sum: 1 }
       }
     }
   ]),
