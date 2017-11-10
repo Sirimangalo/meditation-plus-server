@@ -108,8 +108,14 @@ export default (app, router) => {
     return getUser({ 'username': req.params.username }, req, res);
   });
 
-  router.get('/api/profile/stats/:username', async (req, res) => {
-    const user = await User.findOne({ username: req.params.username });
+  router.get('/api/profile/stats/:usernameOrId', async (req, res) => {
+    const user = await User.findOne({
+      $or: [
+        { _id: ObjectId(req.params.usernameOrId) },
+        { username: req.params.usernameOrId }
+      ],
+      hideStats: { $ne: true }
+    });
 
     if (!user) {
       return res.sendStatus(404);
