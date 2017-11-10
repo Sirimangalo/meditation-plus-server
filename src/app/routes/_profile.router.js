@@ -108,6 +108,18 @@ export default (app, router) => {
     return getUser({ 'username': req.params.username }, req, res);
   });
 
+  /**
+   * @api {get} /api/profile/stats/:usernameOrId Get profile statistics of a user by username or id
+   * @apiName ShowStats
+   * @apiGroup Profile
+   * @apiDescription Get the profile statistics of a user.
+   *
+   * @apiSuccess {Object}     general           Generals meditation stats
+   * @apiSuccess {Object}     chartData         Historical meditation stats for
+   *                                            three different chart types
+   * @apiSuccess {Object}     consecutiveDays   Number of current and total consecutive
+   *                                            days of meditation
+   */
   router.get('/api/profile/stats/:usernameOrId', async (req, res) => {
     const user = await User.findOne({
       $or: [
