@@ -15,7 +15,7 @@ export default {
       }
     }
   ]),
-  statsWeek: userId => Meditation.aggregate([
+  statsWeek: (userId, tzOffset = 0) => Meditation.aggregate([
     {
       $match: {
         user: userId,
@@ -27,7 +27,7 @@ export default {
     },
     {
       $group: {
-        _id: { $dayOfWeek: '$createdAt' },
+        _id: { $dayOfWeek: { $add: ['$createdAt', tzOffset * 60000] } },
         walking: { $sum: '$walking' },
         sitting: { $sum: '$sitting' },
         total: { $sum: { $add: ['$walking', '$sitting'] } },
@@ -35,7 +35,7 @@ export default {
       }
     }
   ]),
-  statsMonth: userId => Meditation.aggregate([
+  statsMonth: (userId, tzOffset = 0) => Meditation.aggregate([
     {
       $match: {
         user: userId,
@@ -47,7 +47,7 @@ export default {
     },
     {
       $group: {
-        _id: { $dayOfMonth: '$createdAt' },
+        _id: { $dayOfMonth: { $add: ['$createdAt', tzOffset * 60000] } },
         walking: { $sum: '$walking' },
         sitting: { $sum: '$sitting' },
         total: { $sum: { $add: ['$walking', '$sitting'] } },
@@ -55,7 +55,7 @@ export default {
       }
     }
   ]),
-  statsYear: async userId => await Meditation.aggregate([
+  statsYear: async (userId, tzOffset = 0) => await Meditation.aggregate([
     {
       $match: {
         user: userId,
@@ -67,7 +67,7 @@ export default {
     },
     {
       $group: {
-        _id: { $month: '$createdAt' },
+        _id: { $month: { $add: ['$createdAt', tzOffset * 60000] } },
         walking: { $sum: '$walking' },
         sitting: { $sum: '$sitting' },
         total: { $sum: { $add: ['$walking', '$sitting'] } },
@@ -75,15 +75,22 @@ export default {
       }
     }
   ]),
-  statsConsecutive: async userId => {
+  statsConsecutive: async (userId, tzOffset = 0) => {
     const daysMeditated = await Meditation.aggregate([
       { $match: { user: userId } },
       {
         $group: {
           _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' },
-            day: { $dayOfMonth: '$createdAt' }
+            $let: {
+              vars: {
+                createdAtTz: { $add: ['$createdAt', tzOffset * 60000] }
+              },
+              in: {
+                year: { $year: '$$createdAtTz' },
+                month: { $month: '$$createdAtTz' },
+                day: { $dayOfMonth: '$$createdAtTz' }
+              }
+            }
           }
         }
       },

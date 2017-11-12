@@ -133,14 +133,16 @@ export default (app, router) => {
       return res.sendStatus(404);
     }
 
+    const tzOffset = timezone(user, 0).utcOffset();
+
     const result = {
       general: (await profileHelper.statsGeneral(user._id))[0],
       chartData: {
-        year: await profileHelper.statsYear(user._id),
-        month: await profileHelper.statsMonth(user._id),
-        week: await profileHelper.statsWeek(user._id),
+        year: await profileHelper.statsYear(user._id, tzOffset),
+        month: await profileHelper.statsMonth(user._id, tzOffset),
+        week: await profileHelper.statsWeek(user._id, tzOffset),
       },
-      consecutiveDays: await profileHelper.statsConsecutive(user._id)
+      consecutiveDays: await profileHelper.statsConsecutive(user._id, tzOffset)
     };
 
     res.json(result);
