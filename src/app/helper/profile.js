@@ -133,4 +133,4 @@ export default {
 
     return result;
   }
-}
+};
