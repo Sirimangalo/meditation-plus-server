@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-import profileHelper from '../helper/profile.js';
+import { ProfileHelper } from '../helper/profile.js';
 import md5 from 'md5';
 import { logger } from '../helper/logger.js';
 import timezone from '../helper/timezone.js';
@@ -133,16 +133,12 @@ export default (app, router) => {
       return res.sendStatus(404);
     }
 
-    const tzOffset = timezone(user, 0).utcOffset();
+    const pHelper = new ProfileHelper(user);
 
     const result = {
-      general: (await profileHelper.statsGeneral(user._id))[0],
-      chartData: {
-        year: await profileHelper.statsYear(user._id, tzOffset),
-        month: await profileHelper.statsMonth(user._id, tzOffset),
-        week: await profileHelper.statsWeek(user._id, tzOffset),
-      },
-      consecutiveDays: await profileHelper.statsConsecutive(user._id, tzOffset)
+      general: await pHelper.getGeneralStats(user),
+      chartData: await pHelper.getChartData(user),
+      consecutiveDays: await pHelper.getConsecutiveDays(user)
     };
 
     res.json(result);
