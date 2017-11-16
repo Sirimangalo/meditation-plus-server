@@ -55,18 +55,19 @@ export class ProfileHelper {
    */
   async getWeekChartData() {
     return Meditation.aggregate([
-      { $match: {
+      {
+        $match: {
           user: this.user._id,
           createdAt: {
-            $gte: timezone(this.user, moment.utc().startOf('isoweek')).toDate(),
-            $lte: moment.utc().toDate()
+            $gte: timezone(this.user, moment.utc().startOf('isoweek')).toDate()
           }
         }
       },
-      { $group: {
+      {
+        $group: {
           _id: { $dayOfWeek: { $add: ['$createdAt', this.utcOffset * 60000] } },
-          total: { $sum: { $add: ['$walking', '$sitting'] } },
-          countOfSessions: { $sum: 1 }
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' }
         }
       }
     ]);
@@ -80,18 +81,19 @@ export class ProfileHelper {
    */
   async getMonthChartData() {
     return Meditation.aggregate([
-      { $match: {
+      {
+        $match: {
           user: this.user._id,
           createdAt: {
             $gte: timezone(this.user, moment().startOf('month')).toDate(),
-            $lte: moment.utc().toDate()
           }
         }
       },
-      { $group: {
+      {
+        $group: {
           _id: { $dayOfMonth: { $add: ['$createdAt', this.utcOffset * 60000] } },
-          total: { $sum: { $add: ['$walking', '$sitting'] } },
-          countOfSessions: { $sum: 1 }
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' }
         }
       }
     ]);
@@ -105,18 +107,19 @@ export class ProfileHelper {
    */
   async getYearChartData() {
     return Meditation.aggregate([
-      { $match: {
+      {
+        $match: {
           user: this.user._id,
           createdAt: {
-            $gte: timezone(this.user, moment().subtract(1, 'year')).toDate(),
-            $lte: moment.utc().toDate()
+            $gte: timezone(this.user, moment().subtract(1, 'year')).toDate()
           }
         }
       },
-      { $group: {
+      {
+        $group: {
           _id: { $month: { $add: ['$createdAt', this.utcOffset * 60000] } },
-          total: { $sum: { $add: ['$walking', '$sitting'] } },
-          countOfSessions: { $sum: 1 }
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' }
         }
       }
     ]);
@@ -146,7 +149,8 @@ export class ProfileHelper {
   async getConsecutiveDays() {
     const daysMeditated = await Meditation.aggregate([
       { $match: { user: this.user._id } },
-      { $group: {
+      {
+        $group: {
           _id: {
             $let: {
               vars: {
@@ -161,7 +165,8 @@ export class ProfileHelper {
           }
         }
       },
-      { $sort: {
+      {
+        $sort: {
           '_id.year': -1,
           '_id.month': -1,
           '_id.day': -1
@@ -174,29 +179,39 @@ export class ProfileHelper {
       total: 0
     };
 
+    // no consecutive days
     if (daysMeditated.length < 2) return result;
 
-    const today = timezone(this.user, moment());
-    let dayBefore = daysMeditated[0];
-    let updateCurrent = today.year() === dayBefore._id.year
-      && today.month() + 1 === dayBefore._id.month
-      && today.date() - 1 <= dayBefore._id.day;
+    // necessary helper function to deal with aggregation
+    // data structure
+    const toMoment = obj => moment
+      .utc()
+      .year(obj._id.year)
+      .month(obj._id.month - 1 === -1 ? 11 : obj._id.month - 1)
+      .date(obj._id.day);
+
+    let dayBefore = toMoment(daysMeditated[0]);
+    let flagUpdateCurrent = true;
+    let flagConsecutive = false;
 
     for (let i = 1; i < daysMeditated.length; i++) {
-      const temp = daysMeditated[i];
+      const currentDay = toMoment(daysMeditated[i]);
+      if (dayBefore.diff(currentDay, 'days') <= 1) {
+        // add two if first item in a series of consecutive days
+        // to not miss the first day. ref: https://meta.stackexchange.com/a/104624
+        result.total += !flagConsecutive ? 2 : 1;
 
-      if (temp._id.year === dayBefore._id.year
-        && temp._id.month === dayBefore._id.month
-        && temp._id.day + 1 === dayBefore._id.day) {
-        result.total++;
-        if (updateCurrent) {
-          result.current++;
+        if (flagUpdateCurrent) {
+          result.current += !flagConsecutive ? 2 : 1;
         }
+
+        flagConsecutive = true;
       } else {
-        updateCurrent = false;
+        flagUpdateCurrent = false;
+        flagConsecutive = false;
       }
 
-      dayBefore = temp;
+      dayBefore = currentDay;
     }
 
     return result;
