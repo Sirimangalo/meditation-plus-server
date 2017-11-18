@@ -63,7 +63,7 @@ export class ProfileHelper {
         $match: {
           user: ObjectId(this.user._id),
           createdAt: {
-            $gte: timezone(this.user, moment.utc().startOf('isoweek')).toDate()
+            $gte: timezone(this.user, moment.utc()).startOf('isoweek').toDate()
           }
         }
       },
@@ -89,7 +89,7 @@ export class ProfileHelper {
         $match: {
           user: ObjectId(this.user._id),
           createdAt: {
-            $gte: timezone(this.user, moment().startOf('month')).toDate(),
+            $gte: timezone(this.user, moment()).startOf('month').toDate(),
           }
         }
       },
@@ -115,7 +115,7 @@ export class ProfileHelper {
         $match: {
           user: ObjectId(this.user._id),
           createdAt: {
-            $gte: timezone(this.user, moment().subtract(1, 'year')).toDate()
+            $gte: timezone(this.user, moment()).subtract(1, 'year').toDate()
           }
         }
       },
@@ -233,7 +233,7 @@ export class ProfileHelper {
         $match: {
           user: ObjectId(this.user._id),
           createdAt: {
-            $gte: timezone(this.user, moment().subtract(aggDaysAgo, 'days')).toDate()
+            $gte: timezone(this.user, moment()).subtract(aggDaysAgo, 'days').toDate()
           }
         }
       },
@@ -265,4 +265,4 @@ export class ProfileHelper {
 
     return Math.round(100 * (reachedValue / reachedMaxValue));
   }
-};
+}
