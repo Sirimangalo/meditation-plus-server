@@ -3,14 +3,18 @@ import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 import timezone from './timezone.js';
 
+let ObjectId = require('mongoose').Types.ObjectId;
+
 export class ProfileHelper {
 
   user: User;
   utcOffset = 0;
 
-  constructor(user) {
-    this.user = user;
-    this.utcOffset = timezone(this.user, 0).utcOffset();
+  constructor(user = null) {
+    if (user) {
+      this.user = user;
+      this.utcOffset = timezone(this.user, 0).utcOffset();
+    }
   }
 
   /**
@@ -31,7 +35,7 @@ export class ProfileHelper {
     };
 
     const data = await Meditation.aggregate([
-      { $match: { user: this.user._id } },
+      { $match: { user: ObjectId(this.user._id) } },
       {
         $group: {
           _id: null,
@@ -57,7 +61,7 @@ export class ProfileHelper {
     return Meditation.aggregate([
       {
         $match: {
-          user: this.user._id,
+          user: ObjectId(this.user._id),
           createdAt: {
             $gte: timezone(this.user, moment.utc().startOf('isoweek')).toDate()
           }
@@ -83,7 +87,7 @@ export class ProfileHelper {
     return Meditation.aggregate([
       {
         $match: {
-          user: this.user._id,
+          user: ObjectId(this.user._id),
           createdAt: {
             $gte: timezone(this.user, moment().startOf('month')).toDate(),
           }
@@ -109,7 +113,7 @@ export class ProfileHelper {
     return Meditation.aggregate([
       {
         $match: {
-          user: this.user._id,
+          user: ObjectId(this.user._id),
           createdAt: {
             $gte: timezone(this.user, moment().subtract(1, 'year')).toDate()
           }
@@ -148,7 +152,7 @@ export class ProfileHelper {
    */
   async getConsecutiveDays() {
     const daysMeditated = await Meditation.aggregate([
-      { $match: { user: this.user._id } },
+      { $match: { user: ObjectId(this.user._id) } },
       {
         $group: {
           _id: {
@@ -187,7 +191,7 @@ export class ProfileHelper {
     const toMoment = obj => moment
       .utc()
       .year(obj._id.year)
-      .month(obj._id.month - 1 === -1 ? 11 : obj._id.month - 1)
+      .month(obj._id.month - 1 === 0 ? 11 : obj._id.month - 1)
       .date(obj._id.day);
 
     let dayBefore = toMoment(daysMeditated[0]);
@@ -216,4 +220,49 @@ export class ProfileHelper {
 
     return result;
   }
-}
+
+  /**
+   * Calculate commitment stats
+   * @param  {Commitment} commitment  A commitment
+   * @return {Number}                 Progress in percentage
+   */
+  async getCommitmentStatus(commitment = null) {
+    const aggDaysAgo = commitment.type === 'daily' ? 10 : 7;
+    const data = await Meditation.aggregate([
+      {
+        $match: {
+          user: ObjectId(this.user._id),
+          createdAt: {
+            $gte: timezone(this.user, moment().subtract(aggDaysAgo, 'days')).toDate()
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfMonth: { $add: ['$createdAt', this.utcOffset * 60000] } },
+          total: { $sum: { $add: ['$walking', '$sitting'] } }
+        }
+      }
+    ]);
+
+    if (!data || !data.length) {
+      return 0;
+    }
+
+    const reachedMaxValue = commitment.type === 'daily'
+      ? commitment.minutes * aggDaysAgo
+      : commitment.minutes;
+
+    let reachedValue = 0;
+
+    // sum up reached minutes until their max value
+    data.map(doc => reachedValue = Math.min(
+      commitment.type === 'daily'
+        ? reachedValue + Math.min(doc.total, commitment.minutes)
+        : reachedValue + doc.total,
+      reachedMaxValue
+    ));
+
+    return Math.round(100 * (reachedValue / reachedMaxValue));
+  }
+};
