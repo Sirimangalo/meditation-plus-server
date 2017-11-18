@@ -1,9 +1,7 @@
 import Meditation from '../models/meditation.model.js';
 import User from '../models/user.model.js';
 import moment from 'moment-timezone';
-import timezone from '../helper/timezone.js';
 import { logger } from '../helper/logger.js';
-import { ProfileHelper } from '../helper/profile.js';
 import push from '../helper/push.js';
 
 export default (app, router, io) => {
