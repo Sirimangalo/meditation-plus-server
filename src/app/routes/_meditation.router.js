@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 import timezone from '../helper/timezone.js';
 import { logger } from '../helper/logger.js';
+import { ProfileHelper } from '../helper/profile.js';
 import push from '../helper/push.js';
 
 export default (app, router, io) => {
@@ -334,28 +335,30 @@ export default (app, router, io) => {
    *
    * @apiSuccess {Object[]} meditationTimes Assoc. array of meditation times
    */
-  router.get('/api/meditation/times', async (req, res) => {
+  router.get('/api/meditation/chart', async (req, res) => {
     try {
-      const result = await Meditation
-        .find({
-          // 30 days in ms
-          end: { $gt: Date.now() - 2.592E9 }
-        })
-        .lean()
-        .exec();
+      const result = await Meditation.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: moment.utc().startOf('day').toDate()
+            }
+          }
+        },
+        {
+          $group: {
+            _id: { $hour: '$createdAt' },
+            total: { $sum: { $add: ['$walking', '$sitting'] } }
+          }
+        },
+        {
+          $sort: {
+            _id: 1
+          }
+        }
+      ]);
 
-      // initialize times
-      let times = {};
-      for (let i = 0; i < 24; i++) {
-        times[i] = 0;
-      }
-
-      // Sum meditation times
-      result.map(entry => {
-        times[timezone(req.user._doc, entry.createdAt).format('H')] += entry.sitting + entry.walking;
-      });
-
-      res.json(times);
+      res.json(result);
     } catch (err) {
       res.send(err);
     }
