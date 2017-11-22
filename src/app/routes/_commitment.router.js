@@ -1,4 +1,5 @@
 import Commitment from '../models/commitment.model.js';
+import { ProfileHelper } from '../helper/profile.js';
 let ObjectId = require('mongoose').Types.ObjectId;
 
 export default (app, router, admin) => {
@@ -28,7 +29,7 @@ export default (app, router, admin) => {
   });
 
   /**
-  * @api {get} /api/commitment/:id Get single commitment of current user
+  * @api {get} /api/commitment/:id Get all commitments of current user
   * @apiName GetCommitment
   * @apiGroup Commitment
   *
@@ -37,12 +38,24 @@ export default (app, router, admin) => {
   */
   router.get('/api/commitment/user', async (req, res) => {
     try {
-      const result = await Commitment
-        .findOne({
+      const commitments = await Commitment
+        .find({
           users: new ObjectId(req.user._doc._id)
         })
         .lean()
         .then();
+
+      const result = {};
+
+      if (commitments) {
+        const pHelper = new ProfileHelper(req.user._doc);
+
+        for (let commit of commitments) {
+          // Calculate progress for all commitments
+          commit.reached = await pHelper.getCommitmentStatus(commit);
+          result[commit._id] = commit;
+        }
+      }
 
       res.json(result);
     } catch (err) {

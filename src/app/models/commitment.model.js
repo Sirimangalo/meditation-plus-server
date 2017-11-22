@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 let commitmentSchema = mongoose.Schema({
-  type: { // daily, weekly, (monthly)
+  type: {
     type: String,
-    required: true
+    required: true,
+    enum: ['daily', 'weekly']
   },
   minutes: { type: Number, required: true },
   users: [{

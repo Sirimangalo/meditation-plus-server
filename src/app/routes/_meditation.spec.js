@@ -204,26 +204,24 @@ describe('Meditation Routes', () => {
     });
   });
 
-  describe('GET /api/meditation/times', () => {
+  describe('GET /api/meditation/chart', () => {
     user.authorize();
 
     it('should respond with 401 when not authenticated', done => {
       request
-        .get('/api/meditation/times')
+        .get('/api/meditation/chart')
         .expect(401)
         .end(err => done(err));
     });
 
     it('should respond with data when authenticated', done => {
       user
-        .get('/api/meditation/times')
+        .get('/api/meditation/chart')
         .expect(200)
         .end((err, res) => {
           let sum = 0;
-          Object.keys(res.body).forEach(key => {
-            sum += res.body[key];
-          });
-          expect(Object.keys(res.body).length).to.equal(24);
+          res.body.map(x => sum += x.total);
+          expect(res.body.length).to.equal(1);
           expect(sum).to.equal(20);
           done(err);
         });

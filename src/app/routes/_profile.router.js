@@ -28,8 +28,6 @@ const getUser = async (query, req, res) =>  {
       return res.json(doc);
     }
 
-    doc.meditations = await new ProfileHelper().calculateStats(doc);
-
     return res.json(doc);
   } catch (err) {
     logger.error(err);
@@ -108,6 +106,42 @@ export default (app, router) => {
    */
   router.get('/api/profile/username/:username', async (req, res) => {
     return getUser({ 'username': req.params.username }, req, res);
+  });
+
+  /**
+   * @api {get} /api/profile/stats/:usernameOrId Get profile statistics of a user by username or id
+   * @apiName ShowStats
+   * @apiGroup Profile
+   * @apiDescription Get the profile statistics of a user.
+   *
+   * @apiSuccess {Object}     general           Generals meditation stats
+   * @apiSuccess {Object}     chartData         Historical meditation stats for
+   *                                            three different chart types
+   * @apiSuccess {Object}     consecutiveDays   Number of current and total consecutive
+   *                                            days of meditation
+   */
+  router.get('/api/profile/stats/:usernameOrId', async (req, res) => {
+    const user = await User.findOne({
+      $or: [
+        { _id: ObjectId(req.params.usernameOrId) },
+        { username: req.params.usernameOrId }
+      ],
+      hideStats: { $ne: true }
+    });
+
+    if (!user) {
+      return res.sendStatus(404);
+    }
+
+    const pHelper = new ProfileHelper(user);
+
+    const result = {
+      general: await pHelper.getGeneralStats(user),
+      chartData: await pHelper.getChartData(user),
+      consecutiveDays: await pHelper.getConsecutiveDays(user)
+    };
+
+    res.json(result);
   });
 
   /**
