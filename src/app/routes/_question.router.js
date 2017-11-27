@@ -25,7 +25,7 @@ export default (app, router, io, admin) => {
     try {
       const perPage = 10;
       const filterAnswered = req.query.filterAnswered === 'true';
-      const sortBy = req.query.sortBy ? req.query.sortBy : 'createdAt';
+      const sortBy = req.query.sortBy ? req.query.sortBy : 'answeredAt';
       const sortOrder = req.query.sortOrder ? req.query.sortOrder : 'descending';
       const linkOnly = req.query.linkOnly ? req.query.linkOnly === 'true' : false;
       const textSearch = req.query.search ? req.query.search : '';
