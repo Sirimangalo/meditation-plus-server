@@ -1,155 +1,268 @@
 import Meditation from '../models/meditation.model.js';
-import timezone from '../helper/timezone.js';
+import User from '../models/user.model.js';
 import moment from 'moment-timezone';
+import timezone from './timezone.js';
+
+let ObjectId = require('mongoose').Types.ObjectId;
 
 export class ProfileHelper {
-  async calculateStats(user) {
-    const timespans = this.initializeTimespans(user);
-    let meditations = {
-      lastMonths: {},
-      lastWeeks: {},
-      lastDays: {},
-      consecutiveDays: [],
-      numberOfSessions: 0,
-      currentConsecutiveDays: 0,
-      totalMeditationTime: 0,
-      averageSessionTime: 0,
-      timespan: {
-        lastDay: null,
-        ...timespans
-      }
-    };
 
-    meditations = this.fillTimespan(meditations);
+  user: User;
+  utcOffset = 0;
 
-    // sum meditation time
-    const result = await this.getMeditationsToDateForUser(
-      meditations.timespan.today, user
-    );
-    meditations = result.reduce(
-      (prev, cur) => this.processEntry(prev, cur, user),
-      meditations
-    );
-
-    meditations.averageSessionTime =
-      Math.round(meditations.totalMeditationTime / meditations.numberOfSessions);
-
-    delete meditations.timespan;
-    return meditations;
+  constructor(user = null) {
+    if (user) {
+      this.user = user;
+      this.utcOffset = timezone(this.user, 0).utcOffset();
+    }
   }
 
-  initializeTimespans(user) {
-    let today = timezone(user, moment());
-    let todayWithoutTime = timezone(user, moment()).startOf('day');
-    let tenDaysAgo = moment(todayWithoutTime).subtract(9, 'days');
-    let tenWeeksAgo = moment(todayWithoutTime).subtract(9, 'weeks');
-    let tenMonthsAgo = moment(todayWithoutTime).subtract(9, 'months');
+  /**
+   * Calculate general, non time-specific statistic
+   * for a certain user.
+   *
+   * @param  {User}   user   Valid user
+   * @return {Object}        General profile stats
+   */
+  async getGeneralStats() {
+    const defaultValues = {
+      _id: null,
+      walking: 0,
+      sitting: 0,
+      total: 0,
+      avgSessionTime: 0,
+      countOfSessions: 0
+    };
 
+    const data = await Meditation.aggregate([
+      { $match: { user: ObjectId(this.user._id) } },
+      {
+        $group: {
+          _id: null,
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' },
+          total: { $sum: { $add: ['$walking', '$sitting'] } },
+          avgSessionTime: { $avg: { $add: ['$walking', '$sitting'] } },
+          countOfSessions: { $sum: 1 }
+        }
+      }
+    ]);
+
+    return data && data.length > 0 ? data[0] : defaultValues;
+  }
+
+  /**
+   * Calculate profile data for the current week (since last monday).
+   *
+   * @param  {User}   user   Valid user
+   * @return {Object}        Profile stats for this week
+   */
+  async getWeekChartData() {
+    return Meditation.aggregate([
+      {
+        $match: {
+          user: ObjectId(this.user._id),
+          createdAt: {
+            $gte: timezone(this.user, moment.utc()).startOf('isoweek').toDate()
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: { $add: ['$createdAt', this.utcOffset * 60000] } },
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' }
+        }
+      }
+    ]);
+  }
+
+  /**
+   * Calculate profile data for the current month (since first day in month).
+   *
+   * @param  {User}   user   Valid user
+   * @return {Object}        Profile stats for this month
+   */
+  async getMonthChartData() {
+    return Meditation.aggregate([
+      {
+        $match: {
+          user: ObjectId(this.user._id),
+          createdAt: {
+            $gte: timezone(this.user, moment()).startOf('month').toDate(),
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfMonth: { $add: ['$createdAt', this.utcOffset * 60000] } },
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' }
+        }
+      }
+    ]);
+  }
+
+  /**
+   * Calculate profile data for the past year.
+   *
+   * @param  {User}   user   Valid user
+   * @return {Object}        Profile stats for past year
+   */
+  async getYearChartData() {
+    return Meditation.aggregate([
+      {
+        $match: {
+          user: ObjectId(this.user._id),
+          createdAt: {
+            $gte: timezone(this.user, moment()).subtract(1, 'year').toDate()
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $month: { $add: ['$createdAt', this.utcOffset * 60000] } },
+          walking: { $sum: '$walking' },
+          sitting: { $sum: '$sitting' }
+        }
+      }
+    ]);
+  }
+
+  /**
+   * Helper function for returning an object containing data from
+   * all three methods (week, month, year).
+   *
+   * @param  {User}   user   Valid user
+   * @return {Object}        Chart data
+   */
+  async getChartData() {
     return {
-      today, todayWithoutTime, tenDaysAgo, tenWeeksAgo, tenMonthsAgo
+      week: await this.getWeekChartData(),
+      month: await this.getMonthChartData(),
+      year: await this.getYearChartData()
     };
   }
 
-  async getMeditationsToDateForUser(date, user) {
-    return await Meditation
-      .find({
-        end: { $lt: date.format('x') },
-        user: user._id
-      })
-      .sort([['createdAt', 'ascending']])
-      .lean()
-      .exec();
-  }
+  /**
+   * Get number of total and current consecutive days of meditation.
+   *
+   * @param  {User}   user Valid user
+   * @return {Object}      Object containing both values
+   */
+  async getConsecutiveDays() {
+    const daysMeditated = await Meditation.aggregate([
+      { $match: { user: ObjectId(this.user._id) } },
+      {
+        $group: {
+          _id: {
+            $let: {
+              vars: {
+                createdAtTz: { $add: ['$createdAt', this.utcOffset * 60000] }
+              },
+              in: {
+                year: { $year: '$$createdAtTz' },
+                month: { $month: '$$createdAtTz' },
+                day: { $dayOfMonth: '$$createdAtTz' }
+              }
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          '_id.year': -1,
+          '_id.month': -1,
+          '_id.day': -1
+        }
+      },
+    ]);
 
-  fillTimespan(meditations) {
-    // iterate days
-    for (let day = moment(meditations.timespan.tenMonthsAgo);
-      day <= meditations.timespan.todayWithoutTime;
-      day.add(1, 'day')
-    ) {
-      meditations = this.setTimespanValue(meditations, day, 0);
-    }
+    const result = {
+      current: 0,
+      total: 0
+    };
 
-    return meditations;
-  }
+    // no consecutive days
+    if (daysMeditated.length < 2) return result;
 
-  setTimespanValue(meditations, date, value, add = false) {
-    const ts = meditations.timespan;
+    // necessary helper function to deal with aggregation
+    // data structure
+    const toMoment = obj => moment
+      .utc()
+      .year(obj._id.year)
+      .month(obj._id.month - 1 === 0 ? 11 : obj._id.month - 1)
+      .date(obj._id.day);
 
-    // adding times of last 10 months
-    meditations.lastMonths[date.format('MMM YY')] =
-      this.setValue(meditations.lastMonths[date.format('MMM YY')], value, add);
+    let dayBefore = toMoment(daysMeditated[0]);
+    let flagUpdateCurrent = true;
+    let flagConsecutive = false;
 
-    // adding times of last 10 weeks
-    if (date >= ts.tenWeeksAgo) {
-      meditations.lastWeeks[date.format('YY-w')] =
-        this.setValue(meditations.lastWeeks[date.format('YY-w')], value, add);
-    }
+    for (let i = 1; i < daysMeditated.length; i++) {
+      const currentDay = toMoment(daysMeditated[i]);
+      if (dayBefore.diff(currentDay, 'days') <= 1) {
+        // add two if first item in a series of consecutive days
+        // to not miss the first day. ref: https://meta.stackexchange.com/a/104624
+        result.total += !flagConsecutive ? 2 : 1;
 
-    // adding times of last 10 days
-    if (date >= ts.tenDaysAgo) {
-      meditations.lastDays[date.format('Do')] =
-        this.setValue(meditations.lastDays[date.format('Do')], value, add);
-    }
+        if (flagUpdateCurrent) {
+          result.current += !flagConsecutive ? 2 : 1;
+        }
 
-    return meditations;
-  }
-
-  setValue(variable, value, add = false) {
-    if (add) return variable += value;
-    else return variable = value;
-  }
-
-  getStartOfDuration(firstDate, lastDate) {
-    return moment.duration(
-      moment(firstDate).startOf('day').diff(moment(lastDate).startOf('day'))
-    );
-  }
-
-  tenDaysBadge(meditations) {
-    // save 10-steps as badges
-    if (meditations.currentConsecutiveDays > 0 && meditations.currentConsecutiveDays % 10 === 0) {
-      meditations.consecutiveDays.push(meditations.currentConsecutiveDays);
-    }
-
-    return meditations;
-  }
-
-  calculateConsecutiveDays(meditations, date) {
-    // calculate consecutive days
-    if (meditations.lastDay) {
-      const duration = this.getStartOfDuration(date, meditations.lastDay);
-
-      // only one day ago = consecutive day
-      if (duration.asDays() === 1) {
-        meditations.currentConsecutiveDays =
-          meditations.currentConsecutiveDays == 0
-            ? 2
-            : meditations.currentConsecutiveDays + 1;
-
-        meditations = this.tenDaysBadge(meditations);
-      } else if (duration.asDays() > 1) {
-        // more than one day ago = reset consecutive days
-        meditations.currentConsecutiveDays = 0;
+        flagConsecutive = true;
+      } else {
+        flagUpdateCurrent = false;
+        flagConsecutive = false;
       }
-    } else {
-      meditations.currentConsecutiveDays = 0;
+
+      dayBefore = currentDay;
     }
 
-    return meditations;
+    return result;
   }
 
-  processEntry(previous, entry, user) {
-    const value = entry.sitting + entry.walking;
+  /**
+   * Calculate commitment stats
+   * @param  {Commitment} commitment  A commitment
+   * @return {Number}                 Progress in percentage
+   */
+  async getCommitmentStatus(commitment = null) {
+    const aggDaysAgo = commitment.type === 'daily' ? 10 : 7;
+    const data = await Meditation.aggregate([
+      {
+        $match: {
+          user: ObjectId(this.user._id),
+          createdAt: {
+            $gte: timezone(this.user, moment()).subtract(aggDaysAgo, 'days').toDate()
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfMonth: { $add: ['$createdAt', this.utcOffset * 60000] } },
+          total: { $sum: { $add: ['$walking', '$sitting'] } }
+        }
+      }
+    ]);
 
-    previous.numberOfSessions++;
-    previous.totalMeditationTime += value;
-    const entryDate = timezone(user, entry.createdAt);
+    if (!data || !data.length) {
+      return 0;
+    }
 
-    previous = this.setTimespanValue(previous, entryDate, value, true);
-    previous = this.calculateConsecutiveDays(previous, entryDate);
-    previous.lastDay = entryDate;
+    const reachedMaxValue = commitment.type === 'daily'
+      ? commitment.minutes * aggDaysAgo
+      : commitment.minutes;
 
-    return previous;
+    let reachedValue = 0;
+
+    // sum up reached minutes until their max value
+    data.map(doc => reachedValue = Math.min(
+      commitment.type === 'daily'
+        ? reachedValue + Math.min(doc.total, commitment.minutes)
+        : reachedValue + doc.total,
+      reachedMaxValue
+    ));
+
+    return Math.round(100 * (reachedValue / reachedMaxValue));
   }
 }
