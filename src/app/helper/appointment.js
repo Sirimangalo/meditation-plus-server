@@ -37,6 +37,10 @@ let appointmentHelper = {
    * @return {Object}               Modified appointment object
    */
   addIncrement: (appointment, increment) => {
+    if (!appointment) {
+      return null;
+    }
+
     // add increment
     appointment.hour = (appointment.hour + 100 * increment);
 
@@ -140,6 +144,72 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
   resolve('Notifications were send. Exiting.');
 });
 
+/**
+ * Find an appointment for the given date/time.
+ *
+ * @param      {'Datable'}            datetime         The date, moment, date-string or 'now'
+ * @param      {number}               toleranceBefore  The minutes of tolerance before
+ * @param      {number}               toleranceAfter   The minutes tolerance after
+ * @return                                             The appointment object
+ */
+appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) => new Promise(async resolve => {
+  // load settings entity
+  const settings = await Settings.findOne();
+  let at = datetime === 'now'
+    ? moment.tz(settings.appointmentsTimezone)
+    : moment(datetime);
+
+  if (!at.isValid()) {
+    return resolve(null);
+  }
+
+  // apply increment
+  const increment = settings && settings.appointmentsIncrement
+    ? settings.appointmentsIncrement
+    : 0;
+  at = at.subtract(increment, 'hours');
+
+  const minDate = at.clone().subtract(toleranceAfter, 'minutes');
+  const maxDate = at.clone().add(toleranceBefore, 'minutes');
+
+  let doc = null;
+  if (minDate.weekday() !== maxDate.weekday()) {
+    // handle the case where the tolerance range
+    // includes two days
+    doc = await Appointment
+      .findOne({
+        $or: [
+          {
+            weekDay: minDate.weekday(),
+            hour: {
+              $gte: timeToNumber(minDate)
+            }
+          },
+          {
+            weekDay: maxDate.weekday(),
+            hour: {
+              $lte: timeToNumber(maxDate)
+            }
+          }
+        ]
+      })
+      .populate('user', 'name username gravatarHash')
+      .exec();
+  } else {
+    doc = await Appointment
+      .findOne({
+        weekDay: minDate.weekday(),
+        hour: {
+          $gte: timeToNumber(minDate),
+          $lte: timeToNumber(maxDate)
+        }
+      })
+      .populate('user', 'name username gravatarHash')
+      .exec();
+  }
+
+  resolve(appointmentHelper.addIncrement(doc, increment));
+});
 
 /**
  * Searches for appointments the user is allowed to
@@ -147,7 +217,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
  * the time of their booked appointment (with a 5 minute
  * tolerance). For admins marked as teacher, it means
  * within the timespan of 5 minutes before any appointment
- * starts and 25 minutes after it was scheduled.
+ * starts and 20 minutes after it was scheduled.
  *
  * @param  {Object}  user      User that needs authorization
  * @param  {Boolean} reconnect If set to true, the time tolarance
@@ -156,72 +226,8 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
  *
  * @return                     the appointment object
  */
-appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resolve) => {
-  if (!user) {
-    return resolve(null);
-  }
-
-  // load settings entity
-  const settings = await Settings.findOne();
-
-  // appointments are formatted in this timezone
-  const now = moment.tz(settings.appointmentsTimezone);
-
-  const increment = settings && settings.appointmentsIncrement
-    ? settings.appointmentsIncrement
-    : 0;
-
-  // find any appointment for right now
-  const doc = await Appointment
-    .findOne({
-      weekDay: now.weekday(),
-      hour: {
-        $lte: timeToNumber(
-          // 5 minutes before appointment
-          now.clone().add(5 + 60 * increment , 'minutes')
-        ),
-        $gte: timeToNumber(
-          // 25 minutes after appointment
-          now.clone().subtract(25 + 60 * increment, 'minutes')
-        )
-      },
-      user: { $exists: true, $ne: null }
-    })
-    .populate('user', 'name username gravatarHash')
-    .exec();
-
-  if (!doc) {
-    return resolve(null);
-  }
-
-  // check if user is admin and marked as teacher
-  const isCallee = user.role === 'ROLE_ADMIN' && user.appointmentsCallee === true;
-
-  // check if appointment is the one of requested user
-  const isOwnAppointment = doc.user._id.toString() === user._id.toString();
-  // check whether the time now is before 10 minutes after the appointment starts
-  const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10 + 60 * increment, 'minutes'));
-
-
-  if (doc && (isCallee || isOwnAppointment && (reconnect || isAppOnTime))) {
-
-    if (!isCallee && !reconnect) {
-      // register the user's request to initiate an appointment.
-      // Use 'await' in order to not confuse the count of
-      // the appointments before this update with the count
-      // afterwards.
-      await User
-        .findOneAndUpdate({
-          _id: user._id
-        }, {
-          $addToSet: { appointments: moment.utc().startOf('day').toDate() }
-        });
-    }
-
-    return resolve(doc);
-  }
-
-  resolve(null);
-});
+appointmentHelper.getNowAuthorized = (user, reconnect = false) => appointmentHelper.getAt('now', 5,
+  reconnect || (user && user.role === 'ROLE_ADMIN' && user.appointmentsCallee === true) ? 25 : 8
+);
 
 export default appointmentHelper;

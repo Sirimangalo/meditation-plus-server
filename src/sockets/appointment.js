@@ -58,7 +58,7 @@ export default (socket, io) => {
 
     // if an authorized user is already in the room 'Appointment', then this means that a
     // reconnect is given (-> second parameter).
-    const appointment = await appointHelper.getNow(userNow, roomLen === 1 && !inRoom());
+    const appointment = await appointHelper.getNowAuthorized(userNow, roomLen === 1 && !inRoom());
 
     // send appointment and status to client
     socket.emit('appointment', {
