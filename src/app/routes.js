@@ -11,6 +11,7 @@ import userRoutes from './routes/_user.router.js';
 import liveRoutes from './routes/_livestream.router.js';
 import settingsRoutes from './routes/_settings.router.js';
 import analyticsRoutes from './routes/_analytics.router.js';
+import meetingRoutes from './routes/_meeting.router.js';
 import pushRoutes from './routes/_push.router.js';
 import mongoose from 'mongoose';
 import User from './models/user.model.js';
@@ -66,6 +67,7 @@ export default (app, router, passport, io) => {
   settingsRoutes(app, router, admin);
   analyticsRoutes(app, router, admin);
   pushRoutes(app, router);
+  meetingRoutes(app, router, io, admin);
 
   // Provide a simple status page
   // Return 204 (No Content) when mongoose is connected

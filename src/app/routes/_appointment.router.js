@@ -2,6 +2,7 @@ import Appointment from '../models/appointment.model.js';
 import Settings from '../models/settings.model.js';
 import { logger } from '../helper/logger.js';
 import appointHelper from '../helper/appointment.js';
+let ObjectId = require('mongoose').Types.ObjectId;
 
 export default (app, router, io, admin) => {
 
@@ -219,6 +220,12 @@ export default (app, router, io, admin) => {
 
       // notify possible updates
       appointHelper.notify().then();
+
+      // remove reference from appointment calls
+      await AppointmentCall
+        .find({ appointment: ObjectId(req.params.id) })
+        .remove()
+        .exec();
 
       res.json(result);
     } catch (err) {
