@@ -23,8 +23,8 @@ export default (app, router, io) => {
       let messages = await Message
         .find(
           req.user._doc.role === 'ROLE_ADMIN'
-            ? { deleted: { $ne: true } }
-            : {}
+            ? { deleted: { $ne: true }, private: { $ne: true } }
+            : { private: { $ne: true } }
         )
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
@@ -61,7 +61,8 @@ export default (app, router, io) => {
           $gt: timeFrameStart,
           $lte: timeFrameEnd
         },
-        deleted: { $ne: true }
+        deleted: { $ne: true },
+        private: { $ne: true }
       };
 
       if (req.user._doc.role === 'ROLE_ADMIN') {
@@ -101,7 +102,9 @@ export default (app, router, io) => {
 
       // fetch previous message to detect missed timespans on the client
       const previousMessage = await Message
-        .findOne()
+        .findOne({
+          private: { $ne: true }
+        })
         .sort('-createdAt')
         .skip(1)
         .then();

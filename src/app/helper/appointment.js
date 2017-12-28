@@ -2,22 +2,22 @@ import {logger} from '../helper/logger.js';
 import Settings from '../models/settings.model.js';
 import Appointment from '../models/appointment.model.js';
 import User from '../models/user.model.js';
+import Meeting from '../models/meeting.model.js';
 import moment from 'moment-timezone';
 import webpush from 'web-push';
 
-/**
- * Converts Date or moment object to Integer representing the time.
- *
- * @param  {moment/Date}   Date or moment object
- * @return {Number}        Time as Number
- */
-function timeToNumber(time): Number {
-  return time instanceof Date
-    ? time.getHours() * 100 + time.getMinutes()
-    : (time instanceof moment ? time.hours() * 100 + time.minutes() : 0);
-}
 
 let appointmentHelper = {
+  /**
+   * Converts Date or moment object to Integer representing the time.
+   *
+   * @param  {moment/Date}   Date or moment object
+   * @return {Number}        Time as Number
+   */
+  timeToNumber: time => time instanceof Date
+    ? time.getHours() * 100 + time.getMinutes()
+    : (time instanceof moment ? time.hours() * 100 + time.minutes() : 0),
+
   /**
    * Parses hour as String.
    *
@@ -56,7 +56,19 @@ let appointmentHelper = {
     }
 
     return appointment;
-  }
+  },
+
+  /**
+   * Checks whether an user is authorized for an appointment.
+   * This applies if he is the holder or an admin.
+   */
+  // TODO: This doesn't work always as expected
+  isAuthorized: (user, appointment) => appointment !== null && user !== null && 'user' in appointment &&
+    ('role' in user && user.role === 'ROLE_ADMIN' || '_id' in user &&
+      ('_id' in appointment.user
+        ? appointment.user._id.toString() === user._id.toString()
+        : appointment.user.toString() === user._id.toString()
+    ))
 };
 
 /**
@@ -147,7 +159,7 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
 /**
  * Find an appointment for the given date/time.
  *
- * @param      {'Datable'}            datetime         The date, moment, date-string or 'now'
+ * @param      {Date/Moment}          datetime         The date, moment, date-string or 'now'
  * @param      {number}               toleranceBefore  The minutes of tolerance before
  * @param      {number}               toleranceAfter   The minutes tolerance after
  * @return                                             The appointment object
@@ -182,13 +194,13 @@ appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) =>
           {
             weekDay: minDate.weekday(),
             hour: {
-              $gte: timeToNumber(minDate)
+              $gte: appointmentHelper.timeToNumber(minDate)
             }
           },
           {
             weekDay: maxDate.weekday(),
             hour: {
-              $lte: timeToNumber(maxDate)
+              $lte: appointmentHelper.timeToNumber(maxDate)
             }
           }
         ]
@@ -200,8 +212,8 @@ appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) =>
       .findOne({
         weekDay: minDate.weekday(),
         hour: {
-          $gte: timeToNumber(minDate),
-          $lte: timeToNumber(maxDate)
+          $gte: appointmentHelper.timeToNumber(minDate),
+          $lte: appointmentHelper.timeToNumber(maxDate)
         }
       })
       .populate('user', 'name username gravatarHash')
@@ -210,24 +222,5 @@ appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) =>
 
   resolve(appointmentHelper.addIncrement(doc, increment));
 });
-
-/**
- * Searches for appointments the user is allowed to
- * join right now. For regular users this means at
- * the time of their booked appointment (with a 5 minute
- * tolerance). For admins marked as teacher, it means
- * within the timespan of 5 minutes before any appointment
- * starts and 20 minutes after it was scheduled.
- *
- * @param  {Object}  user      User that needs authorization
- * @param  {Boolean} reconnect If set to true, the time tolarance
- *                             for regular users is the same as for
- *                             admins.
- *
- * @return                     the appointment object
- */
-appointmentHelper.getNowAuthorized = (user, reconnect = false) => appointmentHelper.getAt('now', 5,
-  reconnect || (user && user.role === 'ROLE_ADMIN' && user.appointmentsCallee === true) ? 25 : 8
-);
 
 export default appointmentHelper;

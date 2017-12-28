@@ -245,4 +245,6 @@ describe('Appointment Helper', () => {
     });
   });
 
+  it('should ')
+
 });

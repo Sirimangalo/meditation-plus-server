@@ -34,8 +34,7 @@ let userSchema = mongoose.Schema({
     testimonial: Boolean,
     appointment: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PushSubscriptions' }]
   },
-  appointments: [{ type: Date }],
-  appointmentsCallee: Boolean
+  appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AppointmentCall' }],
 });
 
 userSchema.methods.generateHash = function(password) {
