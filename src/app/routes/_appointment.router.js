@@ -139,7 +139,7 @@ export default (app, router, io, admin) => {
       if (!appointment) return res.sendStatus(404);
 
       // check if another user is registered
-      if (appointment.user && appointment.user != req.user._doc._id) {
+      if (appointment.user && appointment.user != req.user._id) {
         return res.status(400).send('another user is registered');
       }
 
@@ -147,7 +147,7 @@ export default (app, router, io, admin) => {
         // check if user is already in another appointment and remove it
         const otherAppointment = await Appointment
           .findOne({
-            user: req.user._doc._id
+            user: req.user._id
           })
           .exec();
 
@@ -158,9 +158,9 @@ export default (app, router, io, admin) => {
       }
 
       // toggle registration for current user
-      appointment.user = appointment.user && appointment.user == req.user._doc._id
+      appointment.user = appointment.user && appointment.user == req.user._id
         ? null
-        : req.user._doc;
+        : req.user;
 
       await appointment.save();
       // sending broadcast WebSocket for taken/fred appointment

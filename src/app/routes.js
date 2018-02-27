@@ -21,7 +21,7 @@ export default (app, router, passport, io) => {
   router.use(async (req, res, next) => {
     // update lastActive for user
     if (req.user) {
-      let user = await User.findById(req.user._doc._id);
+      let user = await User.findById(req.user._id);
 
       if (user.suspendedUntil && user.suspendedUntil > new Date()) {
         res.sendStatus(401);
@@ -45,7 +45,7 @@ export default (app, router, passport, io) => {
   // Define a middleware function to be used for all secured administration
   // routes
   let admin = (req, res, next) => {
-    if (!req.isAuthenticated() || req.user._doc.role !== 'ROLE_ADMIN') {
+    if (!req.isAuthenticated() || req.user.role !== 'ROLE_ADMIN') {
       res.sendStatus(401);
     } else {
       next();

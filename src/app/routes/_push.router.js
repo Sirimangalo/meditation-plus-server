@@ -14,7 +14,7 @@ export default (app, router) => {
       const endpoint = req.body.endpoint ? req.body.endpoint : null;
       if (!endpoint) return res.sendStatus(400);
 
-      const user = await User.findOne({ _id : req.user._doc._id });
+      const user = await User.findOne({ _id : req.user._id });
       if (!user) return res.sendStatus(403);
 
       const subscription = JSON.stringify(req.body);

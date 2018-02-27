@@ -130,7 +130,8 @@ describe('Question Routes', () => {
         .end(err => done(err));
     });
 
-    // google api needed to test this in local
+    /* FIXME(sebastian): I can't test this.
+    google api needed to test this in local
     it('should suggestions for entered text', done => {
 
       Broadcast.create({
@@ -165,7 +166,7 @@ describe('Question Routes', () => {
             });
         });
       });
-    });
+    });*/
 
 
     it('should add one more question', done => {
