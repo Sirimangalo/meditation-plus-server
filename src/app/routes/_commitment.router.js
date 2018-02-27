@@ -40,7 +40,7 @@ export default (app, router, admin) => {
     try {
       const commitments = await Commitment
         .find({
-          users: new ObjectId(req.user._doc._id)
+          users: new ObjectId(req.user._id)
         })
         .lean()
         .then();
@@ -48,7 +48,7 @@ export default (app, router, admin) => {
       const result = {};
 
       if (commitments) {
-        const pHelper = new ProfileHelper(req.user._doc);
+        const pHelper = new ProfileHelper(req.user);
 
         for (let commit of commitments) {
           // Calculate progress for all commitments
@@ -138,7 +138,7 @@ export default (app, router, admin) => {
 
       // check if already committed
       for (let user of entry.users) {
-        if (user == req.user._doc._id) {
+        if (user == req.user._id) {
           res.sendStatus(400);
           return;
         }
@@ -148,7 +148,7 @@ export default (app, router, admin) => {
       if (typeof entry.users === 'undefined') {
         entry.users = [];
       }
-      entry.users.push(req.user._doc);
+      entry.users.push(req.user);
       await entry.save();
       res.sendStatus(204);
     } catch (err) {
@@ -169,7 +169,7 @@ export default (app, router, admin) => {
 
       // find user
       for (let key of entry.users.keys()) {
-        if (entry.users[key] == req.user._doc._id) {
+        if (entry.users[key] == req.user._id) {
           entry.users.splice(key, 1);
           await entry.save();
           res.sendStatus(204);

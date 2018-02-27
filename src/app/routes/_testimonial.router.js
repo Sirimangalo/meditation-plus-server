@@ -13,7 +13,7 @@ export default (app, router, io, admin) => {
    */
   router.get('/api/testimonial', async (req, res) => {
     try {
-      let userId = req.user._doc._id;
+      let userId = req.user._id;
       let allowUser = true;
       let testimonials = await Testimonial
         .find()
@@ -77,7 +77,7 @@ export default (app, router, io, admin) => {
     try {
       let testimonial = await Testimonial.create({
         text: req.body.text,
-        user: req.user._doc,
+        user: req.user,
         reviewed: false, // default: false
         anonymous: req.body.anonymous || false
       });

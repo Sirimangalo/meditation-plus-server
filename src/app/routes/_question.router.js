@@ -64,7 +64,7 @@ export default (app, router, io, admin) => {
 
       questions.map(question => {
         for (let like of question.likes) {
-          if (like.toString() === req.user._doc._id) {
+          if (like.toString() === req.user._id) {
             question.alreadyLiked = true;
             break;
           }
@@ -149,7 +149,7 @@ export default (app, router, io, admin) => {
     try {
       let question = await Question.create({
         text: req.body.text,
-        user: req.user._doc
+        user: req.user
       });
 
       // add user details for response and broadcast
@@ -179,7 +179,7 @@ export default (app, router, io, admin) => {
   router.post('/api/question/:id/like', async (req, res) => {
     try {
       let entry = await Question.findById(req.params.id);
-      if (entry.user == req.user._doc._id || entry.answered || entry.answeredAt) {
+      if (entry.user == req.user._id || entry.answered || entry.answeredAt) {
         return res.sendStatus(400);
       }
 
@@ -190,13 +190,13 @@ export default (app, router, io, admin) => {
 
       // check if already liked
       for (let like of entry.likes) {
-        if (like === req.user._doc._id) {
+        if (like === req.user._id) {
           return res.sendStatus(400);
         }
       }
 
       entry.numOfLikes = entry.numOfLikes ? entry.numOfLikes + 1 : 1;
-      entry.likes.push(req.user._doc);
+      entry.likes.push(req.user);
       await entry.save();
 
       // sending broadcast WebSocket question
@@ -222,7 +222,7 @@ export default (app, router, io, admin) => {
         return res.sendStatus(400);
       }
 
-      if (req.user._doc.role !== 'ROLE_ADMIN') {
+      if (req.user.role !== 'ROLE_ADMIN') {
         res.sendStatus(403);
         return;
       }
@@ -329,8 +329,8 @@ export default (app, router, io, admin) => {
         .find({ _id: req.params.id })
         .exec();
 
-      if (req.user._doc.role !== 'ROLE_ADMIN'
-        && result[0].user != req.user._doc._id) {
+      if (req.user.role !== 'ROLE_ADMIN'
+        && result[0].user != req.user._id) {
         return res.sendStatus(403);
       }
 
