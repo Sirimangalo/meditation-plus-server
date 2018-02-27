@@ -25,10 +25,27 @@ export default (app, router, io, admin) => {
     try {
       const perPage = 10;
       const filterAnswered = req.query.filterAnswered === 'true';
+      const sortBy = req.query.sortBy ? req.query.sortBy : 'answeredAt';
+      const sortOrder = req.query.sortOrder ? req.query.sortOrder : 'descending';
+      const linkOnly = req.query.linkOnly ? req.query.linkOnly === 'true' : false;
+      const textSearch = req.query.search ? req.query.search : '';
       const page = req.query.page || 0;
+
+      let answeredQuery = {
+        answered: true
+      };
+
+      if (linkOnly) {
+        answeredQuery.broadcast = { $exists: true };
+      }
+
+      if (textSearch) {
+        answeredQuery['$text'] = { $search: textSearch };
+      }
+
       const query = filterAnswered
         ? Question
-          .find({answered: { $eq: true }})
+          .find(answeredQuery)
           .limit(perPage)
           .skip(perPage * page)
         : Question
@@ -37,7 +54,7 @@ export default (app, router, io, admin) => {
       let questions = await query
         .sort(
           filterAnswered
-            ? [['answeredAt', 'descending']]
+            ? [[sortBy, sortOrder]]
             : [['numOfLikes', 'descending'], ['createdAt', 'ascending']]
         )
         .populate('user', 'name gravatarHash lastMeditation country username')
