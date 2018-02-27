@@ -124,7 +124,7 @@ export default (app, router, io) => {
       const meditation = await Meditation
         .findOne({
           end: { $gt: Date.now() },
-          user: req.user._doc._id
+          user: req.user._id
         })
         .exec();
 
@@ -153,7 +153,7 @@ export default (app, router, io) => {
         }
 
         // check if new session time conflicts with existing sessions
-        let conflict = await findConflictingMeditation(req.user._doc._id, newStart, newEnd);
+        let conflict = await findConflictingMeditation(req.user._id, newStart, newEnd);
 
         if (conflict) {
           return res.status(400).json({errMsg: 'There exists a meditation entry that conflicts with your date/time.'});
@@ -169,11 +169,11 @@ export default (app, router, io) => {
         walking: walking,
         createdAt: medStart,
         end: medEnd,
-        user: req.user._doc,
+        user: req.user,
         numOfLikes: 0
       });
 
-      let user = await User.findById(req.user._doc._id);
+      let user = await User.findById(req.user._id);
 
       // update users lastMeditation log
       user.lastMeditation = created.end;
@@ -241,7 +241,7 @@ export default (app, router, io) => {
       let meditation = await Meditation
         .findOne({
           end: { $gt: Date.now() },
-          user: req.user._doc._id
+          user: req.user._id
         })
         .exec();
 
@@ -272,7 +272,7 @@ export default (app, router, io) => {
 
       // update user's last meditation end to now
       User.findOneAndUpdate({
-        _id: req.user._doc._id
+        _id: req.user._id
       }, {
         lastMeditation: Date.now()
       }).exec();
@@ -294,7 +294,7 @@ export default (app, router, io) => {
    */
   router.post('/api/meditation/like', async (req, res) => {
     try {
-      let user = await User.findById(req.user._doc._id);
+      let user = await User.findById(req.user._id);
 
       const lastLike = user.lastLike
         ? user.lastLike.getTime()

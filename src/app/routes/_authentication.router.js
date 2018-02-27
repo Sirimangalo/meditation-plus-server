@@ -54,7 +54,7 @@ export default (app, router, passport, admin) => {
         // Set HTTP status code `200 OK`
         res.status(200);
 
-        let token = jwt.sign(req.user, process.env.SESSION_SECRET, {
+        let token = jwt.sign(req.user.toObject(), process.env.SESSION_SECRET, {
           expiresIn: '7d'
         });
 
@@ -93,7 +93,7 @@ export default (app, router, passport, admin) => {
       // Return the new token
       res.json({
         token,
-        id: req.user._doc._id,
+        id: req.user._id,
         role: req.user.role ? req.user.role : 'ROLE_USER'
       });
     }
@@ -166,15 +166,15 @@ export default (app, router, passport, admin) => {
       });
 
       if (!user) {
-        res.sendStatus(400);
+        return res.sendStatus(400);
       }
 
       user.verified = true;
       await user.save();
 
-      res.sendStatus(200);
+      return res.sendStatus(200);
     } catch (err) {
-      res.status(500).send(err);
+      return res.status(500).send(err);
     }
   });
 
