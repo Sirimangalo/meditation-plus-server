@@ -33,7 +33,7 @@ export default (app, router, io, admin) => {
     try {
       const userIds = Object.keys(io.sockets.sockets)
         .map(s => io.sockets.sockets[s].decoded_token ?
-          io.sockets.sockets[s].decoded_token._doc._id
+          io.sockets.sockets[s].decoded_token._id
           : null
         );
 

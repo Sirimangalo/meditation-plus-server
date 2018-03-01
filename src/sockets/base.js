@@ -21,7 +21,7 @@ export default (io) => {
     // send out update for onlinecounter
     socket.broadcast.emit('onlinecounter:changed', 1);
 
-    logger.info('a user connected:', socket.decoded_token._doc._id);
+    logger.info('a user connected:', socket.decoded_token._id);
     logger.info(socket.id + ' connected via ('+ socket.client.conn.transport.constructor.name +')');
 
     // fetch latest message to detect missed timespans on the client

@@ -6,7 +6,7 @@ export default (socket, io) => {
   /**
    * method for retrieving user information from the socket
    */
-  const user = () => socket.decoded_token._doc;
+  const user = () => socket.decoded_token;
 
   /**
    * method for getting the room length
