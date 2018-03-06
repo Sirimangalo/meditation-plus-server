@@ -20,9 +20,7 @@ describe('Settings Routes', () => {
 
   beforeEach(done => {
     Settings.remove(() => {
-      settings = new Settings({
-        appointmentsIncrement: 5
-      });
+      settings = new Settings();
 
       settings.save(err => {
         if (err) return done(err);
@@ -41,9 +39,7 @@ describe('Settings Routes', () => {
         .get('/api/settings')
         .expect(200)
         .end((err, res) => {
-          expect(res.body).to.have.property('appointmentsIncrement');
           expect(res.body).to.have.property('appointmentsTimezone');
-          expect(res.body.appointmentsIncrement).to.equal(5);
           expect(res.body.appointmentsTimezone).to.equal('America/Toronto');
           done(err);
         });
@@ -53,23 +49,23 @@ describe('Settings Routes', () => {
   describe('POST /api/settings', () => {
     it('should respond with 401 when not authorized', done => {
       user
-        .put('/api/settings/appointmentsIncrement')
+        .put('/api/settings/appointmentsTimezone')
         .expect(401)
         .end(err => done(err));
     });
 
     it('should respond with 400 if no value is provided', done => {
       admin
-        .put('/api/settings/appointmentsIncrement')
+        .put('/api/settings/appointmentsTimezone')
         .expect(400)
         .end(err => done(err));
     });
 
     it('should respond with 200 if request is valid', done => {
       admin
-        .put('/api/settings/appointmentsIncrement')
+        .put('/api/settings/appointmentsTimezone')
         .send({
-          value: 10
+          value: 'America/Toronto'
         })
         .expect(200)
         .end(err => done(err));
