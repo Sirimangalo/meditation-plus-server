@@ -27,9 +27,7 @@ describe('Appointment Routes', () => {
   beforeEach(done => {
     Settings.remove(() => {
       Appointment.remove(() => {
-        settings = new Settings({
-          appointmentsIncrement: 15
-        });
+        settings = new Settings();
 
         appointment = new Appointment({
           weekDay: 1,
@@ -71,9 +69,8 @@ describe('Appointment Routes', () => {
           expect(res.body).to.have.property('appointments');
           expect(res.body.hours.length).to.equal(1);
           expect(res.body.appointments.length).to.equal(1);
-          // hour & day should be incremented
-          expect(res.body.hours[0]).to.equal(300);
-          expect(res.body.appointments[0].weekDay).to.equal(2);
+          expect(res.body.hours[0]).to.equal(1200);
+          expect(res.body.appointments[0].weekDay).to.equal(1);
           done(err);
         });
     });
@@ -92,8 +89,8 @@ describe('Appointment Routes', () => {
             expect(res.body).to.have.property('hours');
             expect(res.body).to.have.property('appointments');
             expect(res.body.hours.length).to.equal(2);
-            expect(res.body.hours[0]).to.equal(300);
-            expect(res.body.hours[1]).to.equal(2200);
+            expect(res.body.hours[0]).to.equal(700);
+            expect(res.body.hours[1]).to.equal(1200);
             expect(res.body.appointments.length).to.equal(2);
             done(err);
           });
@@ -115,6 +112,50 @@ describe('Appointment Routes', () => {
             expect(res.body).to.have.property('appointments');
             expect(res.body.hours.length).to.equal(1);
             expect(res.body.appointments.length).to.equal(2);
+            done(err);
+          });
+      });
+    });
+  });
+
+  describe('GET /api/appointment/aggregated', () => {
+    user.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .get('/api/appointment/aggregated')
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with data when authenticated', done => {
+      user
+        .get('/api/appointment/aggregated')
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.length).to.equal(1);
+          expect(res.body[0]._id).to.equal(1200);
+          expect(res.body[0].days).to.eql([1]);
+          done(err);
+        });
+    });
+
+    it('should respond with more data when added', done => {
+      Appointment.create({
+        weekDay: 2,
+        hour: 700
+      }).then((res, err) => {
+        if (err) return done(err);
+
+        user
+          .get('/api/appointment/aggregated')
+          .expect(200)
+          .end((err, res) => {
+            expect(res.body.length).to.equal(2);
+            expect(res.body[0]._id).to.equal(700);
+            expect(res.body[0].days).to.eql([2]);
+            expect(res.body[1]._id).to.equal(1200);
+            expect(res.body[1].days).to.eql([1]);
             done(err);
           });
       });
@@ -191,41 +232,6 @@ describe('Appointment Routes', () => {
     });
   });
 
-  describe('PUT /api/appointment/:id', () => {
-    user.authorize();
-    admin.authorize();
-
-    it('should respond with 401 when not authenticated', done => {
-      request
-        .put(`/api/appointment/${appointment._id}`)
-        .send({
-          weekDay: 0
-        })
-        .expect(401)
-        .end(err => done(err));
-    });
-
-    it('should respond with 401 when authenticated as user', done => {
-      user
-        .put(`/api/appointment/${appointment._id}`)
-        .send({
-          weekDay: 0
-        })
-        .expect(401)
-        .end(err => done(err));
-    });
-
-    it('should correctly return when authenticated as admin', done => {
-      admin
-        .put(`/api/appointment/${appointment._id}`)
-        .send({
-          weekDay: 0
-        })
-        .expect(200)
-        .end(err => done(err));
-    });
-  });
-
   describe('POST /api/appointment', () => {
     user.authorize();
     admin.authorize();
@@ -262,36 +268,159 @@ describe('Appointment Routes', () => {
     });
   });
 
-  describe('DELETE /api/appointment/:id', () => {
+  describe('POST /api/appointment/toggle', () => {
     user.authorize();
     admin.authorize();
 
     it('should respond with 401 when not authenticated', done => {
       request
-        .delete(`/api/appointment/${appointment._id}`)
+        .post('/api/appointment/toggle')
+        .send({
+          weekDay: 0
+        })
         .expect(401)
         .end(err => done(err));
     });
 
     it('should respond with 401 when authenticated as user', done => {
       user
-        .delete(`/api/appointment/${appointment._id}`)
+        .post('/api/appointment/toggle')
+        .send({
+          weekDay: 0
+        })
         .expect(401)
         .end(err => done(err));
     });
 
-    it('should correctly delete when authenticated as admin', done => {
+    it('should respond with 400 when given invalid params', done => {
       admin
-        .delete(`/api/appointment/${appointment._id}`)
-        .expect(200)
+        .post('/api/appointment/toggle')
+        .send({
+          hour: 'invalid'
+        })
+        .expect(400)
+        .end(err => done(err));
+    });
+
+    it('should respond with 201 when trying to add a new appointment', done => {
+      admin
+        .post('/api/appointment/toggle')
+        .send({
+          hour: 850,
+          day: 3
+        })
+        .expect(201)
         .end(err => {
           if (err) return done(err);
 
-          // check if really deleted
-          admin
-            .get(`/api/appointment/${appointment._id}`)
-            .expect(404)
-            .end(err => done(err));
+          Appointment
+            .find({}, (err, res) => {
+              expect(res.length).to.equal(2);
+              expect(res[0].hour).to.equal(1200);
+              expect(res[0].weekDay).to.equal(1);
+              expect(res[1].hour).to.equal(850);
+              expect(res[1].weekDay).to.equal(3);
+
+              done(err);
+            });
+        });
+    });
+
+    it('should respond with 204 when trying to delete an existing appointment', done => {
+      admin
+        .post('/api/appointment/toggle')
+        .send({
+          hour: 1200,
+          day: 1
+        })
+        .expect(204)
+        .end(err => {
+          if (err) return done(err);
+
+          Appointment
+            .find({}, (err, res) => {
+              expect(res.length).to.equal(0);
+              done(err);
+            });
+        });
+    });
+  });
+
+  describe('POST /api/appointment/update', () => {
+    user.authorize();
+    admin.authorize();
+
+    it('should respond with 401 when not authenticated', done => {
+      request
+        .post('/api/appointment/update')
+        .send({
+          weekDay: 0
+        })
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 401 when authenticated as user', done => {
+      user
+        .post('/api/appointment/update')
+        .send({
+          weekDay: 0
+        })
+        .expect(401)
+        .end(err => done(err));
+    });
+
+    it('should respond with 400 when given invalid params', done => {
+      admin
+        .post('/api/appointment/update')
+        .send({
+          oldHour: 'invalid'
+        })
+        .expect(400)
+        .end(err => done(err));
+    });
+
+    it('should respond with 400 when appointment already exists', done => {
+      admin
+        .post('/api/appointment/update')
+        .send({
+          oldHour: 1200,
+          newHour: 1200
+        })
+        .expect(400)
+        .end(err => done(err));
+    });
+
+    it('should respond with 400 when no appointment with given hour can be found', done => {
+      admin
+        .post('/api/appointment/update')
+        .send({
+          oldHour: 500,
+          newHour: 600
+        })
+        .expect(400)
+        .end(err => done(err));
+    });
+
+    it('should respond with 204 when params are valid', done => {
+      admin
+        .post('/api/appointment/update')
+        .send({
+          oldHour: 1200,
+          newHour: 300
+        })
+        .expect(204)
+        .end(err => {
+          if (err) return done(err);
+
+          Appointment
+            .find({}, (err, res) => {
+              expect(res.length).to.equal(1);
+              expect(res[0].hour).to.equal(300);
+              expect(res[0].weekDay).to.equal(1);
+
+              done(err);
+            });
         });
     });
   });

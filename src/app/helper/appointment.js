@@ -27,31 +27,6 @@ let appointmentHelper = {
   printHour: hour => {
     const hourStr = '0000' + hour.toString();
     return hourStr.substr(-4, 2) + ':' + hourStr.substr(-2, 2);
-  },
-
-  /**
-   * Adds increment of hours to an appointment.
-   *
-   * @param  {Object} appointment   Appointment object
-   * @param  {Number} increment     Amount of hours to add
-   * @return {Object}               Modified appointment object
-   */
-  addIncrement: (appointment, increment) => {
-    // add increment
-    appointment.hour = (appointment.hour + 100 * increment);
-
-    // handle possible overflow
-    if (appointment.hour < 0) {
-      // change day to previous day if negative hour
-      appointment.weekDay = appointment.weekDay === 0 ? 6 : appointment.weekDay - 1;
-      appointment.hour += 2400;
-    } else if (appointment.hour >= 2400) {
-      // change day to next day if positive overflow
-      appointment.weekDay = (appointment.weekDay + 1) % 7;
-      appointment.hour %= 2400;
-    }
-
-    return appointment;
   }
 };
 
@@ -105,11 +80,6 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
   }
 
   nextAppointment = nextAppointment[0];
-
-  if (settings.appointmentsIncrement) {
-    // add global increment
-    nextAppointment = appointmentHelper.addIncrement(nextAppointment, settings.appointmentsIncrement);
-  }
 
   // notification object for push message
   const notification = {
@@ -167,10 +137,6 @@ appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resol
   // appointments are formatted in this timezone
   const now = moment.tz(settings.appointmentsTimezone);
 
-  const increment = settings && settings.appointmentsIncrement
-    ? settings.appointmentsIncrement
-    : 0;
-
   // find any appointment for right now
   const doc = await Appointment
     .findOne({
@@ -178,11 +144,11 @@ appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resol
       hour: {
         $lte: timeToNumber(
           // 5 minutes before appointment
-          now.clone().add(5 + 60 * increment , 'minutes')
+          now.clone().add(5, 'minutes')
         ),
         $gte: timeToNumber(
           // 25 minutes after appointment
-          now.clone().subtract(25 + 60 * increment, 'minutes')
+          now.clone().subtract(25, 'minutes')
         )
       },
       user: { $exists: true, $ne: null }
@@ -200,7 +166,7 @@ appointmentHelper.getNow = (user, reconnect = false) => new Promise(async (resol
   // check if appointment is the one of requested user
   const isOwnAppointment = doc.user._id.toString() === user._id.toString();
   // check whether the time now is before 10 minutes after the appointment starts
-  const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10 + 60 * increment, 'minutes'));
+  const isAppOnTime = doc.hour >= timeToNumber(now.clone().subtract(10, 'minutes'));
 
 
   if (doc && (isCallee || isOwnAppointment && (reconnect || isAppOnTime))) {
