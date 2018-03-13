@@ -10,7 +10,7 @@
     "start": "nodemon src/server.js --exec babel-node",
     "build": "babel src -d dist",
     "lint": "eslint src",
-    "test": "NODE_ENV=test mocha --compilers js:babel-core/register src/**/_meeting.spec.js",
+    "test": "NODE_ENV=test mocha --compilers js:babel-core/register src/**/*.spec.js",
     "serve": "node src/server.js"
   },
   "dependencies": {
