@@ -1,5 +1,4 @@
 import Appointment from '../models/appointment.model.js';
-import Settings from '../models/settings.model.js';
 import { logger } from '../helper/logger.js';
 import appointHelper from '../helper/appointment.js';
 
@@ -31,14 +30,7 @@ export default (app, router, io, admin) => {
         .lean()
         .exec();
 
-      const settings = await Settings.findOne();
-      const increment = settings && settings.appointmentsIncrement
-        ? settings.appointmentsIncrement
-        : 0;
-
       result.map(entry => {
-        entry = appointHelper.addIncrement(entry, increment);
-
         if (json.hours.indexOf(entry.hour) < 0) {
           json.hours.push(entry.hour);
         }
@@ -51,6 +43,28 @@ export default (app, router, io, admin) => {
       res.json(json);
     } catch (err) {
       logger.error('Appointment Error', err);
+      res.status(400).send(err);
+    }
+  });
+
+  /**
+   * @api {get} /api/appointment/aggregated Get appointment days aggregated by their hour
+   * @apiName AggregateAppointment
+   * @apiGroup appointment
+   */
+  router.get('/api/appointment/aggregated', async (req, res) => {
+    try {
+      const data = await Appointment.aggregate([
+        {
+          $group: {
+            _id: '$hour',
+            days: { $push: '$weekDay'}
+          }
+        }
+      ]);
+
+      res.json(data);
+    } catch (err) {
       res.status(400).send(err);
     }
   });
@@ -71,12 +85,6 @@ export default (app, router, io, admin) => {
 
       if (!result) return res.sendStatus(404);
 
-      const settings = await Settings.findOne();
-
-      if (settings && settings.appointmentsIncrement) {
-        result = appointHelper.addIncrement(result, settings.appointmentsIncrement);
-      }
-
       res.json(result);
     } catch (err) {
       res.send(err);
@@ -84,19 +92,88 @@ export default (app, router, io, admin) => {
   });
 
   /**
-   * @api {put} /api/appointment/:id Update appointment
-   * @apiName UpdateAppointment
+   * @api {post} /api/appointment/update Update the hour of all appointments with a specific hour
+   * @apiName UpdateAppointments
    * @apiGroup Appointment
+   *
+   * @apiParam {number} oldHour   Hour/Time of appointments to be changed from
+   * @apiParam {number} newHour   Hour/Time of appointments to be changed to
    */
-  router.put('/api/appointment/:id', admin, async (req, res) => {
+  router.post('/api/appointment/update', admin, async (req, res) => {
     try {
-      let appointment = await Appointment.findById(req.params.id);
-      for (const key of Object.keys(req.body)) {
-        appointment[key] = req.body[key];
+      if (typeof req.body['oldHour'] !== 'number' || typeof req.body['newHour'] !== 'number') {
+        return res.status(400).send('Invalid Parameters.');
       }
-      await appointment.save();
 
-      res.sendStatus(200);
+      const duplicates = await Appointment
+        .find({
+          hour: req.body['newHour']
+        })
+        .lean();
+
+      if (duplicates.length > 0) {
+        return res.status(400).send('Appointments with this hour already exist.');
+      }
+
+      const appointments = await Appointment
+        .find({
+          hour: req.body['oldHour']
+        });
+
+      if (appointments.length === 0) {
+        return res.status(400).send('No appointments with this hour found.');
+      }
+
+      for (let appoint of appointments) {
+        await appoint.update({
+          hour: req.body['newHour']
+        });
+      }
+
+      io.sockets.emit('appointment', true);
+
+      res.sendStatus(204);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  /**
+   * @api {post} /api/appointment/toggle Toggle an appointment (create or delete it) based on hour and day
+   * @apiName ToggleAppointment
+   * @apiGroup Appointment
+   *
+   * @apiParam {number} hour   Hour of appointment
+   * @apiParam {number} day    Weekday of appointment
+   */
+  router.post('/api/appointment/toggle', admin, async (req, res) => {
+    try {
+      if (typeof req.body['hour'] !== 'number' || typeof req.body['day'] !== 'number') {
+        return res.status(400).send('Invalid Parameters.');
+      }
+
+      const appointments = await Appointment
+        .find({
+          hour: req.body['hour'],
+          weekDay: req.body['day']
+        })
+        .exec();
+
+      if (appointments.length > 0) {
+        // toggle = delete
+        for (const appoint of appointments) {
+          await appoint.remove();
+        }
+      } else {
+        // toggle = create
+        await Appointment.create({
+          hour: req.body['hour'],
+          weekDay: req.body['day']
+        });
+      }
+
+      io.sockets.emit('appointment', true);
+      res.sendStatus(appointments.length > 0 ? 204 : 201);
     } catch (err) {
       res.status(400).send(err);
     }
@@ -109,6 +186,18 @@ export default (app, router, io, admin) => {
    */
   router.post('/api/appointment', admin, async (req, res) => {
     try {
+      // check for duplicates
+      const duplicates = await Appointment
+        .find({
+          weekDay: req.body.weekDay,
+          hour: req.body.hour
+        })
+        .lean();
+
+      if (duplicates.length > 0) {
+        return res.status(400).send('This appointment already exists.');
+      }
+
       await Appointment.create({
         weekDay: req.body.weekDay,
         hour: req.body.hour
@@ -139,7 +228,7 @@ export default (app, router, io, admin) => {
       if (!appointment) return res.sendStatus(404);
 
       // check if another user is registered
-      if (appointment.user && appointment.user != req.user._doc._id) {
+      if (appointment.user && appointment.user != req.user._id) {
         return res.status(400).send('another user is registered');
       }
 
@@ -147,7 +236,7 @@ export default (app, router, io, admin) => {
         // check if user is already in another appointment and remove it
         const otherAppointment = await Appointment
           .findOne({
-            user: req.user._doc._id
+            user: req.user._id
           })
           .exec();
 
@@ -158,9 +247,9 @@ export default (app, router, io, admin) => {
       }
 
       // toggle registration for current user
-      appointment.user = appointment.user && appointment.user == req.user._doc._id
+      appointment.user = appointment.user && appointment.user == req.user._id
         ? null
-        : req.user._doc;
+        : req.user;
 
       await appointment.save();
       // sending broadcast WebSocket for taken/fred appointment
@@ -200,27 +289,6 @@ export default (app, router, io, admin) => {
       appointHelper.notify().then();
 
       res.sendStatus(200);
-    } catch (err) {
-      res.send(err);
-    }
-  });
-
-  /**
-   * @api {delete} /api/appointment/:id Deletes appointment
-   * @apiName DeleteAppointment
-   * @apiGroup Appointment
-   */
-  router.delete('/api/appointment/:id', admin, async (req, res) => {
-    try {
-      const result = await Appointment
-        .find({ _id: req.params.id })
-        .remove()
-        .exec();
-
-      // notify possible updates
-      appointHelper.notify().then();
-
-      res.json(result);
     } catch (err) {
       res.send(err);
     }

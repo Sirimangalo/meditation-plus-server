@@ -24,7 +24,7 @@ const getUser = async (query, req, res) =>  {
     }
 
     // skip stats for public if hideStats is true
-    if (doc.hideStats && doc._id.toString() !== req.user._doc._id) {
+    if (doc.hideStats && doc._id.toString() !== req.user._id) {
       return res.json(doc);
     }
 
@@ -56,7 +56,7 @@ export default (app, router) => {
     try {
       let doc = await User
         .findOne({
-          _id: req.user._doc._id
+          _id: req.user._id
         })
         .lean()
         .exec();
@@ -166,7 +166,7 @@ export default (app, router) => {
       if (req.body.role) delete req.body.role;
       if (req.body.suspendedUntil) delete req.body.suspendedUntil;
 
-      let user = await User.findById(req.user._doc._id);
+      let user = await User.findById(req.user._id);
 
       // change password if set
       if (req.body.newPassword && req.body.newPassword.length >= 8

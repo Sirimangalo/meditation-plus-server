@@ -5,19 +5,17 @@ import User from '../models/user.model.js';
 import moment from 'moment-timezone';
 import webpush from 'web-push';
 
-/**
- * Converts Date or moment object to Integer representing the time.
- *
- * @param  {moment/Date}   Date or moment object
- * @return {Number}        Time as Number
- */
-function timeToNumber(time): Number {
-  return time instanceof Date
-    ? time.getHours() * 100 + time.getMinutes()
-    : (time instanceof moment ? time.hours() * 100 + time.minutes() : 0);
-}
-
 let appointmentHelper = {
+  /**
+   * Converts Date or moment object to Integer representing the time.
+   *
+   * @param  {moment/Date}   Date or moment object
+   * @return {Number}        Time as Number
+   */
+  timeToNumber: time => time instanceof Date
+    ? time.getHours() * 100 + time.getMinutes()
+    : (time instanceof moment ? time.hours() * 100 + time.minutes() : 0),
+
   /**
    * Parses hour as String.
    *
@@ -27,35 +25,6 @@ let appointmentHelper = {
   printHour: hour => {
     const hourStr = '0000' + hour.toString();
     return hourStr.substr(-4, 2) + ':' + hourStr.substr(-2, 2);
-  },
-
-  /**
-   * Adds increment of hours to an appointment.
-   *
-   * @param  {Object} appointment   Appointment object
-   * @param  {Number} increment     Amount of hours to add
-   * @return {Object}               Modified appointment object
-   */
-  addIncrement: (appointment, increment) => {
-    if (!appointment) {
-      return null;
-    }
-
-    // add increment
-    appointment.hour = (appointment.hour + 100 * increment);
-
-    // handle possible overflow
-    if (appointment.hour < 0) {
-      // change day to previous day if negative hour
-      appointment.weekDay = appointment.weekDay === 0 ? 6 : appointment.weekDay - 1;
-      appointment.hour += 2400;
-    } else if (appointment.hour >= 2400) {
-      // change day to next day if positive overflow
-      appointment.weekDay = (appointment.weekDay + 1) % 7;
-      appointment.hour %= 2400;
-    }
-
-    return appointment;
   }
 };
 
@@ -110,11 +79,6 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
 
   nextAppointment = nextAppointment[0];
 
-  if (settings.appointmentsIncrement) {
-    // add global increment
-    nextAppointment = appointmentHelper.addIncrement(nextAppointment, settings.appointmentsIncrement);
-  }
-
   // notification object for push message
   const notification = {
     title: 'Next Appointment',
@@ -144,33 +108,30 @@ appointmentHelper.notify = () => new Promise(async (resolve) => {
   resolve('Notifications were send. Exiting.');
 });
 
+
 /**
  * Find an appointment for the given date/time.
  *
- * @param      {'Datable'}            datetime         The date, moment, date-string or 'now'
+ * @param      {Date/Moment}          datetime         The date, moment, date-string or 'now'
  * @param      {number}               toleranceBefore  The minutes of tolerance before
  * @param      {number}               toleranceAfter   The minutes tolerance after
  * @return                                             The appointment object
  */
-appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) => new Promise(async resolve => {
-  // load settings entity
-  const settings = await Settings.findOne();
-  let at = datetime === 'now'
-    ? moment.tz(settings.appointmentsTimezone)
-    : moment(datetime);
-
-  if (!at.isValid()) {
-    return resolve(null);
+appointmentHelper.getNow = async (user, toleranceBefore = 5, toleranceAfter = 5) => {
+  if (!user) {
+    return null;
   }
 
-  // apply increment
-  const increment = settings && settings.appointmentsIncrement
-    ? settings.appointmentsIncrement
-    : 0;
-  at = at.subtract(increment, 'hours');
+  // load settings entity
+  const settings = await Settings.findOne();
+  let now = moment.tz(settings.appointmentsTimezone);
 
-  const minDate = at.clone().subtract(toleranceAfter, 'minutes');
-  const maxDate = at.clone().add(toleranceBefore, 'minutes');
+  if (!now.isValid()) {
+    return null;
+  }
+
+  const minDate = now.clone().subtract(toleranceAfter, 'minutes');
+  const maxDate = now.clone().add(toleranceBefore, 'minutes');
 
   let doc = null;
   if (minDate.weekday() !== maxDate.weekday()) {
@@ -178,17 +139,18 @@ appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) =>
     // includes two days
     doc = await Appointment
       .findOne({
+        user: user._id,
         $or: [
           {
             weekDay: minDate.weekday(),
             hour: {
-              $gte: timeToNumber(minDate)
+              $gte: appointmentHelper.timeToNumber(minDate)
             }
           },
           {
             weekDay: maxDate.weekday(),
             hour: {
-              $lte: timeToNumber(maxDate)
+              $lte: appointmentHelper.timeToNumber(maxDate)
             }
           }
         ]
@@ -198,36 +160,18 @@ appointmentHelper.getAt = (datetime, toleranceBefore = 0, toleranceAfter = 0) =>
   } else {
     doc = await Appointment
       .findOne({
+        user: user._id,
         weekDay: minDate.weekday(),
         hour: {
-          $gte: timeToNumber(minDate),
-          $lte: timeToNumber(maxDate)
+          $gte: appointmentHelper.timeToNumber(minDate),
+          $lte: appointmentHelper.timeToNumber(maxDate)
         }
       })
       .populate('user', 'name username gravatarHash')
       .exec();
   }
 
-  resolve(appointmentHelper.addIncrement(doc, increment));
-});
-
-/**
- * Searches for appointments the user is allowed to
- * join right now. For regular users this means at
- * the time of their booked appointment (with a 5 minute
- * tolerance). For admins marked as teacher, it means
- * within the timespan of 5 minutes before any appointment
- * starts and 20 minutes after it was scheduled.
- *
- * @param  {Object}  user      User that needs authorization
- * @param  {Boolean} reconnect If set to true, the time tolarance
- *                             for regular users is the same as for
- *                             admins.
- *
- * @return                     the appointment object
- */
-appointmentHelper.getNowAuthorized = (user, reconnect = false) => appointmentHelper.getAt('now', 5,
-  reconnect || (user && user.role === 'ROLE_ADMIN' && user.appointmentsCallee === true) ? 25 : 8
-);
+  return doc;
+};
 
 export default appointmentHelper;

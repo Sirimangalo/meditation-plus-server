@@ -22,7 +22,7 @@ let admin = new AuthedSupertest(
 );
 
 describe('Message Routes', () => {
-  let message;
+  let message, privateMessage;
 
   beforeEach(done => {
     Message.remove(() => {
@@ -33,7 +33,17 @@ describe('Message Routes', () => {
 
       message.save(err => {
         if (err) return done(err);
-        done();
+
+        privateMessage = new Message({
+          user: user.user,
+          text: 'private',
+          private: true
+        });
+
+        privateMessage.save(err => {
+          if (err) return done(err);
+          done();
+        });
       });
     });
   });
@@ -75,6 +85,13 @@ describe('Message Routes', () => {
           .expect(200)
           .end((err, res) => {
             expect(res.body.length).to.equal(2);
+
+            // make sure no private messages get in chat
+            res.body.map(m => {
+              expect('private' in m && m['private'] === true).to.equal(false);
+              expect(m.text).to.not.equal('private');
+            });
+
             done(err);
           });
       });
@@ -102,6 +119,7 @@ describe('Message Routes', () => {
         .end((err, res) => {
           if (err) return done(err);
           expect(res.body.length).to.equal(1);
+          expect(res.body.text === 'privat' || 'private' in res.body[0] && res.body[0]['private'] === true).to.equal(false);
           done();
         });
     });

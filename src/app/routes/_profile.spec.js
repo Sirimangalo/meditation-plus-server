@@ -52,7 +52,7 @@ let userCustomInfos = {
 describe('Profile Routes', () => {
   let profile;
   beforeEach(done => {
-    User.remove({ email: userBasicInfos.email},() => {
+    User.remove({ 'local.email': userBasicInfos.email},() => {
       profile = new User(userCustomInfos);
       profile.save(err => {
         if (err) return done(err);

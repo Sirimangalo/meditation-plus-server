@@ -11,6 +11,7 @@ import userRoutes from './routes/_user.router.js';
 import liveRoutes from './routes/_livestream.router.js';
 import settingsRoutes from './routes/_settings.router.js';
 import analyticsRoutes from './routes/_analytics.router.js';
+import meetingRoutes from './routes/_meeting.router.js';
 import pushRoutes from './routes/_push.router.js';
 import mongoose from 'mongoose';
 import User from './models/user.model.js';
@@ -21,7 +22,7 @@ export default (app, router, passport, io) => {
   router.use(async (req, res, next) => {
     // update lastActive for user
     if (req.user) {
-      let user = await User.findById(req.user._doc._id);
+      let user = await User.findById(req.user._id);
 
       if (user.suspendedUntil && user.suspendedUntil > new Date()) {
         res.sendStatus(401);
@@ -45,7 +46,7 @@ export default (app, router, passport, io) => {
   // Define a middleware function to be used for all secured administration
   // routes
   let admin = (req, res, next) => {
-    if (!req.isAuthenticated() || req.user._doc.role !== 'ROLE_ADMIN') {
+    if (!req.isAuthenticated() || req.user.role !== 'ROLE_ADMIN') {
       res.sendStatus(401);
     } else {
       next();
@@ -66,6 +67,7 @@ export default (app, router, passport, io) => {
   settingsRoutes(app, router, admin);
   analyticsRoutes(app, router, admin);
   pushRoutes(app, router);
+  meetingRoutes(app, router, io, admin);
 
   // Provide a simple status page
   // Return 204 (No Content) when mongoose is connected

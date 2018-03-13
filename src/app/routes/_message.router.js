@@ -22,9 +22,14 @@ export default (app, router, io) => {
 
       let messages = await Message
         .find(
-          req.user._doc.role === 'ROLE_ADMIN'
-            ? { deleted: { $ne: true } }
-            : {}
+          req.user.role === 'ROLE_ADMIN'
+            ? {
+              deleted: { $ne: true },
+              private: { $ne: true }
+            }
+            : {
+              private: { $ne: true }
+            }
         )
         .sort([['createdAt', 'descending']])
         .skip(msgPerPage * page)
@@ -61,10 +66,11 @@ export default (app, router, io) => {
           $gt: timeFrameStart,
           $lte: timeFrameEnd
         },
-        deleted: { $ne: true }
+        deleted: { $ne: true },
+        private: { $ne: true }
       };
 
-      if (req.user._doc.role === 'ROLE_ADMIN') {
+      if (req.user.role === 'ROLE_ADMIN') {
         delete criteria['deleted'];
       }
 
@@ -94,14 +100,20 @@ export default (app, router, io) => {
     try {
       const messageText = req.body.text ? req.body.text : '';
 
+      if (messageText.length > 1000) {
+        return res.status(400).json('The message text exceeds the limit of 1000 characters.');
+      }
+
       let message = await Message.create({
         text: messageText,
-        user: req.user._doc
+        user: req.user
       });
 
       // fetch previous message to detect missed timespans on the client
       const previousMessage = await Message
-        .findOne()
+        .findOne({
+          private: { $ne: true }
+        })
         .sort('-createdAt')
         .skip(1)
         .then();
@@ -122,7 +134,7 @@ export default (app, router, io) => {
       const mentions = [...new Set(messageText.match(/@\w+/g))];
 
       if (mentions) {
-        const user = req.user._doc;
+        const user = req.user;
 
         push.send({
           'notifications.message': true,
@@ -132,13 +144,13 @@ export default (app, router, io) => {
             ? { $exists: true, $ne: user.username }
             : { $in: mentions.map(s => s.substring(1)) }
         }, {
-          title: req.user._doc.name || 'New Message',
+          title: req.user.name || 'New Message',
           body: messageText,
           data: {
             url: '/home;tab=chat'
           },
-          icon: req.user._doc.gravatarHash.length === 32
-            ? 'https://www.gravatar.com/avatar/' + req.user._doc.gravatarHash + '?s=192'
+          icon: req.user.gravatarHash.length === 32
+            ? 'https://www.gravatar.com/avatar/' + req.user.gravatarHash + '?s=192'
             : null
         });
       }
@@ -169,13 +181,13 @@ export default (app, router, io) => {
       if (!message) return res.sendStatus(404);
 
       // only allow to edit own messages (or being admin)
-      if (message.user != req.user._doc._id &&
-        req.user._doc.role !== 'ROLE_ADMIN') {
+      if (message.user != req.user._id &&
+        req.user.role !== 'ROLE_ADMIN') {
         return res.sendStatus(400);
       }
 
       // only allow to edit messages for 30 minutes
-      if (req.user._doc.role !== 'ROLE_ADMIN') {
+      if (req.user.role !== 'ROLE_ADMIN') {
         const created = moment(message.createdAt);
         const now = moment();
         const duration = moment.duration(now.diff(created));
@@ -224,8 +236,8 @@ export default (app, router, io) => {
       if (!message) return res.sendStatus(404);
 
       // only allow to edit own messages (or being admin)
-      if (message.user != req.user._doc._id &&
-        req.user._doc.role !== 'ROLE_ADMIN') {
+      if (message.user != req.user._id &&
+        req.user.role !== 'ROLE_ADMIN') {
         return res.sendStatus(400);
       }
 

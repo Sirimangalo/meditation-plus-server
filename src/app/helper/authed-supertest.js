@@ -17,7 +17,8 @@ export class AuthedSupertest {
     username = 'user',
     email = 'user@sirimangalo.org',
     password = 'password',
-    role = 'ROLE_USER'
+    role = 'ROLE_USER',
+    isTeacher = false
   ) {
     this.name = name;
     this.role = role;
@@ -25,6 +26,7 @@ export class AuthedSupertest {
     this.username = username;
     this.agent = supertest(app);
     this.cleartextPassword = password;
+    this.isTeacher = isTeacher;
   }
 
   createUser() {
@@ -36,7 +38,8 @@ export class AuthedSupertest {
         password: new User().generateHash(this.cleartextPassword)
       },
       role: this.role,
-      verified: true
+      verified: true,
+      isTeacher: this.isTeacher
     });
 
     return new Promise((resolve, reject) => {
